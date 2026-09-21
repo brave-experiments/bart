@@ -18,9 +18,9 @@ export async function doctor(): Promise<number> {
     result(false, String((error as Error).message), 'set BART_BRAVE_CORE_DIR to the Brave Core checkout root (absolute path or ~/), with package name brave-core and brave/brave-core origin; load .envrc and ensure git is on PATH');
   }
   try {
-    result(true, `BART_WORK_DIR: ${await resolveWorkDir()} (writable${process.env.BART_WORK_DIR === undefined ? ', default' : ''})`, '');
+    result(true, `BART_WORK_DIR: ${await resolveWorkDir()} (writable)`, '');
   } catch (error) {
-    result(false, `BART_WORK_DIR: ${(error as Error).message}`, 'set BART_WORK_DIR to a writable directory outside both checkouts, or unset it to use $HOME/.local/share/bart; check parent permissions');
+    result(false, `BART_WORK_DIR: ${(error as Error).message}`, 'set BART_WORK_DIR in .envrc to a writable directory outside BART and the reference checkout, then load it with direnv allow or source .envrc; check parent permissions');
   }
 
   for (const tool of ['clawperator', 'gh', 'claude']) {

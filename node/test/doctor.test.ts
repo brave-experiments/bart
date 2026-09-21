@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { chmod, cp, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { access, chmod, cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,14 +35,14 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   return { root, app, bin, checkout, env, run };
 }
 
-test('doctor succeeds from another directory with default work path and version-only tools', async (t) => {
+test('doctor succeeds from another directory with explicit work path and version-only tools', async (t) => {
   const { root, checkout, run } = await fixture(t);
   const before = await readFile(join(checkout, '.git/config'), 'utf8');
-  const result = run({ BART_WORK_DIR: undefined });
+  const result = run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.match(result.stdout, /All required host checks passed/);
-  assert.ok(result.stdout.includes(join(root, '.local/share/bart')));
-  assert.match(result.stdout, /writable, default/);
+  assert.ok(result.stdout.includes(join(root, 'work')));
+  assert.match(result.stdout, /writable/);
   for (const name of ['clawperator', 'gh', 'claude']) assert.ok(result.stdout.includes(`✅ ${name}: ${name} 1.2.3`));
   assert.match(result.stdout, /Authentication, device readiness, and agent integration were not checked/);
   assert.equal(await readFile(join(checkout, '.git/config'), 'utf8'), before);
@@ -137,5 +137,21 @@ test('doctor protects the whole repository, including paths outside node and sym
     const result = run({ BART_WORK_DIR: workDir });
     assert.equal(result.status, 1, result.stderr);
     assert.match(result.stdout, /must be outside the reference checkout and BART repository/);
+  }
+});
+
+
+test('doctor fails with an actionable fix for missing or blank work paths and creates no fallback', async (t) => {
+  const { root, run } = await fixture(t);
+  const before = await readdir(root);
+  for (const value of [undefined, '', '   ', '\t\n']) {
+    const result = run({ BART_WORK_DIR: value });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stdout, /❌ BART_WORK_DIR: BART_WORK_DIR is required/);
+    assert.match(result.stdout, /Fix: set BART_WORK_DIR in \.envrc/);
+    assert.match(result.stdout, /source \.envrc/);
+    assert.match(result.stdout, /1 required check\(s\) failed/);
+    assert.deepEqual(await readdir(root), before);
+    await assert.rejects(access(join(root, '.local/share/bart')), { code: 'ENOENT' });
   }
 });

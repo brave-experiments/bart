@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { chmod, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { access, chmod, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -18,11 +18,11 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   return { root, checkout, env: { HOME: root, BART_BRAVE_CORE_DIR: checkout, BART_WORK_DIR: join(root, 'work') } };
 }
 
-test('resolves tilde, default work directory, child environment, and planned paths', async (t) => {
+test('resolves tilde, explicit work directory, child environment, and planned paths', async (t) => {
   const { root, checkout, env } = await fixture(t);
-  const config = await resolveConfig({ ...env, BART_BRAVE_CORE_DIR: '~/brave', BART_WORK_DIR: undefined });
+  const config = await resolveConfig({ ...env, BART_BRAVE_CORE_DIR: '~/brave' });
   assert.equal(config.braveCoreDir, checkout);
-  assert.equal(config.workDir, join(root, '.local/share/bart'));
+  assert.equal(config.workDir, env.BART_WORK_DIR);
   assert.deepEqual(config.childEnv, { BART_BRAVE_CORE_DIR: checkout, BART_WORK_DIR: config.workDir });
   assert.equal(config.apkCacheDir, join(config.workDir, 'cache/apks'));
   const casePath = casePaths(config, 'brave-core-pr-39794');
@@ -43,8 +43,7 @@ test('rejects missing, relative, nonexistent, and wrong checkout configuration',
   await assert.rejects(resolveConfig({ ...env, BART_BRAVE_CORE_DIR: 'brave' }), /absolute path/);
   await assert.rejects(resolveConfig({ ...env, BART_BRAVE_CORE_DIR: join(root, 'missing') }), /not a Brave Core checkout/);
   await assert.rejects(resolveConfig({ ...env, BART_WORK_DIR: 'work' }), /absolute path/);
-  await assert.rejects(resolveConfig({ ...env, BART_WORK_DIR: '' }), /absolute path/);
-  await assert.rejects(resolveConfig({ ...env, HOME: undefined, BART_WORK_DIR: undefined }), /absolute path/);
+  await assert.rejects(resolveConfig({ ...env, HOME: undefined, BART_WORK_DIR: undefined }), /BART_WORK_DIR is required/);
   await mkdir(join(checkout, 'subdir'));
   await assert.rejects(resolveConfig({ ...env, BART_BRAVE_CORE_DIR: join(checkout, 'subdir') }), /not a Brave Core checkout/);
   execFileSync('git', ['-C', checkout, 'remote', 'set-url', 'origin', 'https://github.com/other/brave-core.git']);
@@ -80,5 +79,17 @@ test('rejects a file or unwritable work directory without removing existing data
     await assert.rejects(resolveConfig({ ...env, BART_WORK_DIR: locked }), /not writable/);
   } finally {
     await chmod(locked, 0o755);
+  }
+});
+
+
+test('requires an explicit nonblank work directory without creating a fallback', async (t) => {
+  const { root, env } = await fixture(t);
+  const before = await readdir(root);
+  for (const value of [undefined, '', '   ', '\t\n']) {
+    await assert.rejects(resolveConfig({ ...env, BART_WORK_DIR: value }),
+      /BART_WORK_DIR is required; set it to an absolute path in \.envrc/);
+    assert.deepEqual(await readdir(root), before);
+    await assert.rejects(access(join(root, '.local/share/bart')), { code: 'ENOENT' });
   }
 });

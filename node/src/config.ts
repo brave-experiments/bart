@@ -50,7 +50,10 @@ export async function resolveBraveCoreDir(env: NodeJS.ProcessEnv = process.env):
 }
 
 export async function resolveWorkDir(env: NodeJS.ProcessEnv = process.env): Promise<string> {
-  const work = env.BART_WORK_DIR ?? (env.HOME ? join(env.HOME, '.local/share/bart') : '');
+  const work = env.BART_WORK_DIR;
+  if (!work?.trim()) {
+    throw new Error('BART_WORK_DIR is required; set it to an absolute path in .envrc and load it with direnv allow or source .envrc');
+  }
   const requestedWorkDir = absolutePath(work, 'BART_WORK_DIR', env.HOME);
   // Resolve existing ancestors before creating directories, including symlinks.
   let ancestor = resolve(requestedWorkDir);

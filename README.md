@@ -52,7 +52,7 @@ the locked dependencies:
 ```sh
 npm --prefix node ci
 cp .envrc.example .envrc
-# Edit .envrc to point BART_BRAVE_CORE_DIR at your Brave Core checkout.
+# Edit both placeholders in .envrc: your Brave Core checkout and work directory.
 direnv allow
 # Or, without direnv:
 source .envrc
@@ -69,7 +69,9 @@ package name `brave-core` and an `origin` URL for `brave/brave-core` on GitHub
 does not fetch, switch branches, or alter checkout files. A fork with a different
 origin does not meet this initial identity check.
 
-`BART_WORK_DIR` defaults to `$HOME/.local/share/bart`. Both variables accept
+`BART_WORK_DIR` is required and has no default. Set it in `.envrc` to your chosen
+working directory, then load the file. Missing, empty, and whitespace-only values
+fail validation without creating a working directory. Both variables accept
 absolute paths or a leading `~/`, including quoted values in `.envrc`. Resolved
 paths follow symlinks. The work directory must be outside the whole BART
 repository and the reference checkout. Validation creates it if needed and checks writability by creating and
@@ -104,7 +106,7 @@ resolves their paths. There is no automatic cleanup.
 `./scripts/bart doctor` checks the host and exits with status 1 if any required
 check fails. It prints ✅ for passing checks, ❌ with a suggested fix for failures,
 and ⚠️ for checks outside its scope. It checks the package's declared Node range,
-the reference checkout, the configured or default work directory, and versions
+the reference checkout, the required work directory, and versions
 from `clawperator --version`, `gh --version`, and `claude --version`. Each version
 command has a ten-second limit. It prefers the pinned package-local Clawperator
 executable; otherwise it uses PATH. The other tools must be on PATH.

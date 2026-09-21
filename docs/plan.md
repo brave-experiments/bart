@@ -40,7 +40,7 @@ whole BART repository, not just `node/`. Do not add a workspace framework.
 
 Add `./scripts/bart doctor` through a thin launcher for the Node.js/TypeScript
 CLI. Check the declared Node version requirement, reference checkout, work
-directory (including its default), and availability and versions of Clawperator,
+directory (explicitly configured), and availability and versions of Clawperator,
 GitHub CLI, and Claude Code. Print clear results and fixes; exit nonzero when a
 required check fails. Limit checks to the host. Tool availability does not prove
 authentication, device readiness, or working agent integration. Do not install
@@ -51,9 +51,11 @@ Use two path variables:
 | Variable | Meaning | Initial policy |
 | --- | --- | --- |
 | `BART_BRAVE_CORE_DIR` | Reference Brave Core checkout | Required absolute path; validate the repository identity. |
-| `BART_WORK_DIR` | Local context, runs, downloads, and evidence | Default to `$HOME/.local/share/bart`. |
+| `BART_WORK_DIR` | Local context, runs, downloads, and evidence | Required absolute path; no default. |
 
 Set the reference checkout path in local configuration; use a placeholder in `.envrc.example`. Derive Chromium's source directory from the checkout's parent when needed. Read pinned Git objects without changing the checkout's branch or working state.
+
+Set both path variables explicitly; reject missing, empty, or whitespace-only values. Use placeholders for both paths in `.envrc.example`.
 
 Load configuration with `direnv` or source the local `.envrc` before starting the agent. Pass resolved paths explicitly to child Claude processes. Do not add a second configuration format or checkout discovery yet.
 
