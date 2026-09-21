@@ -43,7 +43,7 @@ test('doctor succeeds from another directory with explicit work path and version
   assert.match(result.stdout, /All required host checks passed/);
   assert.ok(result.stdout.includes(join(root, 'work')));
   assert.match(result.stdout, /writable/);
-  for (const name of ['clawperator', 'gh', 'claude']) assert.ok(result.stdout.includes(`✅ ${name}: ${name} 1.2.3`));
+  for (const name of ['clawperator', 'gh', 'claude']) assert.ok(result.stdout.includes(`✅ \`${name}\`: ${name} 1.2.3`));
   assert.match(result.stdout, /Authentication, device readiness, and agent integration were not checked/);
   assert.equal(await readFile(join(checkout, '.git/config'), 'utf8'), before);
 });
@@ -55,7 +55,7 @@ test('doctor reports missing configuration and invalid checkout while continuing
     assert.equal(result.status, 1, result.stderr);
     assert.match(result.stdout, /❌.*BART_BRAVE_CORE_DIR/);
     assert.match(result.stdout, /Fix: set BART_BRAVE_CORE_DIR/);
-    assert.match(result.stdout, /✅ claude:/);
+    assert.match(result.stdout, /✅ `claude`:/);
   }
 });
 
@@ -85,12 +85,12 @@ test('doctor fails for each missing executable and unsuccessful version command'
     await rm(path);
     const result = run();
     assert.equal(result.status, 1, result.stderr);
-    assert.ok(result.stdout.includes(`❌ ${name}:`));
+    assert.ok(result.stdout.includes(`❌ \`${name}\`:`));
     assert.match(result.stdout, /Fix:/);
     await writeFile(path, original, { mode: 0o755 });
   }
   await writeFile(join(bin, 'claude'), '#!/bin/sh\nexit 7\n', { mode: 0o755 });
-  assert.match(run().stdout, /❌ claude: --version exited 7/);
+  assert.match(run().stdout, /❌ `claude`: --version exited 7/);
 });
 
 test('doctor prefers the package-local Clawperator executable', async (t) => {
@@ -100,7 +100,7 @@ test('doctor prefers the package-local Clawperator executable', async (t) => {
   await writeFile(local, '#!/bin/sh\nprintf "0.12.0\\n"\n', { mode: 0o755 });
   const result = run();
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /clawperator: 0.12.0 \(package-local\)/);
+  assert.match(result.stdout, /`clawperator`: 0.12.0 \(package-local\)/);
 });
 
 test('Node check honors the declared minimum and upper bound', () => {
