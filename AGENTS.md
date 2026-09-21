@@ -6,7 +6,7 @@ Build toward the goal in [docs/north-star.md](docs/north-star.md). Use [docs/pla
 - Keep GitHub access read-only and reference checkouts unchanged. External publication is deferred.
 - Tie behavioral conclusions to observed evidence. Preserve failed attempts and report missing coverage; successful commands alone do not prove a pass.
 - Keep machine-specific paths in local configuration and generated files under `BART_WORK_DIR`, with runs inside their cases.
-- Name branches and worktrees for the work they contain. Do not include coding agent names in branch or worktree names or prefixes, such as `claude/` or `cursor/`.
+- Name branches and worktrees for the work they contain. Do not include coding agent names anywhere in those names, regardless of separator. For example, neither `claude/feature-name` nor `claude-feature-name` is allowed.
 - Create all worktrees under `.worktrees/` in the main repository checkout.
 
 ## Writing
