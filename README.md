@@ -137,6 +137,12 @@ Development commands (from the repository root):
 
 You can also run `npm ci` and `npm run check` from inside `node/`.
 
+GitHub Actions runs `npm --prefix node run check` on every pull request and push
+to `main`, using Ubuntu and the Node version in `.nvmrc`. The workflow installs
+locked dependencies with `npm --prefix node ci`. Tests create temporary
+configuration and stub external tools, so CI needs no `.envrc`, credentials,
+Brave Core checkout, or Android device.
+
 Tests use disposable local Git fixtures and do not require a device or a real
 Brave checkout. Dependencies and build outputs stay ignored; runtime working
 files belong under `BART_WORK_DIR`. Phase 1 and later skills, including
