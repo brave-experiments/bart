@@ -32,6 +32,12 @@ Define the minimum report and evidence requirements early, even though the repor
 
 Set up the TypeScript package and basic development commands, select compatible dependencies, and document how to start work. Add a committed `.envrc.example` and ignore the local `.envrc`. Follow Bravebot's simple environment-variable convention.
 
+Keep the single Node.js package in `node/`, including its manifests, TypeScript
+configuration, source, tests, dependencies, and build output. Keep `.nvmrc`, local
+configuration, docs, and `scripts/bart` at the repository root. The launcher must
+resolve paths from its own location. Work-directory validation must protect the
+whole BART repository, not just `node/`. Do not add a workspace framework.
+
 Add `./scripts/bart doctor` through a thin launcher for the Node.js/TypeScript
 CLI. Check the declared Node version requirement, reference checkout, work
 directory (including its default), and availability and versions of Clawperator,
@@ -172,6 +178,23 @@ Use Clawperator's release orchestrator as a coordination reference: establish id
 Unlike a release workflow, a product failure must proceed to assessment and reporting. Setup blockers also receive a diagnostic report. Never infer completion from an agent exit code alone.
 
 Initially coordinate prepared cases. Broader context automation, exact open-PR artifact verification, and external delivery can follow as separate capabilities. GitHub posting and labels require a later authorized delivery path; the initial GitHub integration stays read-only. Retrying publication must not rerun device actions or change the QA verdict.
+
+## Future GitHub entry point
+
+Assigning an issue to a `brave-bart` account or applying a `bart` label could
+request verification. These are future requirements, outside Phase 0:
+
+- Manual and GitHub-triggered requests use the same verification workflow.
+- Execution accepts explicit inputs and returns structured results without
+  requiring an interactive conversation.
+- GitHub discovery stays separate from verification.
+- Track request identity and tested revision so repeated polling does not
+  automatically repeat completed work. Provide an explicit rerun mechanism.
+- Only one controller operates a device at a time.
+- Report publication can retry without repeating device actions.
+
+Phase 0 does not implement polling, webhooks, queues, bot-account setup, or
+publication.
 
 ## References and current gaps
 

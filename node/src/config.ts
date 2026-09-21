@@ -64,7 +64,8 @@ export async function resolveWorkDir(env: NodeJS.ProcessEnv = process.env): Prom
     }
   }
   const workDir = join(ancestor, ...missing);
-  const packageRoot = await realpath(new URL('..', import.meta.url));
+  // Both node/src and node/dist sit two levels below the repository root.
+  const repositoryRoot = await realpath(new URL('../..', import.meta.url));
   let checkout: string | undefined;
   if (env.BART_BRAVE_CORE_DIR?.trim()) {
     checkout = absolutePath(env.BART_BRAVE_CORE_DIR, 'BART_BRAVE_CORE_DIR', env.HOME);
@@ -73,8 +74,8 @@ export async function resolveWorkDir(env: NodeJS.ProcessEnv = process.env): Prom
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
   }
-  if ((checkout && isWithin(checkout, workDir)) || isWithin(packageRoot, workDir)) {
-    throw new Error('BART_WORK_DIR must be outside the reference checkout and BART package');
+  if ((checkout && isWithin(checkout, workDir)) || isWithin(repositoryRoot, workDir)) {
+    throw new Error('BART_WORK_DIR must be outside the reference checkout and BART repository');
   }
   try {
     await mkdir(workDir, { recursive: true });

@@ -1,5 +1,5 @@
 .DS_Store
 .envrc
-node_modules/
-dist/
+/node/node_modules/
+/node/dist/
 *.tsbuildinfo

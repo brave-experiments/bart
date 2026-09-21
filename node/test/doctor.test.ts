@@ -13,8 +13,9 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'bart-doctor-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   const app = join(root, 'app');
-  await mkdir(app);
-  for (const name of ['src', 'scripts', 'package.json']) await cp(join(packageRoot, name), join(app, name), { recursive: true });
+  await mkdir(join(app, 'node'), { recursive: true });
+  for (const name of ['src', 'package.json']) await cp(join(packageRoot, name), join(app, 'node', name), { recursive: true });
+  await cp(join(packageRoot, '../scripts'), join(app, 'scripts'), { recursive: true });
   const bin = join(root, 'bin');
   await mkdir(bin);
   await symlink(process.execPath, join(bin, 'node'));
@@ -94,7 +95,7 @@ test('doctor fails for each missing executable and unsuccessful version command'
 
 test('doctor prefers the package-local Clawperator executable', async (t) => {
   const { app, run } = await fixture(t);
-  const local = join(app, 'node_modules/.bin/clawperator');
+  const local = join(app, 'node/node_modules/.bin/clawperator');
   await mkdir(dirname(local), { recursive: true });
   await writeFile(local, '#!/bin/sh\nprintf "0.12.0\\n"\n', { mode: 0o755 });
   const result = run();
@@ -110,13 +111,31 @@ test('Node check honors the declared minimum and upper bound', () => {
 
 test('launcher stops before TypeScript when Node does not meet the package requirement', async (t) => {
   const { app, run } = await fixture(t);
-  const manifest = JSON.parse(await readFile(join(app, 'package.json'), 'utf8'));
+  const manifest = JSON.parse(await readFile(join(app, 'node/package.json'), 'utf8'));
   manifest.engines.node = '>=99.0.0 <100';
-  await writeFile(join(app, 'package.json'), JSON.stringify(manifest));
-  await rm(join(app, 'src/cli.ts'));
+  await writeFile(join(app, 'node/package.json'), JSON.stringify(manifest));
+  await rm(join(app, 'node/src/cli.ts'));
   const result = run();
   assert.equal(result.status, 1);
   assert.match(result.stderr, /❌ Node.js .*required >=99.0.0 <100/);
   assert.match(result.stderr, /Fix: run nvm install && nvm use/);
   assert.equal(result.stdout, '');
+});
+
+test('launcher help works outside the repository without configuration', async (t) => {
+  const { run } = await fixture(t);
+  const result = run({ BART_BRAVE_CORE_DIR: undefined }, ['--help']);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Usage: bart doctor \| config/);
+});
+
+test('doctor protects the whole repository, including paths outside node and symlinks', async (t) => {
+  const { app, root, run } = await fixture(t);
+  const link = join(root, 'bart-link');
+  await symlink(app, link);
+  for (const workDir of [app, join(app, 'docs/new-work'), join(app, 'node'), join(link, 'new-work')]) {
+    const result = run({ BART_WORK_DIR: workDir });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stdout, /must be outside the reference checkout and BART repository/);
+  }
 });

@@ -4,6 +4,7 @@ import { chmod, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeF
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { casePaths, resolveConfig, runPaths } from '../src/config.ts';
 
 async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
@@ -56,7 +57,13 @@ test('canonicalizes symlinks and refuses work inside either checkout', async (t)
   await symlink(checkout, link);
   assert.equal((await resolveConfig({ ...env, BART_BRAVE_CORE_DIR: link })).braveCoreDir, checkout);
   await assert.rejects(resolveConfig({ ...env, BART_WORK_DIR: join(link, 'new/work') }), /outside/);
-  await assert.rejects(resolveConfig({ ...env, BART_WORK_DIR: process.cwd() }), /outside/);
+  const repositoryRoot = await realpath(fileURLToPath(new URL('../..', import.meta.url)));
+  const repositoryLink = join(root, 'bart-link');
+  await symlink(repositoryRoot, repositoryLink);
+  for (const workDir of [repositoryRoot, join(repositoryRoot, 'docs/new-work'),
+    join(repositoryRoot, 'node'), join(repositoryLink, 'new-work')]) {
+    await assert.rejects(resolveConfig({ ...env, BART_WORK_DIR: workDir }), /outside/);
+  }
   assert.deepEqual((await readdir(checkout)).sort(), ['.git', 'package.json']);
 });
 

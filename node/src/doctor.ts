@@ -34,7 +34,7 @@ export async function doctor(): Promise<number> {
     const output = (version.stdout || version.stderr || '').trim().split(/\r?\n/)[0];
     const ok = !version.error && version.status === 0 && Boolean(output);
     const detail = version.error ? version.error.message : `--version exited ${version.status ?? version.signal}${output ? `: ${output}` : ' without a version'}`;
-    const fix = tool === 'clawperator' ? 'run npm ci in the BART directory to restore the pinned executable, or make clawperator available on PATH' : `install ${tool} or add its executable to PATH; check ${tool} --version`;
+    const fix = tool === 'clawperator' ? 'run npm --prefix node ci in the BART repository root to restore the pinned executable, or make clawperator available on PATH' : `install ${tool} or add its executable to PATH; check ${tool} --version`;
     result(ok, `${tool}: ${ok ? output : detail}${executable === local ? ' (package-local)' : ''}`, fix);
   }
   console.log('⚠️ Host checks only. Authentication, device readiness, and agent integration were not checked.');
