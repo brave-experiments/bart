@@ -12,5 +12,5 @@
     "check": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": { "clawperator": "0.12.0" },
-  "devDependencies": { "@types/node": "24.13.4", "typescript": "5.9.3" }
+  "devDependencies": { "@types/node": "24.13.4", "typescript": "7.0.2" }
 }
