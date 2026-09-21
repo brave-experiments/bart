@@ -17,5 +17,6 @@ Use plain English in documentation, reports, commit messages, and user-facing re
 
 - Use Conventional Commits, such as `feat:`, `fix:`, and `docs:`.
 - Commit completed, checked work at logical breakpoints. Stage only files that belong to the change.
+- Add new commits for changes. Do not amend or otherwise rewrite existing commits unless the user explicitly asks.
 - Attempt signed commits first. If signing cannot complete because the user is unavailable, an unsigned commit is allowed. Prefix its subject with `🚧`, keeping the Conventional Commit format after it, for example: `🚧 docs: clarify run setup`.
 - Before an unsigned fallback, confirm the signed attempt did not create a commit. Do not bypass checks or hooks, and report why the commit is unsigned.
