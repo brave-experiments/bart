@@ -13,6 +13,13 @@ The invoking agent performs this workflow itself. Do not launch another agent CL
 
 Infer scope from the request and session. Ask only if a missing fact prevents a useful draft. Describe the problem or goal, evidence, proposed work, and completion conditions as appropriate. Distinguish completed work from proposed work, observations from inference, and tested behavior from missing coverage. Do not copy the conversation as the body.
 
+Choose the opening based on the issue's scope and complexity:
+
+- For a larger issue with several parts, substantial context, or technical detail, start the body with `## Executive summary`. In a short plain-English paragraph, explain the problem, why it matters, and the intended outcome so a reader can understand the issue before reading the details. Preserve any qualification needed to keep the summary accurate.
+- For a small, focused issue whose body already explains the change in a few direct sentences, omit the executive summary and start with the problem or requested change. Do not add a summary that merely repeats the body.
+
+Use judgment rather than a fixed word count. Include the summary when it helps readers understand the scope; keep supporting evidence and implementation detail below it.
+
 Write Markdown in plain English:
 
 - Preserve every fact, number, name, condition, and qualification.
