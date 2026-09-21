@@ -55,7 +55,7 @@ cp .envrc.example .envrc
 direnv allow
 # Or, without direnv:
 source .envrc
-npm run dev -- config
+./scripts/bart doctor
 npm run check
 ```
 
@@ -100,8 +100,25 @@ with a letter or number. Later phases must allocate unique run IDs, retain the
 context and plan used by each run, and use relative evidence links. Phase 0 only
 resolves their paths. There is no automatic cleanup.
 
+`./scripts/bart doctor` checks the host and exits with status 1 if any required
+check fails. It prints ✅ for passing checks, ❌ with a suggested fix for failures,
+and ⚠️ for checks outside its scope. It checks the package's declared Node range,
+the reference checkout, the configured or default work directory, and versions
+from `clawperator --version`, `gh --version`, and `claude --version`. Each version
+command has a ten-second limit. It prefers the pinned package-local Clawperator
+executable; otherwise it uses PATH. The other tools must be on PATH.
+
+The launcher can run from another directory and does not load `.envrc` itself.
+On an unsupported Node version, it exits before loading TypeScript and tells you
+how to select the required Node version. Doctor does not install tools, edit
+configuration, authenticate, inspect devices, or launch an agent. Passing these
+checks does not establish authentication, device readiness, or working agent
+integration. Its only intended writes are the work directory and the temporary
+writability probe described above.
+
 Development commands:
 
+- `./scripts/bart doctor` (or `npm run dev -- doctor`): check host readiness and show fixes.
 - `npm run dev -- config`: validate local configuration and display resolved paths.
 - `npm run typecheck`: check source and test types.
 - `npm test`: test configuration errors, path layout, symlinks, and writability.

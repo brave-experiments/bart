@@ -3,11 +3,13 @@
     "target": "ES2024",
     "module": "NodeNext",
     "strict": true,
+    "allowJs": true,
+    "checkJs": true,
     "rootDir": "src",
     "outDir": "dist",
     "rewriteRelativeImportExtensions": true,
     "erasableSyntaxOnly": true,
     "noEmitOnError": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.js"]
 }

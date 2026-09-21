@@ -30,7 +30,7 @@ function isWithin(parent: string, child: string): boolean {
   return difference === '' || (!difference.startsWith(`..${sep}`) && difference !== '..' && !isAbsolute(difference));
 }
 
-export async function resolveConfig(env: NodeJS.ProcessEnv = process.env): Promise<Config> {
+export async function resolveBraveCoreDir(env: NodeJS.ProcessEnv = process.env): Promise<string> {
   if (!env.BART_BRAVE_CORE_DIR?.trim()) throw new Error('BART_BRAVE_CORE_DIR is required');
   const checkout = absolutePath(env.BART_BRAVE_CORE_DIR, 'BART_BRAVE_CORE_DIR', env.HOME);
   let braveCoreDir: string;
@@ -46,6 +46,10 @@ export async function resolveConfig(env: NodeJS.ProcessEnv = process.env): Promi
   } catch (error) {
     throw new Error(`BART_BRAVE_CORE_DIR is not a Brave Core checkout: ${checkout}`, { cause: error });
   }
+  return braveCoreDir;
+}
+
+export async function resolveWorkDir(env: NodeJS.ProcessEnv = process.env): Promise<string> {
   const work = env.BART_WORK_DIR ?? (env.HOME ? join(env.HOME, '.local/share/bart') : '');
   const requestedWorkDir = absolutePath(work, 'BART_WORK_DIR', env.HOME);
   // Resolve existing ancestors before creating directories, including symlinks.
@@ -61,7 +65,15 @@ export async function resolveConfig(env: NodeJS.ProcessEnv = process.env): Promi
   }
   const workDir = join(ancestor, ...missing);
   const packageRoot = await realpath(new URL('..', import.meta.url));
-  if (isWithin(braveCoreDir, workDir) || isWithin(packageRoot, workDir)) {
+  let checkout: string | undefined;
+  if (env.BART_BRAVE_CORE_DIR?.trim()) {
+    checkout = absolutePath(env.BART_BRAVE_CORE_DIR, 'BART_BRAVE_CORE_DIR', env.HOME);
+    try { checkout = await realpath(checkout); }
+    catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
+  }
+  if ((checkout && isWithin(checkout, workDir)) || isWithin(packageRoot, workDir)) {
     throw new Error('BART_WORK_DIR must be outside the reference checkout and BART package');
   }
   try {
@@ -71,6 +83,12 @@ export async function resolveConfig(env: NodeJS.ProcessEnv = process.env): Promi
   } catch (error) {
     throw new Error(`BART_WORK_DIR is not writable: ${workDir}`, { cause: error });
   }
+  return workDir;
+}
+
+export async function resolveConfig(env: NodeJS.ProcessEnv = process.env): Promise<Config> {
+  const braveCoreDir = await resolveBraveCoreDir(env);
+  const workDir = await resolveWorkDir(env);
   return {
     braveCoreDir, workDir,
     apkCacheDir: join(workDir, 'cache/apks'), casesDir: join(workDir, 'cases'),

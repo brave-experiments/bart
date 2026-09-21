@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+import { nodeResult, supportsNode } from '../src/node-version.js';
+
+if (!supportsNode(process.versions.node)) {
+  console.error(`❌ ${nodeResult()}. Fix: run nvm install && nvm use in the BART directory, then retry.`);
+  process.exitCode = 1;
+} else {
+  await import('../src/cli.ts');
+}

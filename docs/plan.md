@@ -32,6 +32,14 @@ Define the minimum report and evidence requirements early, even though the repor
 
 Set up the TypeScript package and basic development commands, select compatible dependencies, and document how to start work. Add a committed `.envrc.example` and ignore the local `.envrc`. Follow Bravebot's simple environment-variable convention.
 
+Add `./scripts/bart doctor` through a thin launcher for the Node.js/TypeScript
+CLI. Check the declared Node version requirement, reference checkout, work
+directory (including its default), and availability and versions of Clawperator,
+GitHub CLI, and Claude Code. Print clear results and fixes; exit nonzero when a
+required check fails. Limit checks to the host. Tool availability does not prove
+authentication, device readiness, or working agent integration. Do not install
+tools, edit configuration, or operate a device. Future commands remain deferred.
+
 Use two path variables:
 
 | Variable | Meaning | Initial policy |
@@ -71,7 +79,7 @@ Keep runs under their cases and binaries in a shared cache. Related issue and PR
 
 Keep run evidence links relative for portability. Retain temporary skills with their run. Do not add automatic cleanup initially. Keep generated working files out of Git and preserve the historical handoff as research rather than importing it wholesale as implementation.
 
-Completion: the package's basic checks work, configuration is documented and validated, and working paths can be resolved without changing a device or reference checkout. Phase 0 establishes shared path/configuration support; later phases create their actual outputs.
+Completion: the package's basic checks and host doctor work, configuration is documented and validated, and working paths can be resolved without changing a device or reference checkout. Phase 0 establishes shared path/configuration support; later phases create their actual outputs.
 
 ## Phase 1: understand and plan
 
