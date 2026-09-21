@@ -41,3 +41,103 @@ Build/source: <tested revision and relationship to PR #39794>
 - kBraveYoutubeFullscreenSettingsWorkaround - Enabled: <video link>
 - Supporting screenshots and run details: <report link>
 ```
+
+## Development setup
+
+Use Node.js 24.16.0 (`nvm install && nvm use` if you use nvm), npm, and Git.
+[`clawperator`](https://github.com/clawperator/clawperator) is pinned to 0.12.0,
+which requires Node >=24.0.0. BART currently invokes Clawperator only to read its version. From the repository root, install
+the locked dependencies:
+
+```sh
+npm --prefix node ci
+cp .envrc.example .envrc
+# Edit both placeholders in .envrc: your Brave Core checkout and work directory.
+direnv allow
+# Or, without direnv:
+source .envrc
+./scripts/bart doctor
+npm --prefix node run check
+```
+
+Do not overwrite an existing `.envrc`. Load it before starting an agent so
+its processes inherit the configuration. The local file is ignored by Git.
+
+`BART_BRAVE_CORE_DIR` is required. It must point to the checkout root, with
+package name `brave-core` and an `origin` URL for `brave/brave-core` on GitHub
+(HTTPS or SSH). Validation reads local Git metadata and `package.json`; it
+does not fetch, switch branches, or alter checkout files. A fork with a different
+origin does not meet this initial identity check.
+
+`BART_WORK_DIR` is required and has no default. Set it in `.envrc` to your chosen
+working directory, then load the file. Missing, empty, and whitespace-only values
+fail validation without creating a working directory. Both variables accept
+absolute paths or a leading `~/`, including quoted values in `.envrc`. Resolved
+paths follow symlinks. The work directory must be outside the whole BART
+repository and the reference checkout. Validation creates it if needed and checks writability by creating and
+removing an empty probe directory. It keeps existing data.
+
+`npm --prefix node run dev -- config` prints the validated paths and `childEnv`, an explicit
+pair of resolved environment variables for later child processes. No child agent
+integration exists yet. The output contains local paths; do not commit it.
+
+Shared helpers in `node/src/config.ts` resolve the planned layout without creating
+case or run outputs:
+
+```text
+$BART_WORK_DIR/
+  cache/apks/
+  cases/<case-id>/
+    context/
+    test-plan.md
+    runs/<timestamp>-<id>/
+      run.json
+      skills/
+      exploration/
+      verification/
+      report.md
+```
+
+Case and run IDs accept letters, numbers, hyphens, and underscores, starting
+with a letter or number. Later phases must allocate unique run IDs, retain the
+context and plan used by each run, and use relative evidence links. Phase 0 only
+resolves their paths. There is no automatic cleanup.
+
+`./scripts/bart doctor` checks the host and exits with status 1 if any required
+check fails. It prints ✅ for passing checks, ❌ with a suggested fix for failures,
+and ⚠️ for checks outside its scope. It checks the package's declared Node range,
+the reference checkout, the required work directory, and versions
+from `clawperator --version`, `gh --version`, and `claude --version`. Each version
+command has a ten-second limit. It prefers the pinned package-local Clawperator
+executable; otherwise it uses PATH. The other tools must be on PATH.
+
+The launcher can run from another directory and does not load `.envrc` itself.
+On an unsupported Node version, it exits before loading TypeScript and tells you
+how to select the required Node version. Doctor does not install tools, edit
+configuration, authenticate, inspect devices, or launch an agent. Passing these
+checks does not establish authentication, device readiness, or working agent
+integration. Its only intended writes are the work directory and the temporary
+writability probe described above.
+
+The Node package lives in `node/`: its manifests, TypeScript configuration,
+source, and tests stay together. Dependencies install into `node/node_modules/`
+and builds go into `node/dist/`. Root configuration (`.envrc`, `.envrc.example`,
+and `.nvmrc`), documentation, and the stable `scripts/bart` launcher stay at the
+repository root. The launcher resolves imports relative to its own file.
+
+Development commands (from the repository root):
+
+- `./scripts/bart doctor` (or `npm --prefix node run dev -- doctor`): check host readiness and show fixes.
+- `npm --prefix node run dev -- config`: validate local configuration and display resolved paths.
+- `npm --prefix node run typecheck`: check source and test types.
+- `npm --prefix node test`: test configuration errors, path layout, symlinks, and writability.
+- `npm --prefix node run build`: compile into ignored `node/dist/`.
+- `node node/dist/cli.js config`: run the compiled CLI.
+- `npm --prefix node run check`: run type checks, tests, and the build.
+
+You can also run `npm ci` and `npm run check` from inside `node/`.
+
+Tests use disposable local Git fixtures and do not require a device or a real
+Brave checkout. Dependencies and build outputs stay ignored; runtime working
+files belong under `BART_WORK_DIR`. Phase 1 and later skills, including
+`/bart-verify`, remain unimplemented.

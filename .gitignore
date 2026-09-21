@@ -1,1 +1,5 @@
 .DS_Store
+.envrc
+/node/node_modules/
+/node/dist/
+*.tsbuildinfo

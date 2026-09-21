@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+// Dynamic import also works without a package.json at the repository root.
+import('../node/src/node-version.js').then(async ({ nodeResult, supportsNode }) => {
+  if (!supportsNode(process.versions.node)) {
+    console.error(`❌ ${nodeResult()}. Fix: run nvm install && nvm use in the BART directory, then retry.`);
+    process.exitCode = 1;
+  } else {
+    await import('../node/src/cli.ts');
+  }
+}).catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});

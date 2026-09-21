@@ -1,0 +1,5 @@
+# Copy to .envrc and replace both placeholders with your chosen absolute paths.
+# Then run direnv allow or source .envrc. Both variables are required.
+export BART_BRAVE_CORE_DIR="/absolute/path/to/brave-core"
+# Required working directory placeholder; BART supplies no default.
+export BART_WORK_DIR="/absolute/path/to/your-bart-work-directory"
