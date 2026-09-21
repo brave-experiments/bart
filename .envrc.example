@@ -1,0 +1,4 @@
+# Copy to .envrc, set the checkout path, then run direnv allow or source .envrc.
+export BART_BRAVE_CORE_DIR="/absolute/path/to/brave-core"
+# Optional; defaults to $HOME/.local/share/bart.
+export BART_WORK_DIR="$HOME/.local/share/bart"

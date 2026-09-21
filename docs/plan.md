@@ -1,6 +1,6 @@
 # BART implementation plan
 
-Status: planning. Phase 0 and later phases remain unimplemented.
+Status: Phase 0 is implemented. Phase 1 and later phases remain unimplemented.
 
 ## Goal
 
