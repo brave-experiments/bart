@@ -42,11 +42,11 @@ Build/source: <tested revision and relationship to PR #39794>
 - Supporting screenshots and run details: <report link>
 ```
 
-## Development setup (Phase 0)
+## Development setup
 
 Use Node.js 24.16.0 (`nvm install && nvm use` if you use nvm), npm, and Git.
-Clawperator is pinned to 0.12.0, which requires Node >=24.0.0. Phase 0
-only invokes Clawperator to read its version. From the repository root, install
+[`clawperator`](https://github.com/clawperator/clawperator) is pinned to 0.12.0,
+which requires Node >=24.0.0. BART currently invokes Clawperator only to read its version. From the repository root, install
 the locked dependencies:
 
 ```sh
