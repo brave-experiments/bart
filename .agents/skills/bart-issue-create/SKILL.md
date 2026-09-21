@@ -47,21 +47,23 @@ Resolve the editor with `git var GIT_EDITOR` in the BART checkout. Honor its cur
 
 Launch the configured editor with the draft path as a separately quoted argument. Treat the editor setting as a trusted command, but never interpolate issue text into shell code. Preserve blocking options such as Sublime's `--wait`. If a GUI editor returns before editing ends, use its documented wait option. If no usable editor is configured, ask which editor to use; do not change Git configuration.
 
-Wait for the editing session to finish. Saving alone is not consent to publish. A failed launch, missing file, or invalid title/body returns to local review rather than publication.
+Keep the agent turn active while the editor is open. If the command returns a running session ID, wait on that session in bounded intervals until it exits; do not end the turn with “let me know when done” or require another user message to resume. Tell the user to save and close the draft tab: with `subl --wait`, saving alone does not release the editor command. Once the editor exits, read the saved draft and proceed directly to the confirmation below. Saving or closing is not consent to publish. A failed launch, missing file, or invalid title/body returns to local review rather than publication.
 
 Read the saved file, parse the title and body, and preserve the user's edits. Do not silently rewrite them. If edits introduce an unsupported claim or invalid source link, explain it and reopen the draft for correction before approval.
 
 ## Confirm and create
 
-Show the destination repository, final title, and final body, then ask:
+Prepare the final title and a UTF-8 body file in the draft directory before asking for approval. Show the destination repository, final title, and final body. Then show the exact proposed `gh issue create` command with the actual title and body-file path safely quoted, and ask:
 
-> Confirm: create this issue in `brave-experiments/bart`?
+> Shall I run `gh issue create --repo brave-experiments/bart ...` to create the issue?
+
+Replace the ellipsis with the actual `--title` and `--body-file` arguments. This confirmation should be waiting when the user returns from closing the editor; do not stop at an editor-open status message.
 
 Wait for an explicit affirmative answer. Silence, saving, closing, and an earlier request to draft are not confirmation. Cancellation leaves the draft local. Any change to the title, body, or destination after approval requires renewed review and confirmation.
 
 After confirmation, create exactly one issue with `gh`. This approval authorizes that issue creation as a narrow exception to BART's default read-only GitHub workflow. It does not authorize pushes, comments, labels, assignments, or other remote changes.
 
-Write the approved body to a UTF-8 file in the draft directory and pass the approved title as a safely quoted argument:
+Use the prepared body file and pass the approved title as a safely quoted argument:
 
 ```sh
 gh issue create --repo brave-experiments/bart --title "$issue_title" --body-file "$body_file"
