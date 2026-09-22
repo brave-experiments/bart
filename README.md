@@ -62,6 +62,8 @@ npm --prefix node run check
 
 Do not overwrite an existing `.envrc`. Load it before starting an agent so
 its processes inherit the configuration. The local file is ignored by Git.
+For Claude Code setup and model-provider options, follow [agent configuration](docs/agent-configuration.md),
+including the environment needed by BART skills and worktrees.
 
 `BART_BRAVE_CORE_DIR` is required. It must point to the checkout root, with
 package name `brave-core` and an `origin` URL for `brave/brave-core` on GitHub
@@ -103,22 +105,6 @@ with a letter or number. Later phases must allocate unique run IDs, retain the
 context and plan used by each run, and use relative evidence links. Phase 0 only
 resolves their paths. There is no automatic cleanup.
 
-`./scripts/bart doctor` checks the host and exits with status 1 if any required
-check fails. It prints ✅ for passing checks, ❌ with a suggested fix for failures,
-and ⚠️ for checks outside its scope. It checks the package's declared Node range,
-the reference checkout, the required work directory, and versions
-from `clawperator --version`, `gh --version`, and `claude --version`. Each version
-command has a ten-second limit. It prefers the pinned package-local Clawperator
-executable; otherwise it uses PATH. The other tools must be on PATH.
-
-The launcher can run from another directory and does not load `.envrc` itself.
-On an unsupported Node version, it exits before loading TypeScript and tells you
-how to select the required Node version. Doctor does not install tools, edit
-configuration, authenticate, inspect devices, or launch an agent. Passing these
-checks does not establish authentication, device readiness, or working agent
-integration. Its only intended writes are the work directory and the temporary
-writability probe described above.
-
 The Node package lives in `node/`: its manifests, TypeScript configuration,
 source, and tests stay together. Dependencies install into `node/node_modules/`
 and builds go into `node/dist/`. Root configuration (`.envrc`, `.envrc.example`,
@@ -127,7 +113,7 @@ repository root. The launcher resolves imports relative to its own file.
 
 Development commands (from the repository root):
 
-- `./scripts/bart doctor` (or `npm --prefix node run dev -- doctor`): check host readiness and show fixes.
+- `./scripts/bart doctor`: [check host and Claude readiness](docs/doctor.md). Add `--claude` to opt into a model request that may incur charges.
 - `npm --prefix node run dev -- config`: validate local configuration and display resolved paths.
 - `npm --prefix node run typecheck`: check source and test types.
 - `npm --prefix node test`: test configuration errors, path layout, symlinks, and writability.

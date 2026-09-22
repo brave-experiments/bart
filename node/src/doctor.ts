@@ -1,10 +1,11 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { checkClaudeReadiness } from './claude-readiness.ts';
 import { resolveBraveCoreDir, resolveWorkDir } from './config.ts';
 import { nodeResult, supportsNode } from './node-version.js';
 
-export async function doctor(): Promise<number> {
+export async function doctor(checkModel = false): Promise<number> {
   let failures = 0;
   function result(ok: boolean, message: string, fix: string) {
     console.log(`${ok ? '✅' : '❌'} ${message}${ok ? '' : `. Fix: ${fix}`}`);
@@ -36,8 +37,13 @@ export async function doctor(): Promise<number> {
     const detail = version.error ? version.error.message : `--version exited ${version.status ?? version.signal}${output ? `: ${output}` : ' without a version'}`;
     const fix = tool === 'clawperator' ? 'run npm --prefix node ci in the BART repository root to restore the pinned executable, or make clawperator available on PATH' : `install ${tool} or add its executable to PATH; check ${tool} --version`;
     result(ok, `\`${tool}\`: ${ok ? output : detail}${executable === local ? ' (package-local)' : ''}`, fix);
+    if (tool === 'claude' && ok) {
+      if (checkModel) console.log('⚠️ Claude Haiku model check uses the network and may incur charges or consume quota (30s, one turn, Claude budget setting $0.01).');
+      else console.log('⚠️ Claude model response not checked. Use `./scripts/bart doctor --claude` to opt into a model request that may incur charges.');
+      checkClaudeReadiness(({ ok, message, fix }) => result(ok, message, fix), checkModel);
+    }
   }
-  console.log('⚠️ Host checks only. Authentication, device readiness, and agent integration were not checked.');
-  console.log(failures ? `${failures} required check(s) failed.` : 'All required host checks passed.');
+  console.log('⚠️ Device readiness, file-tool execution, GitHub authentication, and full agent integration were not checked.');
+  console.log(failures ? `${failures} required check(s) failed.` : 'All required doctor checks passed.');
   return failures ? 1 : 0;
 }

@@ -42,9 +42,13 @@ Add `./scripts/bart doctor` through a thin launcher for the Node.js/TypeScript
 CLI. Check the declared Node version requirement, reference checkout, work
 directory (explicitly configured), and availability and versions of Clawperator,
 GitHub CLI, and Claude Code. Print clear results and fixes; exit nonzero when a
-required check fails. Limit checks to the host. Tool availability does not prove
-authentication, device readiness, or working agent integration. Do not install
-tools, edit configuration, or operate a device. Future commands remain deferred.
+required check fails. Tool availability does not prove authentication. Doctor
+also checks Claude authentication/provider configuration. An explicit
+`--claude` option checks a bounded model reply using the preparation
+flags, as described in [doctor](doctor.md). Only that opt-in model check sends a
+model request and may incur model charges. It does not prove device readiness or full
+agent integration. Do not install tools, edit configuration, or operate a device.
+Future commands remain deferred.
 
 Use two path variables:
 
