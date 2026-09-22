@@ -146,3 +146,20 @@ test('rejects bad inputs and case symlinks before launching', async (t) => {
   await assert.rejects(runAgent(config, task, env), /symlinks/);
   await assert.rejects(readFile(join(root, 'runs')), { code: 'ENOENT' });
 });
+
+
+test('version probe stops after ten seconds even when the executable ignores SIGTERM', async (t) => {
+  const { config, env, task } = await fixture(t);
+  await writeFile(join(env.PATH, 'opencode'), `#!${process.execPath}
+    if (process.argv[2] !== '--version') process.exit(9);
+    process.on('SIGTERM', () => {});
+    setTimeout(() => process.exit(0), 15_000);
+  `, { mode: 0o755 });
+  const started = performance.now();
+  const result = await runAgent(config, task, env);
+  const elapsed = performance.now() - started;
+  assert.equal(result.status, 'failed');
+  assert.match(result.detail!, /ETIMEDOUT/);
+  assert.ok(elapsed < 14_000, `version probe waited ${elapsed} ms`);
+  assert.equal(JSON.parse(await readFile(result.recordPath, 'utf8')).status, 'failed');
+});

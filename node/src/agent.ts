@@ -51,7 +51,7 @@ export async function runAgent(config: Config, task: AgentTask, env: NodeJS.Proc
   try {
     const childEnv = { ...env, ...config.childEnv, PWD: paths.directory };
     const probe = spawnSync(config.agent, ['--version'], {
-      cwd: paths.directory, env: childEnv, encoding: 'utf8', timeout: 10_000,
+      cwd: paths.directory, env: childEnv, encoding: 'utf8', timeout: 10_000, killSignal: 'SIGKILL',
       maxBuffer: 64 * 1024, stdio: ['ignore', 'pipe', 'pipe'],
     });
     if (probe.error || probe.status !== 0 || !probe.stdout.trim()) {
