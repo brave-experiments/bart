@@ -42,122 +42,19 @@ Build/source: <tested revision and relationship to PR #39794>
 - Supporting screenshots and run details: <report link>
 ```
 
-## Development setup
+## Current capabilities
 
-Use Node.js 24.16.0 (`nvm install && nvm use` if you use nvm), npm, and Git.
-[`clawperator`](https://github.com/clawperator/clawperator) is pinned to 0.12.0,
-which requires Node >=24.0.0. BART currently invokes Clawperator only to read its version. From the repository root, install
-the locked dependencies:
+BART can check host readiness, run agent tasks, and prepare cases from primary
+sources. Use [bart-prepare-case](skills/bart-prepare-case/SKILL.md) with an issue
+or PR URL and a testing objective. Device verification and `/bart-verify` remain
+unimplemented.
 
-```sh
-npm --prefix node ci
-cp .envrc.example .envrc
-# Edit both placeholders in .envrc: your Brave Core checkout and work directory.
-direnv allow
-# Or, without direnv:
-source .envrc
-./scripts/bart doctor
-npm --prefix node run check
-```
+## Get started
 
-Do not overwrite an existing `.envrc`. Load it before starting an agent so
-its processes inherit the configuration. The local file is ignored by Git.
-For agent selection, task execution, Claude setup, and model-provider options, follow [agent configuration](docs/agent-configuration.md),
-including the environment needed by BART skills and worktrees.
+Follow [development setup](docs/development.md) to install dependencies and configure
+local paths, then run `./scripts/bart doctor` and `npm --prefix node run check`.
 
-`BART_BRAVE_CORE_DIR` is required. It must point to the checkout root, with
-package name `brave-core` and an `origin` URL for `brave/brave-core` on GitHub
-(HTTPS or SSH). Validation reads local Git metadata and `package.json`; it
-does not fetch, switch branches, or alter checkout files. A fork with a different
-origin does not meet this initial identity check.
-
-`BART_WORK_DIR` is required and has no default. Set it in `.envrc` to your chosen
-working directory, then load the file. Missing, empty, and whitespace-only values
-fail validation without creating a working directory. Both variables accept
-absolute paths or a leading `~/`, including quoted values in `.envrc`. Resolved
-paths follow symlinks. The work directory must be outside the whole BART
-repository and the reference checkout. Validation creates it if needed and checks writability by creating and
-removing an empty probe directory. It keeps existing data.
-
-`npm --prefix node run dev -- config` prints the validated paths and `childEnv`, an explicit
-pair of resolved environment variables for later child processes. No child agent
-integration exists yet. The output contains local paths; do not commit it.
-
-Shared helpers in `node/src/config.ts` resolve the planned layout without creating
-case or run outputs:
-
-```text
-$BART_WORK_DIR/
-  cache/apks/
-  cases/<case-id>/
-    context/
-    test-plan.md
-    runs/<timestamp>-<id>/
-      run.json
-      skills/
-      exploration/
-      verification/
-      report.md
-```
-
-Case and run IDs accept letters, numbers, hyphens, and underscores, starting
-with a letter or number. The task runner allocates unique run IDs and retains
-instructions and execution logs. Later phases must also retain case context,
-plans, and evidence with relative links. There is no automatic cleanup.
-
-The Node package lives in `node/`: its manifests, TypeScript configuration,
-source, and tests stay together. Dependencies install into `node/node_modules/`
-and builds go into `node/dist/`. Root configuration (`.envrc`, `.envrc.example`,
-and `.nvmrc`), documentation, and the stable `scripts/bart` launcher stay at the
-repository root. The launcher resolves imports relative to its own file.
-
-Development commands (from the repository root):
-
-- `./scripts/bart doctor`: [check host and selected-agent readiness](docs/doctor.md). Add `--claude` to opt into a model request that may incur charges.
-- `./scripts/bart agent-run <case-id> <instructions-file> [timeout-ms]`: [run a sample task and retain its output](docs/agent-configuration.md#run-a-task). Execution completion is not a QA verdict.
-- `npm --prefix node run dev -- config`: validate local configuration and display resolved paths.
-- `npm --prefix node run typecheck`: check source and test types.
-- `npm --prefix node test`: test configuration errors, path layout, symlinks, and writability.
-- `npm --prefix node run build`: compile into ignored `node/dist/`.
-- `node node/dist/cli.js config`: run the compiled CLI.
-- `npm --prefix node run check`: run type checks, tests, and the build.
-
-You can also run `npm ci` and `npm run check` from inside `node/`.
-
-GitHub Actions runs `npm --prefix node run check` on every pull request and push
-to `main`, using Ubuntu and the Node version in `.nvmrc`. The workflow installs
-locked dependencies with `npm --prefix node ci`. Tests create temporary
-configuration and stub external tools, so CI needs no `.envrc`, credentials,
-Brave Core checkout, or Android device.
-
-Tests use disposable local Git fixtures and do not require a device or a real
-Brave checkout. Dependencies and build outputs stay ignored; runtime working
-files belong under `BART_WORK_DIR`. Phase 1 is available through [bart-prepare-case](skills/bart-prepare-case/SKILL.md).
-Load that skill and supply an issue or PR URL and the testing objective. It writes
-an evidence-based brief without operating a device. `/bart-verify` and later
-phases remain unimplemented.
-
-Package support commands:
-
-```sh
-./scripts/bart case-create <unique-id> <url> issue-reproduction
-# Or use fix-verification for a PR.
-# Follow the skill to gather context and write the plan, then:
-./scripts/bart case-freeze <unique-id>
-```
-
-Both commands reject a symlinked `cases` directory to keep writes under
-`BART_WORK_DIR`. Creation refuses an existing case ID. Freezing requires `case.json` marked
-`prepared-for-attempt` with schemaVersion 2, `test-plan.md`, `context/findings.md`,
-`context/brief-index.json`, `context/sources.json`, and `context/source-index.json`.
-The [package format](skills/bart-prepare-case/references/package-format.md) defines
-the finding/check anchors and descriptive links. Freezing checks these links,
-index shape and referenced captures, then copies the
-package into `first-pass/` and records SHA-256 hashes in `manifest.json`, excluding
-runs. It compares file sets and hashes before writing the completion manifest and
-rejects observed changes during copying. Stop capture writers before freezing; the
-helper does not lock other processes. It refuses to replace a snapshot. These are
-structure and file-integrity checks, not
-validation of research claims or device behavior. Keep the frozen copy unchanged;
-later edits belong in the working package or a new case. No automatic cleanup or
-historical comparison runs. See [Phase 1 notes](docs/phase-1.md) for scope and lessons.
+- [Case preparation](docs/case-preparation.md): research, package format, and freezing.
+- [Agent configuration](docs/agent-configuration.md): agent selection, providers, and task execution.
+- [Readiness checks](docs/doctor.md): checks, limits, and troubleshooting.
+- [Implementation plan](docs/plan.md): scope and completion conditions.

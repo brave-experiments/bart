@@ -1,4 +1,4 @@
-# Phase 1: prepare a case
+# Case preparation
 
 The [bart-prepare-case skill](../skills/bart-prepare-case/SKILL.md) gathers primary
 sources and writes a brief for a later execution agent. The repository's
@@ -11,6 +11,27 @@ configuration. Research and judgments remain in the skill. Each case has identit
 metadata, a human-readable plan, saved primary sources, and a source index. A
 freeze copies those files and records SHA-256 hashes. It excludes future runs and
 refuses an existing snapshot. It checks file integrity, not research quality.
+
+## Prepare and freeze a case
+
+Load the skill and supply an issue or PR URL and the testing objective. Use
+`issue-reproduction` for an issue or `fix-verification` for a PR. After
+[development setup](development.md), run these helpers from the repository root
+as directed by the skill:
+
+```sh
+./scripts/bart case-create <unique-id> <url> issue-reproduction
+# Gather sources and write the package using the skill, then:
+./scripts/bart case-freeze <unique-id>
+```
+
+Both commands reject a symlinked `cases` directory to keep writes under
+`BART_WORK_DIR`. Creation refuses an existing case ID. Freezing requires
+`case.json` marked `prepared-for-attempt` with schemaVersion 2, `test-plan.md`,
+`context/findings.md`, `context/brief-index.json`, `context/sources.json`, and
+`context/source-index.json`. It copies the package into `first-pass/` and records
+SHA-256 hashes in `manifest.json`, excluding runs. No automatic cleanup or
+historical comparison runs.
 
 ## Agent-authored findings and navigation
 
