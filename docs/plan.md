@@ -1,6 +1,6 @@
 # BART implementation plan
 
-Status: Phase 0, configuration/readiness checks, and a [task runner prototype](agent-configuration.md#task-runner) are implemented. Phase 1 and later phases remain unimplemented.
+Status: Phases 0 and 1, configuration/readiness checks, and a [task runner prototype](agent-configuration.md#task-runner) are implemented. Phase 1 prepares cases for an attempt; it does not validate them through execution. Later phases remain unimplemented.
 
 ## Goal
 

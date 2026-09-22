@@ -132,5 +132,32 @@ Brave Core checkout, or Android device.
 
 Tests use disposable local Git fixtures and do not require a device or a real
 Brave checkout. Dependencies and build outputs stay ignored; runtime working
-files belong under `BART_WORK_DIR`. Phase 1 and later skills, including
-`/bart-verify`, remain unimplemented.
+files belong under `BART_WORK_DIR`. Phase 1 is available through [bart-prepare-case](skills/bart-prepare-case/SKILL.md).
+Load that skill and supply an issue or PR URL and the testing objective. It writes
+an evidence-based brief without operating a device. `/bart-verify` and later
+phases remain unimplemented.
+
+Package support commands:
+
+```sh
+./scripts/bart case-create <unique-id> <url> issue-reproduction
+# Or use fix-verification for a PR.
+# Follow the skill to gather context and write the plan, then:
+./scripts/bart case-freeze <unique-id>
+```
+
+Both commands reject a symlinked `cases` directory to keep writes under
+`BART_WORK_DIR`. Creation refuses an existing case ID. Freezing requires `case.json` marked
+`prepared-for-attempt` with schemaVersion 2, `test-plan.md`, `context/findings.md`,
+`context/brief-index.json`, `context/sources.json`, and `context/source-index.json`.
+The [package format](skills/bart-prepare-case/references/package-format.md) defines
+the finding/check anchors and descriptive links. Freezing checks these links,
+index shape and referenced captures, then copies the
+package into `first-pass/` and records SHA-256 hashes in `manifest.json`, excluding
+runs. It compares file sets and hashes before writing the completion manifest and
+rejects observed changes during copying. Stop capture writers before freezing; the
+helper does not lock other processes. It refuses to replace a snapshot. These are
+structure and file-integrity checks, not
+validation of research claims or device behavior. Keep the frozen copy unchanged;
+later edits belong in the working package or a new case. No automatic cleanup or
+historical comparison runs. See [Phase 1 notes](docs/phase-1.md) for scope and lessons.
