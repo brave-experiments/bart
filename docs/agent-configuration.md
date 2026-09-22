@@ -156,13 +156,30 @@ model request; see [doctor](doctor.md) for the optional Claude probe and limits.
 
 ## Run a task
 
-Load the two required path variables and select the agent, then provide an
-instructions file:
+To try the runner, run this from the repository root after completing setup.
+It creates a prompt under `BART_WORK_DIR` and asks the selected agent to name
+its model. This makes a real model request and may consume quota or incur charges.
 
 ```sh
 source .envrc
-export BART_AGENT=opencode
-./scripts/bart agent-run example-case /absolute/path/to/instructions.txt 120000
+# Uses Claude by default. To try OpenCode instead: export BART_AGENT=opencode
+work_dir="$(./scripts/bart config | node -pe 'JSON.parse(require("fs").readFileSync(0, "utf8")).workDir')"
+mkdir -p "$work_dir/cases/model-check"
+printf '%s\n' 'Reply with your model name if you know it; otherwise say unknown. Do not use tools.' \
+  > "$work_dir/cases/model-check/instructions.txt"
+./scripts/bart agent-run model-check "$work_dir/cases/model-check/instructions.txt" 120000
+```
+
+The command prints JSON containing `status`, `reply`, `runDir`, and `recordPath`.
+For a completed run, read the answer in `reply` or in `reply.txt` under `runDir`.
+The model's answer is a self-report, not verified model identity. This sample
+checks that a prompt reaches the agent and its reply is retained; it does not
+check file tools or device access.
+
+Use the same command with your own case ID and instructions file for other tasks:
+
+```sh
+./scripts/bart agent-run <case-id> <instructions-file> [timeout-ms]
 ```
 
 The last argument is the execution deadline in milliseconds; it defaults to

@@ -114,7 +114,7 @@ repository root. The launcher resolves imports relative to its own file.
 Development commands (from the repository root):
 
 - `./scripts/bart doctor`: [check host and selected-agent readiness](docs/doctor.md). Add `--claude` to opt into a model request that may incur charges.
-- `./scripts/bart agent-run <case-id> <instructions-file> [timeout-ms]`: [run one task and retain its output](docs/agent-configuration.md#task-runner). Execution completion is not a QA verdict.
+- `./scripts/bart agent-run <case-id> <instructions-file> [timeout-ms]`: [run a sample task and retain its output](docs/agent-configuration.md#run-a-task). Execution completion is not a QA verdict.
 - `npm --prefix node run dev -- config`: validate local configuration and display resolved paths.
 - `npm --prefix node run typecheck`: check source and test types.
 - `npm --prefix node test`: test configuration errors, path layout, symlinks, and writability.
