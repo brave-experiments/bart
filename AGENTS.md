@@ -9,6 +9,11 @@ Build toward the goal in [docs/north-star.md](docs/north-star.md). Use [docs/pla
 - Name branches and worktrees for the work they contain. Do not include coding agent names anywhere in those names, regardless of separator. For example, neither `claude/feature-name` nor `claude-feature-name` is allowed.
 - Create all worktrees under `.worktrees/` in the main repository checkout.
 
+## Documentation
+
+- Put only durable documentation in `docs/`, such as setup instructions, design decisions, and maintained project plans.
+- Put non-durable information, including investigation notes, temporary findings, session reports, and execution evidence, under `BART_WORK_DIR`. Keep run-specific information inside its case/run directory.
+
 ## Writing
 
 Use plain English in documentation, reports, commit messages, and user-facing responses. Prefer short, familiar words and active voice. Cut words that add no meaning and avoid stock figures of speech. Preserve facts, qualifications, and technical terms when simpler wording would lose precision. Explain what changed and why without achievement language.

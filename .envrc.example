@@ -3,3 +3,13 @@
 export BART_BRAVE_CORE_DIR="/absolute/path/to/brave-core"
 # Required working directory placeholder; BART supplies no default.
 export BART_WORK_DIR="/absolute/path/to/your-bart-work-directory"
+
+# Claude's --restricted flag skips user/project settings. For Bedrock, uncomment
+# and fill these with the provider settings and model IDs approved for your account.
+# Keep credentials in your AWS profile, not this file.
+# export CLAUDE_CODE_USE_BEDROCK=1
+# export AWS_REGION="your-aws-region"
+# export AWS_PROFILE="your-aws-profile"
+# export ANTHROPIC_DEFAULT_OPUS_MODEL="your-bedrock-opus-model-id"
+# export ANTHROPIC_DEFAULT_SONNET_MODEL="your-bedrock-sonnet-model-id"
+# export ANTHROPIC_DEFAULT_HAIKU_MODEL="your-bedrock-haiku-model-id"

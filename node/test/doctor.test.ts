@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
+import { checkClaudeReadiness } from '../src/claude-readiness.ts';
+import { claudePreparationArgs } from '../src/claude-profile.ts';
 import { supportsNode } from '../src/node-version.js';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
@@ -25,9 +27,16 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   execFileSync(git, ['init', '--quiet', checkout]);
   execFileSync(git, ['-C', checkout, 'remote', 'add', 'origin', 'https://github.com/brave/brave-core.git']);
   await writeFile(join(checkout, 'package.json'), '{"name":"brave-core"}');
-  for (const name of ['clawperator', 'gh', 'claude']) {
+  for (const name of ['clawperator', 'gh']) {
     await writeFile(join(bin, name), `#!/bin/sh\n[ "$#" = 1 ] && [ "$1" = --version ] || exit 9\nprintf '${name} 1.2.3\\n'\n`, { mode: 0o755 });
   }
+  await writeFile(join(bin, 'claude'), `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === '--version') console.log('claude 1.2.3');
+else if (args.includes('auth')) console.log(JSON.stringify({ loggedIn: process.env.TEST_AUTH !== 'missing' }));
+else if (process.env.TEST_MODEL !== 'allow') process.exit(8);
+else console.log(JSON.stringify({ type: 'result', subtype: 'success', is_error: false, result: 'BART_READY' }));
+`, { mode: 0o755 });
   const env: NodeJS.ProcessEnv = { PATH: bin, HOME: root, BART_BRAVE_CORE_DIR: checkout, BART_WORK_DIR: join(root, 'work') };
   const run = (overrides: NodeJS.ProcessEnv = {}, args = ['doctor']) => spawnSync(join(app, 'scripts/bart'), args, {
     env: { ...env, ...overrides }, cwd: root, encoding: 'utf8', timeout: 20_000,
@@ -35,16 +44,16 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   return { root, app, bin, checkout, env, run };
 }
 
-test('doctor succeeds from another directory with explicit work path and version-only tools', async (t) => {
+test('doctor succeeds from another directory with explicit work path without a model request', async (t) => {
   const { root, checkout, run } = await fixture(t);
   const before = await readFile(join(checkout, '.git/config'), 'utf8');
   const result = run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
-  assert.match(result.stdout, /All required host checks passed/);
+  assert.match(result.stdout, /All required doctor checks passed/);
   assert.ok(result.stdout.includes(join(root, 'work')));
   assert.match(result.stdout, /writable/);
   for (const name of ['clawperator', 'gh', 'claude']) assert.ok(result.stdout.includes(`✅ \`${name}\`: ${name} 1.2.3`));
-  assert.match(result.stdout, /Authentication, device readiness, and agent integration were not checked/);
+  assert.match(result.stdout, /Device readiness, file-tool execution, GitHub authentication, and full agent integration were not checked/);
   assert.equal(await readFile(join(checkout, '.git/config'), 'utf8'), before);
 });
 
@@ -126,7 +135,7 @@ test('launcher help works outside the repository without configuration', async (
   const { run } = await fixture(t);
   const result = run({ BART_BRAVE_CORE_DIR: undefined }, ['--help']);
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Usage: bart doctor \| config/);
+  assert.match(result.stdout, /Usage: bart doctor \[--claude\] \| config/);
 });
 
 test('doctor protects the whole repository, including paths outside node and symlinks', async (t) => {
@@ -153,5 +162,123 @@ test('doctor fails with an actionable fix for missing or blank work paths and cr
     assert.match(result.stdout, /1 required check\(s\) failed/);
     assert.deepEqual(await readdir(root), before);
     await assert.rejects(access(join(root, '.local/share/bart')), { code: 'ENOENT' });
+  }
+});
+
+
+test('doctor fails when Claude is installed but preparation authentication is missing', async (t) => {
+  const { run } = await fixture(t);
+  const result = run({ TEST_AUTH: 'missing' });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /authentication\/provider configuration unavailable/);
+  assert.ok(result.stdout.includes("`--restricted` ignores Claude user/project settings"));
+  assert.ok(result.stdout.includes("`source .envrc`"));
+  assert.ok(result.stdout.includes("`claude auth login`"));
+  assert.ok(result.stdout.includes("[docs/agent-configuration.md](docs/agent-configuration.md)"));
+  assert.doesNotMatch(result.stdout, /expected model response/);
+});
+
+test('readiness bounds requests, matches preparation flags, and requires a model result', () => {
+  const auth = JSON.stringify({ loggedIn: true });
+  const good = { type: 'result', subtype: 'success', is_error: false, result: 'BART_READY' };
+  for (const [output, exit, expected] of [
+    [JSON.stringify(good), 0, true],
+    [JSON.stringify({ ...good, is_error: true, result: 'Not logged in' }), 0, false],
+    [JSON.stringify({ ...good, subtype: 'error_max_budget_usd' }), 0, false],
+    [JSON.stringify({ ...good, result: 'something else' }), 0, false],
+    [JSON.stringify(good), 1, false], ['not JSON', 0, false], ['null', 0, false],
+  ] as const) {
+    const checks: { ok: boolean; message: string }[] = [];
+    let calls = 0;
+    const run = ((command: string, args: string[], options: { timeout: number; maxBuffer: number; killSignal: string }) => {
+      assert.equal(command, 'claude');
+      assert.deepEqual(args.slice(0, claudePreparationArgs.length), claudePreparationArgs);
+      assert.equal(options.timeout, calls === 0 ? 10_000 : 30_000);
+      assert.equal(options.maxBuffer, 64 * 1024);
+      assert.equal(options.killSignal, 'SIGKILL');
+      if (calls === 1) {
+        assert.equal(args[args.indexOf('--model') + 1], process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL || 'haiku');
+        for (const flag of ['--no-session-persistence', '--max-turns', '--max-budget-usd', '--disallowedTools']) assert.ok(args.includes(flag));
+        assert.equal(args[args.indexOf('--max-turns') + 1], '1');
+        assert.equal(args[args.indexOf('--max-budget-usd') + 1], '0.01');
+        assert.equal(args[args.indexOf('--disallowedTools') + 1], 'Read,Write,Edit');
+      }
+      return { stdout: calls++ === 0 ? auth : output, status: calls === 1 ? 0 : exit };
+    }) as typeof spawnSync;
+    checkClaudeReadiness((check) => checks.push(check), true, run);
+    assert.equal(calls, 2);
+    assert.equal(checks[1]?.ok, expected);
+  }
+});
+
+test('readiness handles timeout, failed auth and malformed auth without leaking output', () => {
+  for (const failed of [
+    { error: Object.assign(new Error('secret'), { code: 'ETIMEDOUT' }) },
+    { error: Object.assign(new Error('secret'), { code: 'ENOENT' }) },
+    { status: 1, stdout: 'secret', stderr: 'secret' },
+    { status: 0, stdout: 'secret' },
+    { status: 0, stdout: '{"loggedIn":false}' },
+  ]) {
+    let calls = 0;
+    const checks: { ok: boolean; message: string }[] = [];
+    checkClaudeReadiness((check) => checks.push(check), true, (() => { calls++; return failed; }) as unknown as typeof spawnSync);
+    assert.equal(calls, 1);
+    assert.equal(checks[0]?.ok, false);
+    assert.doesNotMatch(JSON.stringify(checks), /secret/);
+  }
+});
+
+test('readiness rejects model timeout and output overflow after provider detection', () => {
+  for (const code of ['ETIMEDOUT', 'ENOBUFS']) {
+    let calls = 0;
+    const checks: { ok: boolean; message: string }[] = [];
+    const run = (() => calls++ === 0
+      ? { status: 0, stdout: '{"loggedIn":true}' }
+      : { status: null, error: Object.assign(new Error('private diagnostic'), { code }) }
+    ) as unknown as typeof spawnSync;
+    checkClaudeReadiness(check => checks.push(check), true, run);
+    assert.equal(calls, 2);
+    assert.equal(checks[1]?.ok, false);
+    assert.match(checks[1]!.message, code === 'ETIMEDOUT' ? /timed out/ : /output limit/);
+    assert.doesNotMatch(JSON.stringify(checks), /private diagnostic/);
+  }
+});
+
+
+test('model requests require the explicit CLI option', async (t) => {
+  const { run } = await fixture(t);
+  const normal = run();
+  assert.equal(normal.status, 0, normal.stdout + normal.stderr);
+  assert.match(normal.stdout, /model response not checked/);
+  const denied = run({}, ['doctor', '--claude']);
+  assert.equal(denied.status, 1);
+  assert.match(denied.stdout, /model readiness failed/);
+  const allowed = run({ TEST_MODEL: 'allow' }, ['doctor', '--claude']);
+  assert.equal(allowed.status, 0, allowed.stdout + allowed.stderr);
+  assert.match(allowed.stdout, /expected model response/);
+  assert.match(allowed.stdout, /may incur charges/);
+  const invalid = run({}, ['doctor', '--unknown']);
+  assert.equal(invalid.status, 1);
+  assert.doesNotMatch(invalid.stdout, /configuration detected/);
+});
+
+test('model probe uses the configured Haiku model or the Haiku alias', () => {
+  const previous = process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL;
+  try {
+    for (const model of [undefined, 'configured-bedrock-haiku']) {
+      if (model === undefined) delete process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL;
+      else process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = model;
+      let selected: string | undefined;
+      const run = ((_command: string, args: string[]) => {
+        if (args.includes('auth')) return { status: 0, stdout: '{"loggedIn":true}' };
+        selected = args[args.indexOf('--model') + 1];
+        return { status: 0, stdout: '{"type":"result","subtype":"success","is_error":false,"result":"BART_READY"}' };
+      }) as typeof spawnSync;
+      checkClaudeReadiness(check => assert.equal(check.ok, true), true, run);
+      assert.equal(selected, model ?? 'haiku');
+    }
+  } finally {
+    if (previous === undefined) delete process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL;
+    else process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = previous;
   }
 });
