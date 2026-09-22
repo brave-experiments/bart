@@ -2,7 +2,16 @@ import { execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, realpath, rmdir } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
+export type Agent = 'claude' | 'opencode';
+
+export function resolveAgent(env: NodeJS.ProcessEnv = process.env): Agent {
+  const agent = env.BART_AGENT ?? 'claude';
+  if (agent !== 'claude' && agent !== 'opencode') throw new Error('BART_AGENT must be claude or opencode');
+  return agent;
+}
+
 export interface Config {
+  agent: Agent;
   braveCoreDir: string;
   workDir: string;
   apkCacheDir: string;
@@ -91,10 +100,11 @@ export async function resolveWorkDir(env: NodeJS.ProcessEnv = process.env): Prom
 }
 
 export async function resolveConfig(env: NodeJS.ProcessEnv = process.env): Promise<Config> {
+  const agent = resolveAgent(env);
   const braveCoreDir = await resolveBraveCoreDir(env);
   const workDir = await resolveWorkDir(env);
   return {
-    braveCoreDir, workDir,
+    agent, braveCoreDir, workDir,
     apkCacheDir: join(workDir, 'cache/apks'), casesDir: join(workDir, 'cases'),
     childEnv: { BART_BRAVE_CORE_DIR: braveCoreDir, BART_WORK_DIR: workDir },
   };

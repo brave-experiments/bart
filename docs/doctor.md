@@ -1,7 +1,9 @@
 # Doctor
 
 Run `./scripts/bart doctor` to check the host configuration, required tools,
-and Claude authentication/provider configuration. Model access is checked only
+and the selected agent. `BART_AGENT` defaults to `claude`; only that selection
+requires Claude authentication/provider configuration. OpenCode needs neither
+a Claude executable nor Claude authentication. Model access is checked only
 when requested with `--claude`. It reports failures with suggested fixes and exits
 with status 1 if any required check fails; otherwise it exits with status 0.
 
@@ -27,6 +29,10 @@ To test an actual model response, explicitly opt in:
 ./scripts/bart doctor --claude
 ```
 
+`doctor --claude` fails clearly when `BART_AGENT=opencode`; it does not invoke
+Claude. OpenCode doctor checks only executable availability and version, not
+authentication or model access.
+
 This probe uses the network and may incur model charges or consume quota. It
 runs only after Claude's authentication/provider configuration check passes.
 
@@ -37,12 +43,12 @@ runs only after Claude's authentication/provider configuration check passes.
 | Node.js | The version meets the package's declared range. An unsupported version stops the launcher before TypeScript loads. |
 | `BART_BRAVE_CORE_DIR` | The configured path is a Brave Core checkout root with the expected package name and Git origin. |
 | `BART_WORK_DIR` | The explicit work path is outside BART and the reference checkout, and is writable. |
-| Clawperator, GitHub CLI, Claude Code | Each executable returns a version within ten seconds. |
-| Claude authentication/provider configuration | `auth status --json` reports configuration under the preparation flags within ten seconds. This alone does not validate provider credentials. |
+| Clawperator, GitHub CLI, selected agent | Each executable returns a version within ten seconds. |
+| Claude authentication/provider configuration (Claude selected) | `auth status --json` reports configuration under the preparation flags within ten seconds. This alone does not validate provider credentials. |
 | Claude model response (`--claude` only) | A model request returns a successful JSON result with the exact reply `BART_READY`. Exit 0 alone does not pass. |
 
 Doctor prefers the pinned package-local Clawperator executable and falls back
-to PATH. GitHub CLI and Claude Code must be on PATH. Output uses ✅ for passing
+to PATH. GitHub CLI and the selected agent must be on PATH. Output uses ✅ for passing
 checks, ❌ for failures with suggested fixes, and ⚠️ for costs and scope limits.
 Raw Claude diagnostics are suppressed to avoid exposing account or credential data.
 

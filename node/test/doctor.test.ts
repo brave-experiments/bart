@@ -282,3 +282,25 @@ test('model probe uses the configured Haiku model or the Haiku alias', () => {
     else process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = previous;
   }
 });
+
+test('doctor checks only the selected agent and rejects unknown agents', async (t) => {
+  const { bin, run } = await fixture(t);
+  await rm(join(bin, 'claude'));
+  await writeFile(join(bin, 'opencode'), '#!/bin/sh\n[ "$#" = 1 ] && [ "$1" = --version ] || exit 9\nprintf "opencode 1.2.3\\n"\n', { mode: 0o755 });
+  const result = run({ BART_AGENT: 'opencode' });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /✅ `opencode`/);
+  assert.doesNotMatch(result.stdout, /`claude`/);
+  const invalid = run({ BART_AGENT: 'unknown' });
+  assert.equal(invalid.status, 1);
+  assert.match(invalid.stdout, /BART_AGENT must be claude or opencode/);
+});
+
+test('doctor rejects a Claude probe when OpenCode is selected without invoking Claude', async (t) => {
+  const { bin, run } = await fixture(t);
+  await rm(join(bin, 'claude'));
+  const result = run({ BART_AGENT: 'opencode' }, ['doctor', '--claude']);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /doctor --claude requires BART_AGENT=claude/);
+  assert.doesNotMatch(result.stdout, /model check uses|configuration detected|`claude`:/);
+});

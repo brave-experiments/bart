@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { checkClaudeReadiness } from './claude-readiness.ts';
-import { resolveBraveCoreDir, resolveWorkDir } from './config.ts';
+import { resolveAgent, resolveBraveCoreDir, resolveWorkDir } from './config.ts';
 import { nodeResult, supportsNode } from './node-version.js';
 
 export async function doctor(checkModel = false): Promise<number> {
@@ -24,7 +24,17 @@ export async function doctor(checkModel = false): Promise<number> {
     result(false, `BART_WORK_DIR: ${(error as Error).message}`, 'set BART_WORK_DIR in .envrc to a writable directory outside BART and the reference checkout, then load it with direnv allow or source .envrc; check parent permissions');
   }
 
-  for (const tool of ['clawperator', 'gh', 'claude']) {
+  const tools = ['clawperator', 'gh'];
+  try {
+    const agent = resolveAgent();
+    if (checkModel && agent !== 'claude') {
+      result(false, 'doctor --claude requires BART_AGENT=claude', 'select claude explicitly or omit --claude for OpenCode host checks');
+      return 1;
+    }
+    tools.push(agent);
+    if (agent === 'opencode') console.log('⚠️ OpenCode authentication and model access were not checked.');
+  } catch (error) { result(false, (error as Error).message, 'set BART_AGENT to claude or opencode'); }
+  for (const tool of tools) {
     // Prefer the pinned package executable without changing PATH for other tools.
     const local = fileURLToPath(new URL('../node_modules/.bin/clawperator', import.meta.url));
     const executable = tool === 'clawperator' && existsSync(local) ? local : tool;

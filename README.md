@@ -62,7 +62,7 @@ npm --prefix node run check
 
 Do not overwrite an existing `.envrc`. Load it before starting an agent so
 its processes inherit the configuration. The local file is ignored by Git.
-For Claude Code setup and model-provider options, follow [agent configuration](docs/agent-configuration.md),
+For agent selection, task execution, Claude setup, and model-provider options, follow [agent configuration](docs/agent-configuration.md),
 including the environment needed by BART skills and worktrees.
 
 `BART_BRAVE_CORE_DIR` is required. It must point to the checkout root, with
@@ -101,9 +101,9 @@ $BART_WORK_DIR/
 ```
 
 Case and run IDs accept letters, numbers, hyphens, and underscores, starting
-with a letter or number. Later phases must allocate unique run IDs, retain the
-context and plan used by each run, and use relative evidence links. Phase 0 only
-resolves their paths. There is no automatic cleanup.
+with a letter or number. The task runner allocates unique run IDs and retains
+instructions and execution logs. Later phases must also retain case context,
+plans, and evidence with relative links. There is no automatic cleanup.
 
 The Node package lives in `node/`: its manifests, TypeScript configuration,
 source, and tests stay together. Dependencies install into `node/node_modules/`
@@ -113,7 +113,8 @@ repository root. The launcher resolves imports relative to its own file.
 
 Development commands (from the repository root):
 
-- `./scripts/bart doctor`: [check host and Claude readiness](docs/doctor.md). Add `--claude` to opt into a model request that may incur charges.
+- `./scripts/bart doctor`: [check host and selected-agent readiness](docs/doctor.md). Add `--claude` to opt into a model request that may incur charges.
+- `./scripts/bart agent-run <case-id> <instructions-file> [timeout-ms]`: [run a sample task and retain its output](docs/agent-configuration.md#run-a-task). Execution completion is not a QA verdict.
 - `npm --prefix node run dev -- config`: validate local configuration and display resolved paths.
 - `npm --prefix node run typecheck`: check source and test types.
 - `npm --prefix node test`: test configuration errors, path layout, symlinks, and writability.
