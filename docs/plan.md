@@ -1,6 +1,6 @@
 # BART implementation plan
 
-Status: Phase 0 is implemented. Phase 1 and later phases remain unimplemented.
+Status: Phase 0, configuration/readiness checks, and a [task runner prototype](agent-configuration.md#task-runner) are implemented. Phase 1 and later phases remain unimplemented.
 
 ## Goal
 
@@ -41,14 +41,18 @@ whole BART repository, not just `node/`. Do not add a workspace framework.
 Add `./scripts/bart doctor` through a thin launcher for the Node.js/TypeScript
 CLI. Check the declared Node version requirement, reference checkout, work
 directory (explicitly configured), and availability and versions of Clawperator,
-GitHub CLI, and Claude Code. Print clear results and fixes; exit nonzero when a
+GitHub CLI, and the selected agent (Claude Code by default, or OpenCode). Print clear results and fixes; exit nonzero when a
 required check fails. Tool availability does not prove authentication. Doctor
-also checks Claude authentication/provider configuration. An explicit
+also checks Claude authentication/provider configuration when Claude is selected.
+OpenCode requires no Claude installation or authentication; `doctor --claude`
+is rejected for that selection. An explicit
 `--claude` option checks a bounded model reply using the preparation
 flags, as described in [doctor](doctor.md). Only that opt-in model check sends a
 model request and may incur model charges. It does not prove device readiness or full
 agent integration. Do not install tools, edit configuration, or operate a device.
-Future commands remain deferred.
+The task runner supports execution and retained artifacts, not phase completion.
+Claude uses the restricted file-only profile; OpenCode uses its normal settings
+and model defaults. Device integration and task-result validation remain deferred.
 
 Use two path variables:
 

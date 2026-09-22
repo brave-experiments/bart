@@ -13,15 +13,15 @@ for choosing between runtime skills, MCP and direct CLI use, and its
 [skill authoring guide](https://docs.clawperator.com/skills/authoring/) for building
 reusable workflows.
 
-Claude Code is BART's intended agent runtime. The model provider is a separate
+Claude Code is BART's intended device-assessment runtime. The task runner also supports OpenCode. The model provider is a separate
 choice: Bedrock is one option, not a requirement. This guide covers Claude
 login, API-key access, and Bedrock configuration. The optional `doctor --claude` check
-verifies a model reply; the device-orchestration skills and general child-agent
-launcher remain planned work.
+verifies a bounded model reply for the file-only profile. The task runner below
+executes saved-file tasks; device-orchestration skills remain planned work.
 
 ## Choose how Claude accesses models
 
-Install Claude Code and make `claude` available on PATH. Configure one access
+If you select Claude, install Claude Code and make `claude` available on PATH. Configure one access
 method for the environment that will launch BART's skills.
 
 ### Claude account or Anthropic Console
@@ -119,9 +119,10 @@ For a skill-driven preparation:
    Require a valid, non-error result and validate the output package separately.
 
 The file-only profile supports work on saved evidence. It does not provide
-shell-based research or Clawperator device access. The repository has no general
-child-agent orchestrator yet; later skills must define and verify their own
-required tools. Do not remove restrictions just to make a failing check pass.
+shell-based research or Clawperator device access. The task runner uses this same profile for Claude. It grants only the run
+directory; include required reference material in the instructions or copy it
+into the run as part of an authorized task. A path in the environment does not
+grant file access. Later skills must define and verify their own required tools. Do not remove restrictions just to make a failing check pass.
 
 ## Verify the setup
 
@@ -130,3 +131,109 @@ Add `--claude` to verify an actual reply; this opt-in check may incur model
 charges. The default check sends no model request.
 See [doctor](doctor.md) for checks, network use, model costs, limits, and
 troubleshooting. A pass outside a sandbox does not prove access inside it.
+
+## Task runner
+
+The runner launches one fresh task and retains execution artifacts. It does not
+implement a verification phase or establish a QA verdict.
+
+## Choose the agent
+
+Set `BART_AGENT=opencode` or `BART_AGENT=claude` in your local `.envrc`.
+If unset, BART uses `claude`. Blank and unknown values fail validation.
+There is no automatic fallback to another agent.
+
+BART passes no model or reasoning flags. Configure those defaults in the selected
+agent. OpenCode uses its configured default model and reasoning settings. No BART model environment variable is needed.
+The child runs in its new run directory, so configuration scoped only to the
+checkout where BART was launched does not carry over. OpenCode loads its normal settings. Claude uses the restricted profile above
+and inherits provider configuration through the environment.
+
+`bart doctor` checks the selected agent's version. OpenCode requires no Claude executable or authentication. For Claude, doctor also
+checks authentication/provider configuration under the restricted profile.
+`doctor --claude` is rejected when OpenCode is selected. Plain doctor makes no
+model request; see [doctor](doctor.md) for the optional Claude probe and limits.
+
+## Run a task
+
+Load the two required path variables and select the agent, then provide an
+instructions file:
+
+```sh
+source .envrc
+export BART_AGENT=opencode
+./scripts/bart agent-run example-case /absolute/path/to/instructions.txt 120000
+```
+
+The last argument is the execution deadline in milliseconds; it defaults to
+120000. BART checks the executable version first, with a separate ten-second
+limit. Real tasks consume the selected agent's quota or paid usage. Automated
+tests use fake executables and require no model access.
+
+The runner passes instructions over stdin, starts a fresh session, and supplies
+resolved `BART_BRAVE_CORE_DIR` and `BART_WORK_DIR` values. It sets the process
+working directory and `PWD` to the run directory and also passes OpenCode's
+`--dir` explicitly. It does not invoke a shell to construct the agent command.
+
+Claude uses the restricted file-only profile above with `acceptEdits`, JSON
+output, and session persistence disabled. OpenCode uses its non-interactive
+`run` command with normal settings and existing tool permissions. OpenCode can
+have broader tools than Claude; BART does not promise equivalent restrictions.
+Operations needing interactive approval can be refused. BART does not provide
+a permission translation layer or an operating-system sandbox. Tasks must retain
+the project's read-only GitHub and reference-checkout requirements.
+
+## Retained output
+
+Each invocation creates a unique directory:
+
+```text
+$BART_WORK_DIR/cases/<case-id>/runs/<timestamp>-<uuid>/
+  run.json
+  instructions.txt
+  stdout.log
+  stderr.log
+  reply.txt
+```
+
+`run.json` records the selected agent, executable version, arguments, deadline,
+timestamps, process exit, execution status, and relative artifact paths. It
+records model selection as `agent-default`; it does not claim a resolved model
+identity that the CLI output did not supply. The native logs retain any model,
+usage, or session information the agent emits. BART does not copy credentials
+into the run record. Agent output can still contain sensitive task content. If the version check
+fails before execution starts, the run record and reply remain, but process
+logs have not been created.
+
+Output is limited to 8 MiB across stdout and stderr. Exceeding the limit stops
+the process and retains the prefix. Timeout and cancellation stop the process
+group, first with SIGTERM and then SIGKILL when needed. This supports ordinary
+child commands on macOS and Linux; deliberately detached processes and remote
+jobs are outside this prototype's lifecycle support. Forced termination of BART
+can leave a `running` record; it is not evidence of completion.
+
+## Execution results
+
+- `completed`: exit zero and a recognized native completion result.
+- `blocked`: Claude explicitly reported permission denials.
+- `failed`: process failure, invalid or incomplete output, output limit, or a
+  native agent/tool error. OpenCode tool refusals remain failures with native
+  details in the logs; the prototype does not guess from error prose.
+- `timed_out`: the execution deadline expired.
+- `cancelled`: the caller aborted or BART received SIGINT or SIGTERM.
+
+The command prints a JSON result with the reply and run paths. Its exit status
+is zero only for `completed`, 130 for cancellation, and one for other failures.
+Tool errors conservatively fail an OpenCode invocation even if the agent later
+recovers; its full attempt remains available for assessment.
+
+Execution completion does not prove a task's claims or a product pass. A future
+phase must define and validate its own structured result file and inspect the
+supporting evidence. Session resume, normalized token budgets, device locking,
+screenshot assessment, and Bravebot support remain outside this prototype.
+
+
+Fixture tests cover invocation settings, retained output, failures, deadlines,
+and cancellation. Claude file operations, device control, and screenshot
+assessment still need live validation. Keep trial notes and all attempts under
+`BART_WORK_DIR/cases/<case-id>/runs/`, including failed attempts.

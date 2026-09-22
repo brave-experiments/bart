@@ -13,3 +13,6 @@ export BART_WORK_DIR="/absolute/path/to/your-bart-work-directory"
 # export ANTHROPIC_DEFAULT_OPUS_MODEL="your-bedrock-opus-model-id"
 # export ANTHROPIC_DEFAULT_SONNET_MODEL="your-bedrock-sonnet-model-id"
 # export ANTHROPIC_DEFAULT_HAIKU_MODEL="your-bedrock-haiku-model-id"
+
+# Agent task runner: claude (default) or opencode. Each uses its model defaults.
+# export BART_AGENT=opencode
