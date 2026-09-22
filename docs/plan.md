@@ -116,7 +116,7 @@ Produce a concise human-readable brief and test plan with supporting sources:
 
 The issue and QA requirements establish desired behavior. Code explains the mechanism and its conditions; implementation behavior alone does not define correctness. Prepared context supplies expectations, never live observations or a verdict.
 
-Completion: a fresh agent can understand and attempt the scoped case from the saved package without the original conversation. Begin with #39794 using the existing handoff research.
+Completion: a fresh agent can understand and attempt the scoped case from the saved package without the original conversation. Prepare from primary sources without reading historical case packages or summaries. Exclude `.context` from searches; planning examples are not research evidence.
 
 ## Phase 2: prepare the run
 

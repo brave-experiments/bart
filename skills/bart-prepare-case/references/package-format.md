@@ -31,7 +31,8 @@ Define findings only in context/findings.md and checks only in test-plan.md, usi
 literal explicit anchors (double quotes, as below). Headings and titles describe the
 item; links use exactly the title recorded in brief-index.json, not the bare ID.
 The supported format uses inline Markdown links and no other explicit HTML anchors
-in those two documents. Definitions and links must be outside fenced code examples.
+in those two documents. Definitions and links must be outside fenced code and inline code spans.
+Link destinations must match the full path and anchor; extra fragment text is invalid.
 
 ```markdown
 <a id="finding-001"></a>
