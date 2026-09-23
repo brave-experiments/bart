@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -27,5 +28,12 @@ jobs:
           cache-dependency-path: node/package-lock.json
       - name: Install dependencies
         run: npm --prefix node ci
-      - name: Check types, tests, and build
-        run: npm --prefix node run check
+      - name: Set up reviewdog
+        uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+        with:
+          reviewdog_version: v0.17.5
+      - name: Run presubmit checks
+        env:
+          BART_WORK_DIR: ${{ runner.temp }}/bart-checks
+          BART_CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before || 'origin/main' }}
+        run: ./scripts/bart check-all --base "$BART_CHECK_BASE"

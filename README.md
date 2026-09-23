@@ -56,5 +56,6 @@ local paths, then run `./scripts/bart doctor` and `npm --prefix node run check`.
 
 - [Case preparation](docs/case-preparation.md): research, package format, and freezing.
 - [Agent configuration](docs/agent-configuration.md): agent selection, providers, and task execution.
+- [Presubmit checks](docs/checks.md): local checks, security scans, and commit signatures.
 - [Readiness checks](docs/doctor.md): checks, limits, and troubleshooting.
 - [Implementation plan](docs/plan.md): scope and completion conditions.
