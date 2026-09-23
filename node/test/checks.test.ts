@@ -7,8 +7,8 @@ import { test } from 'node:test';
 import { checkSignatures, git, mergeBase, parseCheckOptions, runCheck, runChecks } from '../src/checks.ts';
 import { runnerCommand, runRunners, snapshot } from '../src/reviewdog.ts';
 
-async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
-  const root = await mkdtemp(join(tmpdir(), 'bart-checks-'));
+async function fixture(t: { after: (fn: () => Promise<void>) => void }, prefix = 'bart-checks-') {
+  const root = await mkdtemp(join(tmpdir(), prefix));
   t.after(() => rm(root, { recursive: true, force: true }));
   const repo = join(root, 'repo');
   await mkdir(repo);
@@ -137,14 +137,16 @@ test('scanner failures survive pipelines and filtered findings; clean runs alone
 test('real reviewdog preserves runner failures after filtering all findings', async t => {
   try { execFileSync('reviewdog', ['-version'], { stdio: 'pipe' }); }
   catch { t.skip('reviewdog is not installed; mocked scanner tests still run'); return; }
-  const { root, repo } = await fixture(t);
+  const { root, repo } = await fixture(t, 'bart checks-');
   const assets = join(root, 'assets');
   await mkdir(join(assets, 'reviewdog'), { recursive: true });
+  await writeFile(join(assets, 'empty.txt'), '');
   await writeFile(join(repo, 'sample.ts'), '// dirty\n');
   const base = mergeBase(repo, 'origin/main');
   for (const full of [false, true]) {
     for (const [command, expected] of [
       ['true', 0],
+      ['cat $SCRIPTPATH/empty.txt', 0],
       ["printf 'sample.ts:1: finding\\n'", 1],
       ["printf 'other.ts:99: filtered finding\\n'; exit 7", 1],
       ['exit 7 | cat', 1],

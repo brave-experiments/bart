@@ -118,7 +118,9 @@ export async function runRunners(directory: string, assets: string, run: string,
   let failed = false;
   // Always scan current source without OpenGrep's commit-only baseline. Reviewdog
   // filters the result to the complete branch and working-tree diff.
-  const childEnv: NodeJS.ProcessEnv = { ...env, SCRIPTPATH: assets };
+  // Upstream commands expand SCRIPTPATH unquoted. The sibling run layout keeps
+  // this relative path free of spaces inherited from BART_WORK_DIR.
+  const childEnv: NodeJS.ProcessEnv = { ...env, SCRIPTPATH: relative(directory, assets) };
   delete childEnv.GITHUB_BASE_REF;
   for (const name of selected) {
     console.log(`Security scan: ${name}`);
