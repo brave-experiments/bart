@@ -69,8 +69,8 @@ run those checks today.
 The scan copies tracked files and untracked files not excluded by Git, including
 staged and unstaged edits and deletions, into a disposable Git checkout. It does not
 modify the source checkout's index or refs. Ignored files, such as local configuration,
-build output, and dependencies, are excluded unless tracked. Symlinks and submodules
-are rejected rather than followed outside the snapshot.
+build output, and dependencies, are excluded unless tracked. Internal symlinks are recreated inside the snapshot. Links outside the repository,
+links to content excluded from the snapshot, and submodules fail the check.
 
 OpenGrep scans current source without a commit-only baseline; reviewdog filters
 findings to the branch and working-tree diff. The npm-audit runner examines changed

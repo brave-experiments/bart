@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
-import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises';
+import { dirname, join, relative, sep } from 'node:path';
 import { parse } from 'yaml';
 import { git, mergeBase, type CheckOptions } from './checks.ts';
 import { resolveWorkDir } from './config.ts';
@@ -59,6 +59,8 @@ export async function snapshot(root: string, destination: string): Promise<void>
   git(destination, ['checkout', '--quiet', '--detach', git(root, ['rev-parse', 'HEAD'])]);
   const files = git(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard']).split('\0').filter(Boolean);
   const included = new Set(files);
+  const links: string[] = [];
+  const sourceRoot = await realpath(root);
   const original = git(destination, ['ls-files', '-z']).split('\0').filter(Boolean);
   for (const file of new Set([...original, ...files])) {
     const source = join(root, file);
@@ -70,11 +72,22 @@ export async function snapshot(root: string, destination: string): Promise<void>
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
       throw error;
     }
-    if (!stat.isFile()) throw new Error(`Security snapshot requires regular files: ${file}`);
     await mkdir(dirname(target), { recursive: true });
+    if (stat.isSymbolicLink()) {
+      const resolved = relative(sourceRoot, await realpath(source));
+      if (resolved === '..' || resolved.startsWith(`..${sep}`)) {
+        throw new Error(`Security snapshot rejects links outside the repository: ${file}`);
+      }
+      await symlink(relative(dirname(target), join(destination, resolved)), target);
+      links.push(target);
+      continue;
+    }
+    if (!stat.isFile()) throw new Error(`Security snapshot requires regular files or internal links: ${file}`);
     await copyFile(source, target);
     await chmod(target, stat.mode);
   }
+  // Fail if a link points to ignored content that was not copied.
+  for (const link of links) await realpath(link);
   // Include new files in reviewdog's diff without changing the user's index.
   git(destination, ['add', '--all']);
 }

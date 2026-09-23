@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -175,4 +175,18 @@ test('an exception in one check does not prevent the remaining checks', async ()
   });
   assert.equal(status, 1);
   assert.equal(scanned, true);
+});
+
+
+test('snapshot preserves internal skill links and rejects external links', async t => {
+  const { root, repo } = await fixture(t);
+  await mkdir(join(repo, 'skills'));
+  await writeFile(join(repo, 'skills', 'SKILL.md'), 'skill instructions');
+  await symlink('skills', join(repo, 'skill-link'));
+  const target = join(root, 'internal-snapshot');
+  await snapshot(repo, target);
+  assert.equal(await realpath(join(target, 'skill-link')), await realpath(join(target, 'skills')));
+  assert.equal(await readFile(join(target, 'skill-link', 'SKILL.md'), 'utf8'), 'skill instructions');
+  await symlink(root, join(repo, 'outside-link'));
+  await assert.rejects(snapshot(repo, join(root, 'external-snapshot')), /outside the repository/);
 });
