@@ -121,12 +121,18 @@ Development commands (from the repository root):
 - `npm --prefix node run build`: compile into ignored `node/dist/`.
 - `node node/dist/cli.js config`: run the compiled CLI.
 - `npm --prefix node run check`: run type checks, tests, and the build.
+- `./scripts/bart check-all`: run [presubmit checks](docs/checks.md), with warnings for unsigned commits.
+- `./scripts/bart pr-ready`: run presubmit checks and require verified signatures on every branch commit.
+- `./scripts/bart check-reviewdog [--full]`: run the local security scan.
+- `./scripts/bart check-signatures`: check branch commit signatures without running other checks.
 
 You can also run `npm ci` and `npm run check` from inside `node/`.
 
-GitHub Actions runs `npm --prefix node run check` on every pull request and push
+GitHub Actions runs `./scripts/bart check-all` on every pull request and push
 to `main`, using Ubuntu and the Node version in `.nvmrc`. The workflow installs
-locked dependencies with `npm --prefix node ci`. Tests create temporary
+locked dependencies with `npm --prefix node ci` and sets up reviewdog. See
+[check setup](docs/checks.md) for scanner tools, network access, and `BART_WORK_DIR`.
+Tests create temporary
 configuration and stub external tools, so CI needs no `.envrc`, credentials,
 Brave Core checkout, or Android device.
 
