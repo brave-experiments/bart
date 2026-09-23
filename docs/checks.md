@@ -76,7 +76,8 @@ OpenGrep scans current source without a commit-only baseline; reviewdog filters
 findings to the branch and working-tree diff. The npm-audit runner examines changed
 lockfiles in branch mode and all tracked lockfiles in full mode. Full mode retains
 all findings. Scanner failures fail the command even if a pipeline or diff filter
-hides their output. Runner stderr also fails the check so an incomplete scan cannot
+hides their output. OpenGrep runs in strict mode so partial parsing and other scan
+warnings fail before the upstream formatter discards JSON errors. Runner stderr also fails the check so an incomplete scan cannot
 look clean. No scan posts GitHub comments or uses a model. Rule downloads and npm
 audit need network access.
 

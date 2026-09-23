@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { chmod, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { checkSignatures, git, mergeBase, parseCheckOptions, runCheck, runChecks } from '../src/checks.ts';
-import { runRunners, snapshot } from '../src/reviewdog.ts';
+import { runnerCommand, runRunners, snapshot } from '../src/reviewdog.ts';
 
 async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   const root = await mkdtemp(join(tmpdir(), 'bart-checks-'));
@@ -189,4 +189,35 @@ test('snapshot preserves internal skill links and rejects external links', async
   assert.equal(await readFile(join(target, 'skill-link', 'SKILL.md'), 'utf8'), 'skill instructions');
   await symlink(root, join(repo, 'outside-link'));
   await assert.rejects(snapshot(repo, join(root, 'external-snapshot')), /outside the repository/);
+});
+
+
+test('OpenGrep partial parsing fails even when its JSON formatter drops errors', async t => {
+  const binary = process.env.OPENGREP_TEST_BINARY ?? 'opengrep';
+  const version = spawnSync(binary, ['--version'], { encoding: 'utf8' });
+  if (version.status !== 0 || version.stdout.trim() !== '1.30.0') {
+    t.skip('set OPENGREP_TEST_BINARY to OpenGrep 1.30.0 for the partial-parse regression');
+    return;
+  }
+  const { root, repo } = await fixture(t);
+  const bin = join(root, 'bin');
+  await mkdir(bin);
+  const resolvedBinary = binary.includes('/') ? binary : execFileSync('which', [binary], { encoding: 'utf8' }).trim();
+  await symlink(resolvedBinary, join(bin, 'opengrep'));
+  await writeFile(join(repo, 'bad.js'), 'function bad( { eval(@@@@@');
+  await writeFile(join(repo, 'rule.json'), JSON.stringify({ rules: [{
+    id: 'eval-test', languages: ['javascript'], severity: 'ERROR', message: 'eval', pattern: 'eval(...)',
+  }] }));
+  const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`,
+    SEMGREP_LOG_FILE: join(root, 'scan.log'), SEMGREP_SETTINGS_FILE: join(root, 'settings.yml') };
+  const args = ['--config', 'rule.json', '--quiet', '--json', 'bad.js'];
+  const unchecked = spawnSync('opengrep', args, { cwd: repo, env, encoding: 'utf8' });
+  assert.equal(unchecked.status, 0, unchecked.stderr);
+  assert.ok(JSON.parse(unchecked.stdout).errors.some((error: { type: unknown }) => Array.isArray(error.type) && error.type[0] === 'PartialParsing'));
+  const failures = join(root, 'failures');
+  // The formatter emits nothing for errors, just like the pinned upstream runner.
+  const formatter = `opengrep ${args.join(' ')} | "${process.execPath}" -e 'let s="";process.stdin.on("data",d=>s+=d);process.stdin.on("end",()=>{for(const r of JSON.parse(s).results) console.log(r.check_id)})'`;
+  const checked = spawnSync('bash', ['-c', runnerCommand(formatter, 'opengrep', failures)], { cwd: repo, env, encoding: 'utf8' });
+  assert.notEqual(checked.status, 0);
+  assert.equal((await readFile(failures, 'utf8')).trim(), 'opengrep');
 });

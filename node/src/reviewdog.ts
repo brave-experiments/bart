@@ -93,6 +93,9 @@ export async function snapshot(root: string, destination: string): Promise<void>
 }
 
 export function runnerCommand(command: string, name: string, failureFile: string): string {
+  // Upstream formatting discards JSON .errors. Strict mode makes partial parsing
+  // and other scan warnings fail before that information is lost.
+  if (name === 'opengrep') command = 'opengrep() { command opengrep --strict "$@"; }\n' + command;
   const quote = (value: string) => "'" + value.replaceAll("'", "'\\''") + "'";
   return `bash -o pipefail -c ${quote(command)}\nstatus=$?\nif [ "$status" -ne 0 ]; then printf '%s\\n' ${quote(name)} >> ${quote(failureFile)}; fi\nexit "$status"`;
 }
