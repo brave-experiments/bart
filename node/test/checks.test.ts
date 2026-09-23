@@ -245,3 +245,22 @@ test('snapshot ignores Git overrides and leaves the source index and branch unch
   assert.equal(git(repo, ['symbolic-ref', 'HEAD']), beforeBranch);
   assert.equal(await readFile(join(target, 'new.ts'), 'utf8'), '// untracked\n');
 });
+
+
+test('snapshot keeps force-added ignored files in the security diff', async t => {
+  const { root, repo } = await fixture(t);
+  await writeFile(join(repo, '.gitignore'), 'generated/\n');
+  git(repo, ['add', '.gitignore']);
+  git(repo, ['commit', '-qm', 'ignore generated files']);
+  await mkdir(join(repo, 'generated'));
+  await writeFile(join(repo, 'generated', 'new.js'), 'eval(input)');
+  await writeFile(join(repo, 'generated', 'private.txt'), 'ignored local file');
+  git(repo, ['add', '-f', 'generated/new.js']);
+  const beforeIndex = await readFile(join(repo, '.git', 'index'));
+  const target = join(root, 'snapshot');
+  await snapshot(repo, target);
+  assert.equal(git(target, ['ls-files', 'generated/new.js']), 'generated/new.js');
+  assert.match(git(target, ['diff', '--name-only', 'HEAD']), /generated\/new\.js/);
+  await assert.rejects(readFile(join(target, 'generated', 'private.txt')), { code: 'ENOENT' });
+  assert.deepEqual(await readFile(join(repo, '.git', 'index')), beforeIndex);
+});

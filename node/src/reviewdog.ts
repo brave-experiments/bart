@@ -88,8 +88,9 @@ export async function snapshot(root: string, destination: string): Promise<void>
   }
   // Fail if a link points to ignored content that was not copied.
   for (const link of links) await realpath(link);
-  // Include new files in reviewdog's diff without changing the user's index.
-  git(destination, ['add', '--all']);
+  // All copied files came from the source index or nonignored untracked files.
+  // Preserve force-added ignored files in reviewdog's diff as well.
+  git(destination, ['add', '--all', '--force']);
 }
 
 export function runnerCommand(command: string, name: string, failureFile: string): string {
