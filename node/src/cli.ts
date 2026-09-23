@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { runAgent } from './agent.ts';
 import { doctor, type DoctorDevice } from './doctor.ts';
 import { resolveConfig } from './config.ts';
+import { prepareRun, validateRun } from './run-preparation.ts';
 
 import { parseCheckOptions, runChecks, type CheckCommand } from './checks.ts';
 
@@ -48,6 +49,17 @@ if (['check-all', 'check-signatures', 'check-reviewdog', 'pr-ready'].includes(ar
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   }
+} else if ((args[0] === 'prepare-run' && args.length === 3) || (args[0] === 'validate-run' && args.length === 2)) {
+  try {
+    const result = args[0] === 'prepare-run'
+      ? await prepareRun(await resolveConfig(), args[1]!, JSON.parse(await readFile(args[2]!, 'utf8')))
+      : await validateRun(args[1]!);
+    console.log(JSON.stringify(result, null, 2));
+    process.exitCode = args[0] === 'prepare-run' && result.status === 'blocked' ? 1 : 0;
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
 } else if (args[0] === 'agent-run' && (args.length === 3 || args.length === 4)) {
   const controller = new AbortController();
   const cancel = () => controller.abort();
@@ -79,6 +91,6 @@ if (['check-all', 'check-signatures', 'check-reviewdog', 'pr-ready'].includes(ar
     process.exitCode = 1;
   }
 } else {
-  console.log('Checks: bart {check-all|pr-ready|check-signatures|check-reviewdog} [--base REF]\n  check-reviewdog also accepts --full\nSee docs/checks.md for setup and signature policy.\nUsage: bart doctor [--claude] [--device <serial> [--operator-package <package>]] | config | case-create <id> <url> <objective> | case-freeze <id> | agent-run <case-id> <instructions-file> [timeout-ms]\n  doctor  Check host readiness without a model request.\n  --claude  Probe a Claude reply (network and charges may apply; requires BART_AGENT=claude).\n  --device  Check the named Android device and capture commands.\n  config  Validate and print resolved configuration.\n  agent-run  Run one agent task (default deadline: 120000 ms).');
+  console.log('Checks: bart {check-all|pr-ready|check-signatures|check-reviewdog} [--base REF]\n  check-reviewdog also accepts --full\nSee docs/checks.md for setup and signature policy.\nUsage: bart doctor [--claude] [--device <serial> [--operator-package <package>]] | config | case-create <id> <url> <objective> | case-freeze <id> | prepare-run <case-id> <input.json> | validate-run <run-directory> | agent-run <case-id> <instructions-file> [timeout-ms]\n  doctor  Check host readiness without a model request.\n  --claude  Probe a Claude reply (network and charges may apply; requires BART_AGENT=claude).\n  --device  Check the named Android device and capture commands.\n  config  Validate and print resolved configuration.\n  agent-run  Run one agent task (default deadline: 120000 ms).');
   if (args.length && !(args.length === 1 && ['--help', '-h'].includes(args[0]!))) process.exitCode = 1;
 }
