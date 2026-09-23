@@ -5,10 +5,11 @@ interface Entry { id: string; title: string; sourceIds?: string[] }
 
 function entries(value: unknown, kind: 'finding' | 'check', sourceIds: Set<string>): Entry[] {
   if (!Array.isArray(value) || !value.length) throw new Error(`brief-index ${kind}s must be a nonempty array`);
+  const pattern = kind === 'finding' ? /^finding-(?!000)[0-9]{3}$/ : /^check-(?!000)[0-9]{3}$/;
   const ids = new Set<string>();
   return value.map(entry => {
     if (!entry || typeof entry !== 'object' || typeof entry.id !== 'string' ||
-        !new RegExp(`^${kind}-(?!000)[0-9]{3}$`).test(entry.id) || ids.has(entry.id)) {
+        !pattern.test(entry.id) || ids.has(entry.id)) {
       throw new Error(`Invalid or duplicate ${kind} ID`);
     }
     ids.add(entry.id);
