@@ -1,6 +1,6 @@
 # BART implementation plan
 
-Status: Phase 0, configuration/readiness checks, and a [task runner prototype](agent-configuration.md#task-runner) are implemented. Phase 1 and later phases remain unimplemented.
+Status: Phases 0 and 1, configuration/readiness checks, and a [task runner prototype](agent-configuration.md#task-runner) are implemented. Phase 1 prepares cases for an attempt; it does not validate them through execution. Later phases remain unimplemented.
 
 ## Goal
 
@@ -116,7 +116,7 @@ Produce a concise human-readable brief and test plan with supporting sources:
 
 The issue and QA requirements establish desired behavior. Code explains the mechanism and its conditions; implementation behavior alone does not define correctness. Prepared context supplies expectations, never live observations or a verdict.
 
-Completion: a fresh agent can understand and attempt the scoped case from the saved package without the original conversation. Begin with #39794 using the existing handoff research.
+Completion: a fresh agent can understand and attempt the scoped case from the saved package without the original conversation. Prepare from primary sources without reading historical case packages or summaries. Exclude `.context` from searches; planning examples are not research evidence.
 
 ## Phase 2: prepare the run
 
