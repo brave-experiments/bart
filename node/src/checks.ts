@@ -16,8 +16,13 @@ export function parseCheckOptions(args: string[], command: CheckCommand): CheckO
   return options;
 }
 
+export function gitEnvironment(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  // Directory and index overrides must never redirect checks to the caller's Git state.
+  return Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('GIT_')));
+}
+
 export function git(root: string, args: string[]): string {
-  const result = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' });
+  const result = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8', env: gitEnvironment() });
   if (result.error || result.status !== 0) throw new Error(`git ${args[0]} failed: ${result.error?.message ?? result.stderr.trim()}`);
   return result.stdout.trimEnd();
 }

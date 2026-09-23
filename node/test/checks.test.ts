@@ -110,7 +110,7 @@ test('scanner failures survive pipelines and filtered findings; clean runs alone
   await mkdir(bin);
   // Execute the generated runner commands, while simulating reviewdog discarding
   // diagnostics and returning success after a failed scanner.
-  await writeFile(join(bin, 'reviewdog'), `#!${process.execPath}\nconst fs = require('node:fs');\nconst cp = require('node:child_process');\nconst config = JSON.parse(fs.readFileSync(process.argv.find(x => x.startsWith('-conf=')).slice(6)));\nconst name = process.argv.find(x => x.startsWith('-runners=')).slice(9);\nconst r = cp.spawnSync('bash', ['-c', config.runner[name].cmd], {encoding:'utf8'});\nif (!process.env.FILTER_FINDINGS) process.stdout.write(r.stdout || '');\n`);
+  await writeFile(join(bin, 'reviewdog'), `#!${process.execPath}\nconst fs = require('node:fs');\nconst cp = require('node:child_process');\nif (process.env.GIT_INDEX_FILE || process.env.GIT_DIR || process.env.GIT_WORK_TREE) process.exit(8);\nconst config = JSON.parse(fs.readFileSync(process.argv.find(x => x.startsWith('-conf=')).slice(6)));\nconst name = process.argv.find(x => x.startsWith('-runners=')).slice(9);\nconst r = cp.spawnSync('bash', ['-c', config.runner[name].cmd], {encoding:'utf8'});\nif (!process.env.FILTER_FINDINGS) process.stdout.write(r.stdout || '');\n`);
   await chmod(join(bin, 'reviewdog'), 0o755);
   const base = mergeBase(repo, 'origin/main');
   for (const full of [false, true]) {
@@ -119,7 +119,7 @@ test('scanner failures survive pipelines and filtered findings; clean runs alone
         opengrep: { cmd: command }, 'npm-audit': { cmd: 'true' },
       } }));
       for (const filtered of [false, true]) {
-        const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, FILTER_FINDINGS: filtered ? '1' : '', GITHUB_BASE_REF: 'must-not-inherit' };
+        const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, FILTER_FINDINGS: filtered ? '1' : '', GITHUB_BASE_REF: 'must-not-inherit', GIT_INDEX_FILE: 'must-not-inherit', GIT_DIR: 'must-not-inherit', GIT_WORK_TREE: 'must-not-inherit' };
         const result = await runRunners(repo, assets, root, base, full, env);
         assert.equal(result, filtered && String(command).startsWith('printf') ? 0 : expected);
       }
@@ -222,4 +222,26 @@ test('OpenGrep partial parsing fails even when its JSON formatter drops errors',
   const checked = spawnSync('bash', ['-c', runnerCommand(formatter, 'opengrep', failures)], { cwd: repo, env, encoding: 'utf8' });
   assert.notEqual(checked.status, 0);
   assert.equal((await readFile(failures, 'utf8')).trim(), 'opengrep');
+});
+
+
+test('snapshot ignores Git overrides and leaves the source index and branch unchanged', async t => {
+  const { root, repo } = await fixture(t);
+  await writeFile(join(repo, 'sample.ts'), '// dirty\n');
+  await writeFile(join(repo, 'new.ts'), '// untracked\n');
+  const beforeIndex = await readFile(join(repo, '.git', 'index'));
+  const beforeStatus = git(repo, ['status', '--porcelain']);
+  const beforeBranch = git(repo, ['symbolic-ref', 'HEAD']);
+  const target = join(root, 'snapshot');
+  const module = new URL('../src/reviewdog.ts', import.meta.url).href;
+  const result = spawnSync(process.execPath, ['--input-type=module', '-e',
+    `const {snapshot} = await import(${JSON.stringify(module)}); await snapshot(${JSON.stringify(repo)}, ${JSON.stringify(target)});`], {
+    encoding: 'utf8', env: { ...process.env, GIT_DIR: join(repo, '.git'), GIT_WORK_TREE: repo,
+      GIT_INDEX_FILE: join(repo, '.git', 'index') },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(await readFile(join(repo, '.git', 'index')), beforeIndex);
+  assert.equal(git(repo, ['status', '--porcelain']), beforeStatus);
+  assert.equal(git(repo, ['symbolic-ref', 'HEAD']), beforeBranch);
+  assert.equal(await readFile(join(target, 'new.ts'), 'utf8'), '// untracked\n');
 });

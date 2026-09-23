@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, sep } from 'node:path';
 import { parse } from 'yaml';
-import { git, mergeBase, type CheckOptions } from './checks.ts';
+import { git, gitEnvironment, mergeBase, type CheckOptions } from './checks.ts';
 import { resolveWorkDir } from './config.ts';
 
 const actionRevision = '0e33cb6a9c05ff50538df044f7eda3983084d40c';
@@ -16,7 +16,7 @@ const distributions: Record<string, [string, string]> = {
 };
 
 function execute(command: string, args: string[], cwd: string, env = process.env): string {
-  const result = spawnSync(command, args, { cwd, env, timeout: 120_000, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const result = spawnSync(command, args, { cwd, env: gitEnvironment(env), timeout: 120_000, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (result.error || result.status !== 0) throw new Error(`${command} failed: ${result.error?.message ?? result.stderr.trim()}`);
   return result.stdout;
 }
@@ -120,7 +120,7 @@ export async function runRunners(directory: string, assets: string, run: string,
   // filters the result to the complete branch and working-tree diff.
   // Upstream commands expand SCRIPTPATH unquoted. The sibling run layout keeps
   // this relative path free of spaces inherited from BART_WORK_DIR.
-  const childEnv: NodeJS.ProcessEnv = { ...env, SCRIPTPATH: relative(directory, assets) };
+  const childEnv: NodeJS.ProcessEnv = { ...gitEnvironment(env), SCRIPTPATH: relative(directory, assets) };
   delete childEnv.GITHUB_BASE_REF;
   for (const name of selected) {
     console.log(`Security scan: ${name}`);
