@@ -110,18 +110,26 @@ test('scanner failures survive pipelines and filtered findings; clean runs alone
   await mkdir(bin);
   // Execute the generated runner commands, while simulating reviewdog discarding
   // diagnostics and returning success after a failed scanner.
-  await writeFile(join(bin, 'reviewdog'), `#!${process.execPath}\nconst fs = require('node:fs');\nconst cp = require('node:child_process');\nif (process.env.GIT_INDEX_FILE || process.env.GIT_DIR || process.env.GIT_WORK_TREE) process.exit(8);\nconst config = JSON.parse(fs.readFileSync(process.argv.find(x => x.startsWith('-conf=')).slice(6)));\nconst name = process.argv.find(x => x.startsWith('-runners=')).slice(9);\nconst r = cp.spawnSync('bash', ['-c', config.runner[name].cmd], {encoding:'utf8'});\nif (!process.env.FILTER_FINDINGS) process.stdout.write(r.stdout || '');\n`);
+  await writeFile(join(bin, 'reviewdog'), `#!${process.execPath}
+const fs = require('node:fs');
+const cp = require('node:child_process');
+if (process.env.GIT_INDEX_FILE || process.env.GIT_DIR || process.env.GIT_WORK_TREE) process.exit(8);
+const config = JSON.parse(fs.readFileSync(process.argv.find(x => x.startsWith('-conf=')).slice(6)));
+const name = process.argv.find(x => x.startsWith('-runners=')).slice(9);
+const r = cp.spawnSync('bash', ['-c', config.runner[name].cmd], {encoding:'utf8'});
+if (!process.env.FILTER_FINDINGS) process.stdout.write(r.stdout || '');
+`);
   await chmod(join(bin, 'reviewdog'), 0o755);
   const base = mergeBase(repo, 'origin/main');
   for (const full of [false, true]) {
-    for (const [command, expected] of [['true', 0], ['exit 7 | cat', 1], ["printf 'sample.ts:1: finding\\n'", 1]]) {
+    for (const [command, expected] of [['true', 0], ['exit 7 | cat', 1], ["printf 'sample.ts:1: finding\\n'", 1]] as const) {
       await writeFile(join(assets, 'reviewdog/reviewdog.yml'), JSON.stringify({ runner: {
         opengrep: { cmd: command }, 'npm-audit': { cmd: 'true' },
       } }));
       for (const filtered of [false, true]) {
         const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, FILTER_FINDINGS: filtered ? '1' : '', GITHUB_BASE_REF: 'must-not-inherit', GIT_INDEX_FILE: 'must-not-inherit', GIT_DIR: 'must-not-inherit', GIT_WORK_TREE: 'must-not-inherit' };
         const result = await runRunners(repo, assets, root, base, full, env);
-        assert.equal(result, filtered && String(command).startsWith('printf') ? 0 : expected);
+        assert.equal(result, filtered && command.startsWith('printf') ? 0 : expected);
       }
     }
     await writeFile(join(assets, 'reviewdog/reviewdog.yml'), JSON.stringify({ runner: {

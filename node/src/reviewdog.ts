@@ -27,7 +27,7 @@ async function download(url: string, path: string): Promise<void> {
   await writeFile(path, Buffer.from(await response.arrayBuffer()));
 }
 
-async function scannerTools(directory: string): Promise<string> {
+async function prepareScannerTools(directory: string): Promise<void> {
   const dist = distributions[`${process.platform}-${process.arch}`];
   if (!dist) throw new Error('Security checks currently support macOS arm64 and Linux x64.');
   await mkdir(directory, { recursive: true });
@@ -51,18 +51,18 @@ async function scannerTools(directory: string): Promise<string> {
     throw new Error(`Install reviewdog ${reviewdogVersion}; see docs/checks.md.`);
   }
   console.log(`Security rules: brave/security-action@${actionRevision}; OpenGrep ${opengrepVersion}; reviewdog ${reviewdogVersion}.`);
-  return directory;
 }
 
 export async function snapshot(root: string, destination: string): Promise<void> {
   execute('git', ['clone', '--quiet', '--no-hardlinks', '--no-checkout', root, destination], root);
   git(destination, ['checkout', '--quiet', '--detach', git(root, ['rev-parse', 'HEAD'])]);
-  const files = git(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard']).split('\0').filter(Boolean);
-  const included = new Set(files);
+  const included = new Set(
+    git(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard']).split('\0').filter(Boolean),
+  );
   const links: string[] = [];
   const sourceRoot = await realpath(root);
   const original = git(destination, ['ls-files', '-z']).split('\0').filter(Boolean);
-  for (const file of new Set([...original, ...files])) {
+  for (const file of new Set([...original, ...included])) {
     const source = join(root, file);
     const target = join(destination, file);
     await rm(target, { force: true, recursive: true });
@@ -152,7 +152,8 @@ export async function checkReviewdog(root: string, options: CheckOptions): Promi
   const run = await mkdtemp(join(runs, `${Date.now()}-`));
   console.log(`Security scan files: ${run}`);
   try {
-    const bin = await scannerTools(join(work, 'cache', `opengrep-${opengrepVersion}`));
+    const bin = join(work, 'cache', `opengrep-${opengrepVersion}`);
+    await prepareScannerTools(bin);
     const env = { ...process.env, PATH: `${bin}:${process.env.PATH}` };
     for (const tool of ['bash', 'git', 'jq', 'ruby', 'python3', 'npm']) execute(tool, ['--version'], run, env);
     const action = join(run, 'security-action');
