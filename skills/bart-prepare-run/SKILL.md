@@ -62,9 +62,11 @@ initial attempts and failures. Never edit a frozen package or erase old evidence
 - Establish Claude integration with a bounded child invocation that has explicit
   Clawperator tools. Save its prompt, exact arguments, MCP configuration, native
   output and device observation. The existing `agent-run` file-only profile and
-  `doctor --claude` cannot pass this check. Keep `--safe-mode`, `--restricted`, and
-  `--strict-mcp-config`; add only an explicit Clawperator MCP server and the tools
-  required for a read-only snapshot probe. No arbitrary shell access is needed.
+  `doctor --claude` cannot pass this check. Use `--bare`, `--restricted`, `--disable-slash-commands`, and
+  `--strict-mcp-config` with an explicit Clawperator MCP server. Set `--tools ""`,
+  `--allowedTools mcp__clawperator__snapshot`, and `--permission-mode dontAsk`
+  for a read-only snapshot probe. `--safe-mode` disables explicit MCP servers
+  in Claude 2.1.267 and cannot establish this integration. No arbitrary shell access is needed.
   Use the installed Claude CLI help to confirm accepted flags. The child must
   return an observed device fact backed by a successful tool result, not just a
   `READY` reply. Retain failures and mark integration blocked when not established.
@@ -72,6 +74,14 @@ initial attempts and failures. Never edit a frozen package or erase old evidence
   with ffprobe/ffmpeg and inspect frames including rotation. Preserve original
   clips and action receipts. Do not confuse Operator action recordings with video.
   A video start receipt is not proof of a usable finalized recording.
+  Clawperator 0.12.0's verifier uses `-vsync`, which FFmpeg 9 removed. Use FFmpeg 8
+  for this pinned version, with its bin directory first in the capture process's
+  PATH; keep the host's default unchanged. Preserve any failed clip before retrying.
+  Inspect landscape frames too: the default downscaled portrait recording can
+  make the landscape view too small. Request the device's full display size when
+  needed and verify the resulting clip before marking recording ready.
+  Inspect the return rotation and final hold too. Black frames or missing footage
+  block readiness even when decoding passes and the manifest says `complete`.
 
 For #39794, use the frozen build requirements, including the video-fit companion
 fix. Observe both-study assignments. Select **one** current settings condition

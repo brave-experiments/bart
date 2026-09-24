@@ -50,6 +50,23 @@ or the file-only task runner cannot substitute for this check. Recording pass
 requires a finalized, decoded and visually inspected calibration clip, including
 rotation, without assessing the product behavior reserved for later phases.
 
+For Claude 2.1.267, use `--bare --restricted --disable-slash-commands
+--strict-mcp-config` with an explicit Clawperator MCP configuration for this
+probe. Use `--tools "" --allowedTools mcp__clawperator__snapshot
+--permission-mode dontAsk` to permit only the snapshot call, and pass the device
+and Operator package explicitly in that call. `--safe-mode` disables even
+explicit MCP servers in this version. Retain native tool results and check the
+device observation; a successful process exit can still contain no tool call.
+
+Clawperator 0.12.0's video verifier requires the legacy FFmpeg `-vsync` option.
+FFmpeg 9 can pass executable checks but fail video finalization. Use FFmpeg 8
+for the capture process, for example by putting `$(brew --prefix ffmpeg@8)/bin`
+first in that process's PATH on macOS. Record the selected tool versions and
+retain failed clips. Do not change the host's default just for a preparation.
+Decode success does not prove usable capture. Inspect both rotation transitions
+and the final hold; black frames or a missing return to portrait block readiness
+even when the capture manifest says `complete`.
+
 ## Saved output (version 1)
 
 Each invocation creates `cases/<case-id>/runs/<timestamp>-<uuid>/` containing:
