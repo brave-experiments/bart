@@ -6,6 +6,9 @@ sources and writes a brief for a later execution agent. The repository's
 agents can load the canonical skill directly. It does not implement `bart-verify`,
 prepare binaries, operate devices, or post to GitHub.
 
+Use [run preparation](run-preparation.md) to consume a frozen package and retain
+build identity, device observations and readiness for Phase 3.
+
 The CLI adds case allocation and first-pass preservation using Phase 0's validated
 configuration. Research and judgments remain in the skill. Each case has identity
 metadata, a human-readable plan, saved primary sources, and a source index. A

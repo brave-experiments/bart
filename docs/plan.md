@@ -1,6 +1,6 @@
 # BART implementation plan
 
-Status: Phases 0 and 1, configuration/readiness checks, and a [task runner prototype](agent-configuration.md#task-runner) are implemented. Phase 1 prepares cases for an attempt; it does not validate them through execution. Later phases remain unimplemented.
+Status: Phases 0–2 are complete. Configuration/readiness checks and a [task runner prototype](agent-configuration.md#task-runner) are also implemented. [Phase 2 preparation](run-preparation.md) records readiness or specific blockers; it does not establish a product verdict. Phase 3 workflow development is next. Phases 3 onward remain unimplemented.
 
 ## Goal
 
@@ -122,13 +122,23 @@ The issue and QA requirements establish desired behavior. Code explains the mech
 
 Completion: a fresh agent can understand and attempt the scoped case from the saved package without the original conversation. Prepare from primary sources without reading historical case packages or summaries. Exclude `.context` from searches; planning examples are not research evidence.
 
-## Phase 2: prepare the run
+## Phase 2: prepare the run (complete)
 
-Proposed skill: `bart-prepare-run`.
+Implemented skill: [bart-prepare-run](../skills/bart-prepare-run/SKILL.md).
+
+The skill gathers and assesses observations. The file-only `prepare-run` and
+`validate-run` commands retain the frozen case, APK identity, setup authority,
+and evidence, and check hashes and agreement between the input, record, and
+summary. See the [run preparation contract](run-preparation.md).
 
 Input: the case package, build requirements, designated target/package, and permitted setup actions.
 
-Reuse the existing APK-selection mechanism once its actual entry point is located. Download or accept an appropriate binary, record its source relationship and provenance, and verify installation and active package identity. A containing release supports retrospective verification; it does not establish exact PR-head testing.
+Reuse an existing APK-selection mechanism when available. No callable selector
+was located for the initial implementation, so the skill accepts an explicitly
+selected local APK using the case's saved release inventory. Record its source
+relationship and provenance, and verify installation and active package identity.
+A containing release supports retrospective verification; it does not establish
+exact PR-head testing. A general APK resolver remains deferred.
 
 Create the run record. Check device and Operator readiness, Claude integration,
 capture tooling, installed Brave/Chromium versions, and applicable settings. Record,
@@ -223,4 +233,8 @@ publication.
 - Environment convention: `.envrc.example` in the Bravebot repository.
 - QA references: the `qa-resources` repository and its `qa-resources.wiki` checkout.
 
-Before live work, locate the existing APK-selection entry point, designate the target/package, establish binary provenance and setup authority, and prove Claude/Clawperator integration and recording readiness. The historical helpers and prepared case packages are reusable material, not evidence that the new workflow already works.
+Next, implement Phase 3 using the frozen #39794 plan and a validated Phase 2
+preparation. Recheck mutable device, package, flags, integration, and capture
+conditions before workflow discovery. Retain the temporary workflow and its
+observations under the case's run directory. Assessed Disabled/Enabled attempts
+and a product verdict remain work for Phases 4 and 5.
