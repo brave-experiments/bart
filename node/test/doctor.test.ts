@@ -17,6 +17,13 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   const app = join(root, 'app');
   await mkdir(join(app, 'node'), { recursive: true });
   for (const name of ['src', 'package.json']) await cp(join(packageRoot, name), join(app, 'node', name), { recursive: true });
+  for (const path of ['node_modules/.bin', 'node_modules/yaml', 'node_modules/clawperator']) {
+    await mkdir(join(app, 'node', path), { recursive: true });
+  }
+  for (const path of ['node_modules/.bin/tsc', 'node_modules/.bin/lockfile-lint',
+    'node_modules/yaml/package.json', 'node_modules/clawperator/package.json']) {
+    await writeFile(join(app, 'node', path), 'fixture');
+  }
   await cp(join(packageRoot, '../scripts'), join(app, 'scripts'), { recursive: true });
   const bin = join(root, 'bin');
   await mkdir(bin);
@@ -144,6 +151,15 @@ test('doctor gives installation guidance for missing Android capture host tools'
     assert.match(result.stdout, name === 'adb' ? /Android SDK Platform-Tools/ : /brew install ffmpeg/);
     await writeFile(path, original, { mode: 0o755 });
   }
+});
+
+test('doctor reports missing Node dependencies in a new worktree', async (t) => {
+  const { app, run } = await fixture(t);
+  await rm(join(app, 'node/node_modules'), { recursive: true });
+  const result = run();
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /❌ Node package dependencies:/);
+  assert.match(result.stdout, /Fix: run npm --prefix node ci/);
 });
 
 test('explicit device check verifies the designated device, Operator, and capture commands', async (t) => {

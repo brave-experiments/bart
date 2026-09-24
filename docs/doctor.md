@@ -55,6 +55,7 @@ and inspect a short clip before relying on capture for a case.
 | Check | What it establishes |
 | --- | --- |
 | Node.js | The version meets the package's declared range. An unsupported version stops the launcher before TypeScript loads. |
+| Node package dependencies | The package-local TypeScript and lockfile-lint commands, YAML module, and pinned Clawperator package are present. Run `npm --prefix node ci` in each worktree when they are missing. |
 | `BART_BRAVE_CORE_DIR` | The configured path is a Brave Core checkout root with the expected package name and Git origin. |
 | `BART_WORK_DIR` | The explicit work path is outside BART and the reference checkout, and is writable. |
 | Clawperator, GitHub CLI, selected agent | Each executable returns a version within ten seconds. |

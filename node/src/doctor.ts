@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkClaudeReadiness } from './claude-readiness.ts';
 import { resolveAgent, resolveBraveCoreDir, resolveWorkDir } from './config.ts';
@@ -18,6 +19,12 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
   }
 
   result(supportsNode(process.versions.node), nodeResult(), 'run nvm install && nvm use in the BART directory');
+  const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const missingPackages = ['.bin/tsc', '.bin/lockfile-lint', 'yaml/package.json', 'clawperator/package.json']
+    .filter(path => !existsSync(join(packageRoot, 'node_modules', path)));
+  result(missingPackages.length === 0,
+    `Node package dependencies: ${missingPackages.length ? `missing ${missingPackages.join(', ')}` : 'installed'}`,
+    'run npm --prefix node ci from this BART worktree root to install the locked Node packages');
   try {
     result(true, `BART_BRAVE_CORE_DIR: ${await resolveBraveCoreDir()}`, '');
   } catch (error) {
