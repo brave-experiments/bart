@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { constants, createReadStream } from 'node:fs';
 import { copyFile, lstat, mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/promises';
 import { basename, isAbsolute, join, resolve } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { casePaths, type Config } from './config.ts';
 
 export const checkIds = ['build-provenance', 'device', 'operator', 'agent-integration', 'recording',
@@ -141,6 +142,30 @@ function readiness(input: Input) {
   return { checks, blockers, unknowns: checkIds.filter(id => checks[id].status === 'unknown').map(id => `${id}: ${checks[id].detail}`), status: blockers.length ? 'blocked' as const : 'ready' as const };
 }
 
+function retainedEvidencePath(path: string, index: number) {
+  return `preparation/evidence/${index}-${basename(path).replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+}
+
+function validateInputConsistency(record: RunRecord, receipt: Input) {
+  const normalized = { ...receipt, checks: readiness(receipt).checks };
+  const imported = new Map<string, string>();
+  const retain = (path: string) => {
+    if (!imported.has(path)) imported.set(path, retainedEvidencePath(path, imported.size));
+    return imported.get(path)!;
+  };
+  for (const check of Object.values(normalized.checks)) check.evidence = check.evidence.map(retain);
+  if (normalized.build && record.build) {
+    normalized.build = { ...normalized.build, path: record.build.path,
+      evidence: normalized.build.evidence.map(retain) };
+  }
+  const savedBuild = record.build ? { ...record.build } : null;
+  if (savedBuild) delete (savedBuild as Partial<NonNullable<RunRecord['build']>>).sha256;
+  for (const key of ['schemaVersion', 'target', 'authority', 'observations', 'checks', 'build'] as const) {
+    requireValue(isDeepStrictEqual(normalized[key], key === 'build' ? savedBuild : record[key]), `Run ${key} differs from preserved input`);
+  }
+  requireValue(isDeepStrictEqual(Object.keys(record.evidence).sort(), [...imported.values()].sort()), 'Evidence inventory differs from preserved input');
+}
+
 export async function prepareRun(config: Config, caseId: string, raw: unknown) {
   const input = validateInput(structuredClone(raw));
   const state = readiness(input);
@@ -174,7 +199,7 @@ export async function prepareRun(config: Config, caseId: string, raw: unknown) {
   const imported = new Map<string, string>();
   async function retain(path: string) {
     if (imported.has(path)) return imported.get(path)!;
-    const name = `preparation/evidence/${imported.size}-${basename(path).replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    const name = retainedEvidencePath(path, imported.size);
     await copyFile(path, join(directory, name));
     evidence[name] = await sha256(join(directory, name));
     imported.set(path, name);
@@ -210,11 +235,14 @@ export async function prepareRun(config: Config, caseId: string, raw: unknown) {
       next: state.status === 'ready' ? 'Recheck mutable conditions, then begin Phase 3 workflow development.' : 'Resolve the listed blockers and create a new preparation; preserve this attempt.' },
   };
   await validateRecord(directory, record);
-  const summary = `# Preparation: ${record.status}\n\nCase: ${caseId}\nObjective: ${record.objective}\nPrepared: ${record.completedAt}\n\nThis is preparation readiness, not a product verdict.\n\n[Saved plan](${record.handoff.plan}) · [Run record](run.json) · [Manifest](preparation/package/manifest.json)\n\nBuild: ${build ? `${build.path} (${build.sha256}); ${build.relationship}; ${build.origin}` : 'Unknown; no binary supplied.'}\nTarget: ${input.target.deviceId ?? 'unknown'} / ${input.target.packageId ?? 'unknown'}.\nAndroid: ${input.observations.androidVersion ?? 'unknown'}; Brave: ${input.observations.braveVersion ?? 'unknown'}; Chromium: ${input.observations.chromiumVersion ?? 'unknown'}.\nCurrent settings variant: ${input.observations.settingsVariant ?? 'unknown'}.\nReset: ${input.authority.reset}. ${input.authority.basis}\n\n${checkIds.map(id => `- **${id}: ${record.checks[id].status}**. ${record.checks[id].detail} ${record.checks[id].nextAction ?? ''} ${record.checks[id].evidence.map(p => `[Evidence](${p})`).join(' ')}`).join('\n')}\n\n${record.handoff.next}\nRecheck before execution: ${record.handoff.recheck.join(', ')}.\n`;
-  await writeFile(join(directory, 'preparation.md'), summary, { flag: 'wx' });
+  await writeFile(join(directory, 'preparation.md'), renderSummary(record), { flag: 'wx' });
   // Publish readiness last, after all retained files and the summary exist.
   await writeFile(join(directory, 'run.json'), JSON.stringify(record, null, 2) + '\n', { flag: 'wx' });
   return { status: record.status, runDir: directory, recordPath: join(directory, 'run.json'), blockers: record.blockers };
+}
+
+function renderSummary(record: RunRecord) {
+  return `# Preparation: ${record.status}\n\nCase: ${record.caseId}\nObjective: ${record.objective}\nPrepared: ${record.completedAt}\n\nThis is preparation readiness, not a product verdict.\n\n[Saved plan](${record.handoff.plan}) · [Run record](run.json) · [Manifest](preparation/package/manifest.json)\n\nBuild: ${record.build ? `${record.build.path} (${record.build.sha256}); ${record.build.relationship}; ${record.build.origin}` : 'Unknown; no binary supplied.'}\nTarget: ${record.target.deviceId ?? 'unknown'} / ${record.target.packageId ?? 'unknown'}.\nAndroid: ${record.observations.androidVersion ?? 'unknown'}; Brave: ${record.observations.braveVersion ?? 'unknown'}; Chromium: ${record.observations.chromiumVersion ?? 'unknown'}.\nCurrent settings variant: ${record.observations.settingsVariant ?? 'unknown'}.\nReset: ${record.authority.reset}. ${record.authority.basis}\n\n${checkIds.map(id => `- **${id}: ${record.checks[id].status}**. ${record.checks[id].detail} ${record.checks[id].nextAction ?? ''} ${record.checks[id].evidence.map(p => `[Evidence](${p})`).join(' ')}`).join('\n')}\n\n${record.handoff.next}\nRecheck before execution: ${record.handoff.recheck.join(', ')}.\n`;
 }
 
 export async function validateRun(directory: string) {
@@ -222,7 +250,10 @@ export async function validateRun(directory: string) {
   await realDirectory(directory);
   await regularFile(join(directory, 'run.json'));
   await regularFile(join(directory, 'preparation.md'));
-  return validateRecord(directory, JSON.parse(await readFile(join(directory, 'run.json'), 'utf8')));
+  const record = JSON.parse(await readFile(join(directory, 'run.json'), 'utf8'));
+  const result = await validateRecord(directory, record);
+  requireValue(await readFile(join(directory, 'preparation.md'), 'utf8') === renderSummary(record), 'Preparation summary differs from run record');
+  return result;
 }
 
 async function validateRecord(directory: string, value: unknown) {
@@ -240,6 +271,8 @@ async function validateRecord(directory: string, value: unknown) {
   for (const key of ['status', 'blockers', 'unknowns'] as const) requireValue(JSON.stringify(raw[key]) === JSON.stringify(expected[key]), `Inconsistent ${key}`);
   await regularFile(join(directory, 'preparation/input.json'));
   requireValue(digest(raw.inputSha256) && await sha256(join(directory, 'preparation/input.json')) === raw.inputSha256, 'Input hash mismatch');
+  const receipt = validateInput(JSON.parse(await readFile(join(directory, 'preparation/input.json'), 'utf8')));
+  validateInputConsistency(raw as RunRecord, receipt);
   const evidence = object(raw.evidence);
   for (const [path, hash] of Object.entries(evidence)) {
     safeRelative(path);

@@ -99,7 +99,11 @@ and must be rechecked when resuming. There is no product-result field.
 
 `bart validate-run <run-directory>` checks the full record, retained hashes and
 package manifest, and rejects readiness inconsistent with missing identity or
-unresolved checks. It validates blocked records too. `prepare-run` exits 1 for
+unresolved checks. It compares the record with the preserved input after filling
+missing checks and rewriting evidence and APK paths, and requires the summary to
+match the record. Original input files need not remain available. Edit neither
+`run.json` nor `preparation.md`; create a new preparation for changed observations
+or authority. It validates blocked records too. `prepare-run` exits 1 for
 a saved blocked run and 0 for ready; malformed inputs fail before allocation.
 Interrupted writes never count as a ready preparation.
 
