@@ -133,7 +133,9 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
       result(compatible, `Operator ${device.operatorPackage}: ${compatible ? 'compatible' : 'compatibility unverified'}`,
         `check the installed Operator package and version with \`clawperator version --check-compat --device ${device.serial} --operator-package ${device.operatorPackage} --output json\``);
       if (workDir) {
-        const diagnosticCommand = `${clawperatorExecutable} doctor --device ${device.serial} --operator-package ${device.operatorPackage} --output pretty`;
+        const suggestedExecutable = clawperatorExecutable === 'clawperator' ? 'clawperator'
+          : `'${clawperatorExecutable.replaceAll("'", "'\\''")}'`;
+        const diagnosticCommand = `${suggestedExecutable} doctor --device ${device.serial} --operator-package ${device.operatorPackage} --output pretty`;
         const logDir = join(workDir, 'cases/doctor/runs', `${Date.now()}-${randomUUID()}`, 'clawperator-logs');
         const readiness = spawnSync(clawperatorExecutable, ['doctor', '--check-only', '--device', device.serial,
           '--operator-package', device.operatorPackage, '--output', 'json'], {

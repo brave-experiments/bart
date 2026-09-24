@@ -11,10 +11,10 @@ import { supportsNode } from '../src/node-version.js';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
 
-async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
+async function fixture(t: { after: (fn: () => Promise<void>) => void }, appName = 'app') {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'bart-doctor-')));
   t.after(() => rm(root, { recursive: true, force: true }));
-  const app = join(root, 'app');
+  const app = join(root, appName);
   await mkdir(join(app, 'node'), { recursive: true });
   for (const name of ['src', 'package.json']) await cp(join(packageRoot, name), join(app, 'node', name), { recursive: true });
   for (const path of ['node_modules/.bin', 'node_modules/yaml', 'node_modules/clawperator']) {
@@ -202,6 +202,16 @@ test('device doctor suggests Clawperator diagnostics only for reported findings'
   assert.equal(invalid.status, 0);
   assert.match(invalid.stdout.trimEnd(), /Clawperator readiness findings could not be checked\.$/);
   assert.doesNotMatch(invalid.stdout, /Run `clawperator doctor/);
+});
+
+test('device doctor quotes the package-local executable in the suggested command', async (t) => {
+  const { app, bin, run } = await fixture(t, "app's files");
+  const local = join(app, 'node/node_modules/.bin/clawperator');
+  await cp(join(bin, 'clawperator'), local);
+  const result = run({ TEST_CLAWPERATOR_DOCTOR: 'warn' }, ['doctor', '--device', 'emulator-5554']);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const quoted = `'${local.replaceAll("'", "'\\''")}'`;
+  assert.ok(result.stdout.includes(`Run \`${quoted} doctor --device emulator-5554`));
 });
 
 test('doctor rejects incomplete or ambiguous device options before running checks', async (t) => {
