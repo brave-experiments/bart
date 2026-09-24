@@ -1,7 +1,7 @@
 # Development setup
 
 Use Node.js 24.16.0 (`nvm install && nvm use` if you use nvm), npm, and Git.
-[`clawperator`](https://github.com/clawperator/clawperator) is pinned to 0.12.0,
+[`clawperator`](https://github.com/clawperator/clawperator) is pinned to 0.12.2,
 which requires Node >=24.0.0. BART currently invokes Clawperator only to read its version. From the repository root, install
 the locked dependencies:
 

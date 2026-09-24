@@ -58,14 +58,14 @@ and Operator package explicitly in that call. `--safe-mode` disables even
 explicit MCP servers in this version. Retain native tool results and check the
 device observation; a successful process exit can still contain no tool call.
 
-Clawperator 0.12.0's video verifier requires the legacy FFmpeg `-vsync` option.
-FFmpeg 9 can pass executable checks but fail video finalization. Use FFmpeg 8
-for the capture process, for example by putting `$(brew --prefix ffmpeg@8)/bin`
-first in that process's PATH on macOS. Record the selected tool versions and
-retain failed clips. Do not change the host's default just for a preparation.
+Clawperator 0.12.2 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
+6.1 or newer with a working libx264 encoder. Check the encoder capability probe
+before capture. Record the selected tool versions and retain failed clips.
 Decode success does not prove usable capture. Inspect both rotation transitions
 and the final hold; black frames or a missing return to portrait block readiness
-even when the capture manifest says `complete`.
+even when the capture manifest says `complete`. Rotation retains the initial
+canvas and can show sideways content. Inspect every video artifact listed in
+the manifest; a display-size change can produce more than one clip.
 
 ## Saved output (version 1)
 

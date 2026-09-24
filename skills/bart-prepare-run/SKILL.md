@@ -74,12 +74,13 @@ initial attempts and failures. Never edit a frozen package or erase old evidence
   with ffprobe/ffmpeg and inspect frames including rotation. Preserve original
   clips and action receipts. Do not confuse Operator action recordings with video.
   A video start receipt is not proof of a usable finalized recording.
-  Clawperator 0.12.0's verifier uses `-vsync`, which FFmpeg 9 removed. Use FFmpeg 8
-  for this pinned version, with its bin directory first in the capture process's
-  PATH; keep the host's default unchanged. Preserve any failed clip before retrying.
-  Inspect landscape frames too: the default downscaled portrait recording can
-  make the landscape view too small. Request the device's full display size when
-  needed and verify the resulting clip before marking recording ready.
+  Clawperator 0.12.2 requires scrcpy 3.0+, ffprobe and FFmpeg 6.1+ with a
+  working libx264 encoder. Check the encoder capability probe before capture,
+  record tool versions and preserve failed clips before retrying.
+  Inspect landscape frames too. Rotation retains the initial canvas and can show
+  sideways content. Request the device's full display size when needed. Inspect
+  every video artifact in the manifest; display-size changes can produce several
+  clips. Verify the resulting footage before marking recording ready.
   Inspect the return rotation and final hold too. Black frames or missing footage
   block readiness even when decoding passes and the manifest says `complete`.
 
