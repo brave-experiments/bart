@@ -65,6 +65,9 @@ source, and tests stay together. Dependencies install into `node/node_modules/`
 and builds go into `node/dist/`. Root configuration (`.envrc`, `.envrc.example`,
 and `.nvmrc`), documentation, and the stable `scripts/bart` launcher stay at the
 repository root. The launcher resolves imports relative to its own file.
+Each new Git worktree needs its own `node/node_modules/`; run
+`npm --prefix node ci` from that worktree unless it already has compatible
+local dependencies.
 
 Development commands (from the repository root):
 
