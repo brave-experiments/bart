@@ -44,10 +44,13 @@ Build/source: <tested revision and relationship to PR #39794>
 
 ## Current capabilities
 
-BART can check host readiness, run agent tasks, and prepare cases from primary
-sources. Use [bart-prepare-case](skills/bart-prepare-case/SKILL.md) with an issue
-or PR URL and a testing objective. Device verification and `/bart-verify` remain
-unimplemented.
+BART can check host readiness, run agent tasks, prepare cases from primary
+sources, and save run preparation with readiness evidence. Use
+[bart-prepare-case](skills/bart-prepare-case/SKILL.md) with an issue or PR URL and
+a testing objective, then [bart-prepare-run](skills/bart-prepare-run/SKILL.md)
+to prepare the build and device. Preparation records readiness or specific
+blockers; it does not establish a product verdict. Device verification and
+`/bart-verify` remain unimplemented.
 
 ## Get started
 
@@ -55,6 +58,7 @@ Follow [development setup](docs/development.md) to install dependencies and conf
 local paths, then run `./scripts/bart doctor` and `npm --prefix node run check`.
 
 - [Case preparation](docs/case-preparation.md): research, package format, and freezing.
+- [Run preparation](docs/run-preparation.md): build identity, readiness evidence, and handoff.
 - [Agent configuration](docs/agent-configuration.md): agent selection, providers, and task execution.
 - [Presubmit checks](docs/checks.md): local checks, security scans, and commit signatures.
 - [Readiness checks](docs/doctor.md): checks, limits, and troubleshooting.
