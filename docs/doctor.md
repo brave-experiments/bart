@@ -58,17 +58,26 @@ and inspect a short clip before relying on capture for a case.
 | Node package dependencies | The package-local TypeScript and lockfile-lint commands, YAML module, and pinned Clawperator package are present. Run `npm --prefix node ci` in each worktree when they are missing. |
 | `BART_BRAVE_CORE_DIR` | The configured path is a Brave Core checkout root with the expected package name and Git origin. |
 | `BART_WORK_DIR` | The explicit work path is outside BART and the reference checkout, and is writable. |
-| Clawperator, GitHub CLI, selected agent | Each executable returns a version within ten seconds. |
+| Clawperator | The selected executable returns a version within ten seconds and meets the version pinned in `node/package.json`. |
+| GitHub CLI, selected agent | Each executable returns a version within ten seconds. |
 | `adb` | Android SDK Platform-Tools are on PATH and return a version. |
 | `ffmpeg`, `ffprobe` | Both FFmpeg tools are on PATH and return a version. Clawperator checks both before starting video capture. |
 | Android device (`--device` only) | The named device is connected, the selected Operator is version compatible, `screenrecord` advertises size and time-limit options, and `screencap` is available. |
+| Clawperator advice (`--device` only) | The selected Clawperator executable runs `doctor --check-only --output json` for the named device. BART suggests Clawperator's doctor when that report has warnings or failures. This advice does not change BART's exit status. |
 | Claude authentication/provider configuration (Claude selected) | `auth status --json` reports configuration under the preparation flags within ten seconds. This alone does not validate provider credentials. |
 | Claude model response (`--claude` only) | A model request returns a successful JSON result with the exact reply `BART_READY`. Exit 0 alone does not pass. |
 
-Doctor prefers the pinned package-local Clawperator executable and falls back
-to PATH. GitHub CLI, `adb`, both FFmpeg tools, and the selected agent must be on PATH. Output uses ✅ for passing
-checks, ❌ for failures with suggested fixes, and ⚠️ for costs and scope limits.
+Doctor prefers the package-local Clawperator executable and falls back to PATH.
+It rejects an older version from either location. Run `npm --prefix node ci` in
+this checkout to install the pinned version when the check fails. GitHub CLI,
+`adb`, both FFmpeg tools, and the selected agent must be on PATH. Output uses
+✅ for passing checks, ❌ for failures with suggested fixes, and ⚠️ for costs
+and scope limits.
 Raw Claude diagnostics are suppressed to avoid exposing account or credential data.
+Clawperator's healthy report may include general next actions; BART suggests
+its doctor only when checks report warnings or failures. If BART cannot read the
+report, it prints a warning without claiming that Clawperator is ready. It keeps
+Clawperator logs for this probe under `BART_WORK_DIR/cases/doctor/runs/`.
 
 On macOS, install missing `adb` with Android Studio's
 [SDK Manager](https://developer.android.com/tools) or
@@ -105,8 +114,9 @@ in that environment. Bedrock users should follow [agent configuration](agent-con
 and renew their AWS login when needed.
 
 Plain doctor does not log in, edit configuration, install tools, or operate devices.
-`--device` reads the named device through adb and Clawperator's compatibility
-check. Neither mode starts a recording.
+`--device` uses adb and Clawperator's compatibility and readiness checks.
+Clawperator's `--check-only` does not apply fixes, but it can start the adb
+server, clear logcat, and ping the Operator. Neither mode starts a recording.
 Its path checks create the work directory if needed and create and remove a
 temporary writability probe. Claude may refresh credentials and write its own
 CLI state.

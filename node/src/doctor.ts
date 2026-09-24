@@ -1,5 +1,6 @@
 import { spawnSync, type SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkClaudeReadiness } from './claude-readiness.ts';
@@ -11,6 +12,29 @@ export interface DoctorDevice {
   operatorPackage: string;
 }
 
+function meetsClawperatorVersion(output: string, required: string): boolean {
+  const parse = (value: string) => /^(?:clawperator\s+)?v?(\d+)\.(\d+)\.(\d+)$/.exec(value.trim())?.slice(1).map(Number);
+  const installed = parse(output);
+  const minimum = parse(required);
+  if (!installed || !minimum) return false;
+  for (let part = 0; part < minimum.length; part++) {
+    if (installed[part] !== minimum[part]) return installed[part]! > minimum[part]!;
+  }
+  return true;
+}
+
+function clawperatorHasFindings(output: string): boolean | undefined {
+  try {
+    const report: unknown = JSON.parse(output);
+    if (typeof report !== 'object' || report === null ||
+        !('ok' in report) || typeof report.ok !== 'boolean' ||
+        !('checks' in report) || !Array.isArray(report.checks)) return undefined;
+    return !report.ok || report.checks.some((check: unknown) =>
+      typeof check === 'object' && check !== null && 'status' in check &&
+      (check.status === 'warn' || check.status === 'fail'));
+  } catch { return undefined; }
+}
+
 export async function doctor(checkModel = false, device?: DoctorDevice): Promise<number> {
   let failures = 0;
   function result(ok: boolean, message: string, fix: string) {
@@ -20,6 +44,7 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
 
   result(supportsNode(process.versions.node), nodeResult(), 'run nvm install && nvm use in the BART directory');
   const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const requiredClawperatorVersion: string = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')).dependencies.clawperator;
   const localClawperator = join(packageRoot, 'node_modules/.bin/clawperator');
   const clawperatorExecutable = existsSync(localClawperator) ? localClawperator : 'clawperator';
   const probeOptions: SpawnSyncOptionsWithStringEncoding = {
@@ -36,8 +61,10 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
   } catch (error) {
     result(false, String((error as Error).message), 'set BART_BRAVE_CORE_DIR to the Brave Core checkout root (absolute path or ~/), with package name brave-core and brave/brave-core origin; load .envrc and ensure git is on PATH');
   }
+  let workDir: string | undefined;
   try {
-    result(true, `BART_WORK_DIR: ${await resolveWorkDir()} (writable)`, '');
+    workDir = await resolveWorkDir();
+    result(true, `BART_WORK_DIR: ${workDir} (writable)`, '');
   } catch (error) {
     result(false, `BART_WORK_DIR: ${(error as Error).message}`, 'set BART_WORK_DIR in .envrc to a writable directory outside BART and the reference checkout, then load it with direnv allow or source .envrc; check parent permissions');
   }
@@ -59,13 +86,14 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
     const versionArg = tool === 'ffmpeg' || tool === 'ffprobe' ? '-version' : '--version';
     const version = spawnSync(executable, [versionArg], probeOptions);
     const output = (version.stdout || version.stderr || '').trim().split(/\r?\n/)[0];
-    const ok = !version.error && version.status === 0 && Boolean(output);
+    const versionAvailable = !version.error && version.status === 0 && Boolean(output);
+    const ok = versionAvailable && (tool !== 'clawperator' || meetsClawperatorVersion(output, requiredClawperatorVersion));
     const detail = version.error ? version.error.message : `${versionArg} exited ${version.status ?? version.signal}${output ? `: ${output}` : ' without a version'}`;
-    const fix = tool === 'clawperator' ? 'run npm --prefix node ci in the BART repository root to restore the pinned executable, or make clawperator available on PATH'
+    const fix = tool === 'clawperator' ? `run npm --prefix node ci in this BART checkout to install Clawperator ${requiredClawperatorVersion} (required >=${requiredClawperatorVersion})`
       : tool === 'adb' ? 'install Android SDK Platform-Tools with Android Studio SDK Manager or `brew install --cask android-platform-tools` on macOS, then add adb to PATH'
       : tool === 'ffmpeg' || tool === 'ffprobe' ? 'install FFmpeg with `brew install ffmpeg` on macOS, then add both ffmpeg and ffprobe to PATH'
       : `install ${tool} or add its executable to PATH; check ${tool} --version`;
-    result(ok, `\`${tool}\`: ${ok ? output : detail}${executable === localClawperator ? ' (package-local)' : ''}`, fix);
+    result(ok, `\`${tool}\`: ${versionAvailable ? output : detail}${tool === 'clawperator' ? ` (required >=${requiredClawperatorVersion})` : ''}${executable === localClawperator ? ' (package-local)' : ''}`, fix);
     if (ok) available.add(tool);
     if (tool === 'claude' && ok) {
       if (checkModel) console.log('⚠️ Claude Haiku model check uses the network and may incur charges or consume quota (30s, one turn, Claude budget setting $0.01).');
@@ -73,6 +101,7 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
       checkClaudeReadiness(({ ok, message, fix }) => result(ok, message, fix), checkModel);
     }
   }
+  let clawperatorAdvice: string | undefined;
   if (device) {
     let connected = false;
     if (!available.has('adb')) console.log('⚠️ Device capture checks skipped because adb is unavailable.');
@@ -103,11 +132,26 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
       catch { /* Invalid or missing JSON is a failed check. */ }
       result(compatible, `Operator ${device.operatorPackage}: ${compatible ? 'compatible' : 'compatibility unverified'}`,
         `check the installed Operator package and version with \`clawperator version --check-compat --device ${device.serial} --operator-package ${device.operatorPackage} --output json\``);
+      if (workDir) {
+        const suggestedExecutable = clawperatorExecutable === 'clawperator' ? 'clawperator'
+          : `'${clawperatorExecutable.replaceAll("'", "'\\''")}'`;
+        const diagnosticCommand = `${suggestedExecutable} doctor --device ${device.serial} --operator-package ${device.operatorPackage} --output pretty`;
+        const logDir = join(workDir, 'cases/doctor/runs', `${Date.now()}-${randomUUID()}`, 'clawperator-logs');
+        const readiness = spawnSync(clawperatorExecutable, ['doctor', '--check-only', '--device', device.serial,
+          '--operator-package', device.operatorPackage, '--output', 'json'], {
+          ...probeOptions, timeout: 30_000, env: { ...process.env, CLAWPERATOR_LOG_DIR: logDir },
+        });
+        const hasFindings = !readiness.error && (readiness.status === 0 || readiness.status === 1)
+          ? clawperatorHasFindings(readiness.stdout) : undefined;
+        if (hasFindings) clawperatorAdvice = `⚠️ Clawperator reported readiness findings. Run \`${diagnosticCommand}\` to review them.`;
+        else if (hasFindings === undefined) clawperatorAdvice = '⚠️ Clawperator readiness findings could not be checked.';
+      } else clawperatorAdvice = '⚠️ Clawperator readiness findings were not checked because BART_WORK_DIR is unavailable.';
     } else console.log('⚠️ Operator compatibility check skipped because the device is unavailable.');
   }
   console.log(device
     ? '⚠️ A capture clip, file-tool execution, GitHub authentication, and full agent integration were not checked.'
     : '⚠️ Device readiness, capture capability, file-tool execution, GitHub authentication, and full agent integration were not checked. Use `./scripts/bart doctor --device <serial>` for device capture checks.');
   console.log(failures ? `${failures} required check(s) failed.` : 'All required doctor checks passed.');
+  if (clawperatorAdvice) console.log(clawperatorAdvice);
   return failures ? 1 : 0;
 }

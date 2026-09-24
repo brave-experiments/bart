@@ -11,10 +11,10 @@ import { supportsNode } from '../src/node-version.js';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
 
-async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
+async function fixture(t: { after: (fn: () => Promise<void>) => void }, appName = 'app') {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'bart-doctor-')));
   t.after(() => rm(root, { recursive: true, force: true }));
-  const app = join(root, 'app');
+  const app = join(root, appName);
   await mkdir(join(app, 'node'), { recursive: true });
   for (const name of ['src', 'package.json']) await cp(join(packageRoot, name), join(app, 'node', name), { recursive: true });
   for (const path of ['node_modules/.bin', 'node_modules/yaml', 'node_modules/clawperator']) {
@@ -39,6 +39,20 @@ if [ "$1" = --version ]; then echo 'clawperator 1.2.3'; exit; fi
 if [ "$1" = version ] && [ "$2" = --check-compat ]; then
   [ "$TEST_OPERATOR" = incompatible ] && { echo '{"compatible":false}'; exit 1; }
   echo '{"compatible":true}'; exit
+fi
+if [ "$1" = doctor ] && [ "$2" = --check-only ]; then
+  [ "$3" = --device ] && [ "$4" = emulator-5554 ] &&
+  [ "$5" = --operator-package ] && [ "$7" = --output ] && [ "$8" = json ] || exit 9
+  case "$CLAWPERATOR_LOG_DIR" in
+    "$BART_WORK_DIR"/cases/doctor/runs/*/clawperator-logs) ;;
+    *) exit 9 ;;
+  esac
+  case "$TEST_CLAWPERATOR_DOCTOR" in
+    warn) echo '{"ok":true,"checks":[{"status":"warn"}],"nextActions":["Review setup"]}'; exit ;;
+    fail) echo '{"ok":false,"checks":[{"status":"fail"}]}'; exit 1 ;;
+    invalid) echo 'not json'; exit 1 ;;
+  esac
+  echo '{"ok":true,"checks":[{"status":"pass"}],"nextActions":["Try a snapshot"]}'; exit
 fi
 exit 9
 `, { mode: 0o755 });
@@ -159,6 +173,7 @@ test('explicit device check verifies the designated device, Operator, and captur
   assert.match(result.stdout, /Android screenrecord supports --size and --time-limit/);
   assert.match(result.stdout, /Android screencap is available/);
   assert.match(result.stdout, /A capture clip.*not checked/);
+  assert.doesNotMatch(result.stdout, /Clawperator reported readiness findings/);
   for (const [env, failed] of [
     [{ TEST_DEVICE: 'offline' }, /Device emulator-5554: unavailable/],
     [{ TEST_OPERATOR: 'incompatible' }, /Operator com\.clawperator\.operator: compatibility unverified/],
@@ -169,6 +184,34 @@ test('explicit device check verifies the designated device, Operator, and captur
     assert.equal(check.status, 1);
     assert.match(check.stdout, failed);
   }
+});
+
+test('device doctor suggests Clawperator diagnostics only for reported findings', async (t) => {
+  const { run } = await fixture(t);
+  const args = ['doctor', '--device', 'emulator-5554'];
+  const plain = run({ TEST_CLAWPERATOR_DOCTOR: 'warn' });
+  assert.equal(plain.status, 0);
+  assert.doesNotMatch(plain.stdout, /Clawperator reported readiness findings/);
+
+  for (const report of ['warn', 'fail']) {
+    const result = run({ TEST_CLAWPERATOR_DOCTOR: report }, args);
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.match(result.stdout.trimEnd(), /Clawperator reported readiness findings\. Run `clawperator doctor --device emulator-5554 --operator-package com\.clawperator\.operator --output pretty` to review them\.$/);
+  }
+  const invalid = run({ TEST_CLAWPERATOR_DOCTOR: 'invalid' }, args);
+  assert.equal(invalid.status, 0);
+  assert.match(invalid.stdout.trimEnd(), /Clawperator readiness findings could not be checked\.$/);
+  assert.doesNotMatch(invalid.stdout, /Run `clawperator doctor/);
+});
+
+test('device doctor quotes the package-local executable in the suggested command', async (t) => {
+  const { app, bin, run } = await fixture(t, "app's files");
+  const local = join(app, 'node/node_modules/.bin/clawperator');
+  await cp(join(bin, 'clawperator'), local);
+  const result = run({ TEST_CLAWPERATOR_DOCTOR: 'warn' }, ['doctor', '--device', 'emulator-5554']);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const quoted = `'${local.replaceAll("'", "'\\''")}'`;
+  assert.ok(result.stdout.includes(`Run \`${quoted} doctor --device emulator-5554`));
 });
 
 test('doctor rejects incomplete or ambiguous device options before running checks', async (t) => {
@@ -193,7 +236,43 @@ test('doctor prefers the package-local Clawperator executable', async (t) => {
   await writeFile(local, '#!/bin/sh\nprintf "0.12.0\\n"\n', { mode: 0o755 });
   const result = run();
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /`clawperator`: 0.12.0 \(package-local\)/);
+  assert.match(result.stdout, /`clawperator`: 0.12.0 \(required >=0.12.0\) \(package-local\)/);
+});
+
+test('doctor rejects an older Clawperator selected from PATH or the local package', async (t) => {
+  const { app, bin, run } = await fixture(t);
+  const global = join(bin, 'clawperator');
+  await writeFile(global, '#!/bin/sh\necho 0.11.1\n', { mode: 0o755 });
+  const olderGlobal = run();
+  assert.equal(olderGlobal.status, 1);
+  assert.match(olderGlobal.stdout, /❌ `clawperator`: 0.11.1 \(required >=0.12.0\)/);
+  assert.match(olderGlobal.stdout, /Fix: run npm --prefix node ci/);
+
+  await writeFile(global, '#!/bin/sh\necho 0.12.0\n', { mode: 0o755 });
+  assert.equal(run().status, 0);
+  await writeFile(global, '#!/bin/sh\necho 0.13.0\n', { mode: 0o755 });
+  assert.equal(run().status, 0);
+  await writeFile(global, '#!/bin/sh\necho 0.12.0-beta.1\n', { mode: 0o755 });
+  const prerelease = run();
+  assert.equal(prerelease.status, 1);
+  assert.match(prerelease.stdout, /❌ `clawperator`: 0.12.0-beta.1/);
+  await writeFile(global, '#!/bin/sh\necho 0.12.0\n', { mode: 0o755 });
+  const local = join(app, 'node/node_modules/.bin/clawperator');
+  await writeFile(local, '#!/bin/sh\necho 0.11.1\n', { mode: 0o755 });
+  const olderLocal = run();
+  assert.equal(olderLocal.status, 1);
+  assert.match(olderLocal.stdout, /❌ `clawperator`: 0.11.1 \(required >=0.12.0\) \(package-local\)/);
+});
+
+test('doctor reads the Clawperator requirement from the package manifest', async (t) => {
+  const { app, run } = await fixture(t);
+  const manifestPath = join(app, 'node/package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  manifest.dependencies.clawperator = '1.2.4';
+  await writeFile(manifestPath, JSON.stringify(manifest));
+  const result = run();
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /❌ `clawperator`: clawperator 1.2.3 \(required >=1.2.4\)/);
 });
 
 test('Node check honors the declared minimum and upper bound', () => {
