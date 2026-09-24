@@ -73,6 +73,9 @@ this checkout to install the pinned version when the check fails. GitHub CLI,
 ✅ for passing checks, ❌ for failures with suggested fixes, and ⚠️ for costs
 and scope limits.
 Raw Claude diagnostics are suppressed to avoid exposing account or credential data.
+The closing line suggests `clawperator doctor --check-only` for Clawperator's
+own readiness checks. Pass `--device <serial>` and `--operator-package <package>`
+when needed.
 
 On macOS, install missing `adb` with Android Studio's
 [SDK Manager](https://developer.android.com/tools) or

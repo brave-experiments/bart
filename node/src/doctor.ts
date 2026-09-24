@@ -122,5 +122,6 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
     ? '⚠️ A capture clip, file-tool execution, GitHub authentication, and full agent integration were not checked.'
     : '⚠️ Device readiness, capture capability, file-tool execution, GitHub authentication, and full agent integration were not checked. Use `./scripts/bart doctor --device <serial>` for device capture checks.');
   console.log(failures ? `${failures} required check(s) failed.` : 'All required doctor checks passed.');
+  console.log('ℹ️ For Clawperator readiness checks, run `clawperator doctor --check-only`.');
   return failures ? 1 : 0;
 }
