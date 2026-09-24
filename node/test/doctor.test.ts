@@ -133,24 +133,12 @@ test('doctor fails for each missing executable and unsuccessful version command'
     assert.equal(result.status, 1, result.stderr);
     assert.ok(result.stdout.includes(`❌ \`${name}\`:`));
     assert.match(result.stdout, /Fix:/);
+    if (name === 'adb') assert.match(result.stdout, /Android SDK Platform-Tools/);
+    if (name === 'ffmpeg' || name === 'ffprobe') assert.match(result.stdout, /brew install ffmpeg/);
     await writeFile(path, original, { mode: 0o755 });
   }
   await writeFile(join(bin, 'claude'), '#!/bin/sh\nexit 7\n', { mode: 0o755 });
   assert.match(run().stdout, /❌ `claude`: --version exited 7/);
-});
-
-test('doctor gives installation guidance for missing Android capture host tools', async (t) => {
-  const { bin, run } = await fixture(t);
-  for (const name of ['adb', 'ffmpeg', 'ffprobe']) {
-    const path = join(bin, name);
-    const original = await readFile(path);
-    await rm(path);
-    const result = run();
-    assert.equal(result.status, 1);
-    assert.ok(result.stdout.includes(`❌ \`${name}\`:`));
-    assert.match(result.stdout, name === 'adb' ? /Android SDK Platform-Tools/ : /brew install ffmpeg/);
-    await writeFile(path, original, { mode: 0o755 });
-  }
 });
 
 test('doctor reports missing Node dependencies in a new worktree', async (t) => {

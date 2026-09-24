@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawnSync, type SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +20,12 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
 
   result(supportsNode(process.versions.node), nodeResult(), 'run nvm install && nvm use in the BART directory');
   const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const localClawperator = join(packageRoot, 'node_modules/.bin/clawperator');
+  const clawperatorExecutable = existsSync(localClawperator) ? localClawperator : 'clawperator';
+  const probeOptions: SpawnSyncOptionsWithStringEncoding = {
+    encoding: 'utf8', timeout: 10_000, killSignal: 'SIGKILL', maxBuffer: 64 * 1024,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  };
   const missingPackages = ['.bin/tsc', '.bin/lockfile-lint', 'yaml/package.json', 'clawperator/package.json']
     .filter(path => !existsSync(join(packageRoot, 'node_modules', path)));
   result(missingPackages.length === 0,
@@ -49,13 +55,9 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
   } catch (error) { result(false, (error as Error).message, 'set BART_AGENT to claude or opencode'); }
   for (const tool of tools) {
     // Prefer the pinned package executable without changing PATH for other tools.
-    const local = fileURLToPath(new URL('../node_modules/.bin/clawperator', import.meta.url));
-    const executable = tool === 'clawperator' && existsSync(local) ? local : tool;
+    const executable = tool === 'clawperator' ? clawperatorExecutable : tool;
     const versionArg = tool === 'ffmpeg' || tool === 'ffprobe' ? '-version' : '--version';
-    const version = spawnSync(executable, [versionArg], {
-      encoding: 'utf8', timeout: 10_000, killSignal: 'SIGKILL', maxBuffer: 64 * 1024,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    const version = spawnSync(executable, [versionArg], probeOptions);
     const output = (version.stdout || version.stderr || '').trim().split(/\r?\n/)[0];
     const ok = !version.error && version.status === 0 && Boolean(output);
     const detail = version.error ? version.error.message : `${versionArg} exited ${version.status ?? version.signal}${output ? `: ${output}` : ' without a version'}`;
@@ -63,7 +65,7 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
       : tool === 'adb' ? 'install Android SDK Platform-Tools with Android Studio SDK Manager or `brew install --cask android-platform-tools` on macOS, then add adb to PATH'
       : tool === 'ffmpeg' || tool === 'ffprobe' ? 'install FFmpeg with `brew install ffmpeg` on macOS, then add both ffmpeg and ffprobe to PATH'
       : `install ${tool} or add its executable to PATH; check ${tool} --version`;
-    result(ok, `\`${tool}\`: ${ok ? output : detail}${executable === local ? ' (package-local)' : ''}`, fix);
+    result(ok, `\`${tool}\`: ${ok ? output : detail}${executable === localClawperator ? ' (package-local)' : ''}`, fix);
     if (ok) available.add(tool);
     if (tool === 'claude' && ok) {
       if (checkModel) console.log('⚠️ Claude Haiku model check uses the network and may incur charges or consume quota (30s, one turn, Claude budget setting $0.01).');
@@ -75,18 +77,12 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
     let connected = false;
     if (!available.has('adb')) console.log('⚠️ Device capture checks skipped because adb is unavailable.');
     else {
-      const state = spawnSync('adb', ['-s', device.serial, 'get-state'], {
-        encoding: 'utf8', timeout: 10_000, killSignal: 'SIGKILL', maxBuffer: 64 * 1024,
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
+      const state = spawnSync('adb', ['-s', device.serial, 'get-state'], probeOptions);
       connected = !state.error && state.status === 0 && state.stdout.trim() === 'device';
       result(connected, `Device ${device.serial}: ${connected ? 'connected' : 'unavailable or unauthorized'}`,
         `check \`adb -s ${device.serial} get-state\` and authorize or reconnect the designated device`);
       if (connected) {
-        const run = (args: string[]) => spawnSync('adb', ['-s', device.serial, 'shell', ...args], {
-          encoding: 'utf8', timeout: 10_000, killSignal: 'SIGKILL', maxBuffer: 64 * 1024,
-          stdio: ['ignore', 'pipe', 'pipe'],
-        });
+        const run = (args: string[]) => spawnSync('adb', ['-s', device.serial, 'shell', ...args], probeOptions);
         const recording = run(['screenrecord', '--help']);
         const recordingHelp = `${recording.stdout ?? ''}${recording.stderr ?? ''}`;
         result(!recording.error && recording.status === 0 && recordingHelp.includes('--size') && recordingHelp.includes('--time-limit'),
@@ -100,13 +96,8 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
     }
     if (!available.has('clawperator')) console.log('⚠️ Operator compatibility check skipped because Clawperator is unavailable.');
     else if (connected) {
-      const local = fileURLToPath(new URL('../node_modules/.bin/clawperator', import.meta.url));
-      const executable = existsSync(local) ? local : 'clawperator';
-      const compatibility = spawnSync(executable, ['version', '--check-compat', '--device', device.serial,
-        '--operator-package', device.operatorPackage, '--output', 'json'], {
-        encoding: 'utf8', timeout: 10_000, killSignal: 'SIGKILL', maxBuffer: 64 * 1024,
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
+      const compatibility = spawnSync(clawperatorExecutable, ['version', '--check-compat', '--device', device.serial,
+        '--operator-package', device.operatorPackage, '--output', 'json'], probeOptions);
       let compatible = false;
       try { compatible = compatibility.status === 0 && JSON.parse(compatibility.stdout).compatible === true; }
       catch { /* Invalid or missing JSON is a failed check. */ }
