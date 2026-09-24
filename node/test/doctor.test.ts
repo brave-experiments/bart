@@ -27,8 +27,37 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   execFileSync(git, ['init', '--quiet', checkout]);
   execFileSync(git, ['-C', checkout, 'remote', 'add', 'origin', 'https://github.com/brave/brave-core.git']);
   await writeFile(join(checkout, 'package.json'), '{"name":"brave-core"}');
-  for (const name of ['clawperator', 'gh']) {
-    await writeFile(join(bin, name), `#!/bin/sh\n[ "$#" = 1 ] && [ "$1" = --version ] || exit 9\nprintf '${name} 1.2.3\\n'\n`, { mode: 0o755 });
+  await writeFile(join(bin, 'clawperator'), `#!/bin/sh
+if [ "$1" = --version ]; then echo 'clawperator 1.2.3'; exit; fi
+if [ "$1" = version ] && [ "$2" = --check-compat ]; then
+  [ "$TEST_OPERATOR" = incompatible ] && { echo '{"compatible":false}'; exit 1; }
+  echo '{"compatible":true}'; exit
+fi
+exit 9
+`, { mode: 0o755 });
+  await writeFile(join(bin, 'adb'), `#!/bin/sh
+if [ "$1" = --version ]; then echo 'Android Debug Bridge version 1.0.41'; exit; fi
+[ "$1" = -s ] && [ "$2" = emulator-5554 ] || exit 9
+shift 2
+if [ "$1" = get-state ]; then
+  [ "$TEST_DEVICE" = offline ] && { echo offline; exit 1; }
+  echo device; exit
+fi
+[ "$1" = shell ] || exit 9
+shift
+if [ "$1" = screenrecord ] && [ "$2" = --help ]; then
+  [ "$TEST_RECORDING" = missing ] && exit 1
+  echo 'screenrecord --size WIDTHxHEIGHT --time-limit TIME'; exit
+fi
+if [ "$1" = command ] && [ "$2" = -v ] && [ "$3" = screencap ]; then
+  [ "$TEST_SCREENSHOT" = missing ] && exit 1
+  echo /system/bin/screencap; exit
+fi
+exit 9
+`, { mode: 0o755 });
+  for (const name of ['gh', 'ffmpeg', 'ffprobe']) {
+    const versionArg = name === 'gh' ? '--version' : '-version';
+    await writeFile(join(bin, name), `#!/bin/sh\n[ "$#" = 1 ] && [ "$1" = ${versionArg} ] || exit 9\nprintf '${name} 1.2.3\\n'\n`, { mode: 0o755 });
   }
   await writeFile(join(bin, 'claude'), `#!/usr/bin/env node
 const args = process.argv.slice(2);
@@ -52,8 +81,9 @@ test('doctor succeeds from another directory with explicit work path without a m
   assert.match(result.stdout, /All required doctor checks passed/);
   assert.ok(result.stdout.includes(join(root, 'work')));
   assert.match(result.stdout, /writable/);
-  for (const name of ['clawperator', 'gh', 'claude']) assert.ok(result.stdout.includes(`✅ \`${name}\`: ${name} 1.2.3`));
-  assert.match(result.stdout, /Device readiness, file-tool execution, GitHub authentication, and full agent integration were not checked/);
+  for (const name of ['clawperator', 'gh', 'ffmpeg', 'ffprobe', 'claude']) assert.ok(result.stdout.includes(`✅ \`${name}\`: ${name} 1.2.3`));
+  assert.match(result.stdout, /✅ `adb`: Android Debug Bridge version 1.0.41/);
+  assert.match(result.stdout, /Device readiness, capture capability, file-tool execution, GitHub authentication, and full agent integration were not checked/);
   assert.equal(await readFile(join(checkout, '.git/config'), 'utf8'), before);
 });
 
@@ -88,7 +118,7 @@ test('doctor rejects unusable work directories and retains existing data', async
 
 test('doctor fails for each missing executable and unsuccessful version command', async (t) => {
   const { bin, run } = await fixture(t);
-  for (const name of ['clawperator', 'gh', 'claude']) {
+  for (const name of ['clawperator', 'gh', 'adb', 'ffmpeg', 'ffprobe', 'claude']) {
     const path = join(bin, name);
     const original = await readFile(path);
     await rm(path);
@@ -100,6 +130,56 @@ test('doctor fails for each missing executable and unsuccessful version command'
   }
   await writeFile(join(bin, 'claude'), '#!/bin/sh\nexit 7\n', { mode: 0o755 });
   assert.match(run().stdout, /❌ `claude`: --version exited 7/);
+});
+
+test('doctor gives installation guidance for missing Android capture host tools', async (t) => {
+  const { bin, run } = await fixture(t);
+  for (const name of ['adb', 'ffmpeg', 'ffprobe']) {
+    const path = join(bin, name);
+    const original = await readFile(path);
+    await rm(path);
+    const result = run();
+    assert.equal(result.status, 1);
+    assert.ok(result.stdout.includes(`❌ \`${name}\`:`));
+    assert.match(result.stdout, name === 'adb' ? /Android SDK Platform-Tools/ : /brew install ffmpeg/);
+    await writeFile(path, original, { mode: 0o755 });
+  }
+});
+
+test('explicit device check verifies the designated device, Operator, and capture commands', async (t) => {
+  const { run } = await fixture(t);
+  const result = run({}, ['doctor', '--device', 'emulator-5554', '--operator-package', 'com.clawperator.operator.dev']);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /Device emulator-5554: connected/);
+  assert.match(result.stdout, /Operator com\.clawperator\.operator\.dev: compatible/);
+  assert.match(result.stdout, /Android screenrecord supports --size and --time-limit/);
+  assert.match(result.stdout, /Android screencap is available/);
+  assert.match(result.stdout, /A capture clip.*not checked/);
+  for (const [env, failed] of [
+    [{ TEST_DEVICE: 'offline' }, /Device emulator-5554: unavailable/],
+    [{ TEST_OPERATOR: 'incompatible' }, /Operator com\.clawperator\.operator: compatibility unverified/],
+    [{ TEST_RECORDING: 'missing' }, /❌ Android screenrecord/],
+    [{ TEST_SCREENSHOT: 'missing' }, /❌ Android screencap/],
+  ] as const) {
+    const check = run(env, ['doctor', '--device', 'emulator-5554']);
+    assert.equal(check.status, 1);
+    assert.match(check.stdout, failed);
+  }
+});
+
+test('doctor rejects incomplete or ambiguous device options before running checks', async (t) => {
+  const { run } = await fixture(t);
+  for (const args of [
+    ['doctor', '--device'],
+    ['doctor', '--device', '--claude'],
+    ['doctor', '--operator-package', 'com.clawperator.operator'],
+    ['doctor', '--device', 'emulator-5554', '--device', 'emulator-5556'],
+  ]) {
+    const result = run({}, args);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Usage: bart doctor/);
+    assert.equal(result.stdout, '');
+  }
 });
 
 test('doctor prefers the package-local Clawperator executable', async (t) => {
@@ -135,7 +215,7 @@ test('launcher help works outside the repository without configuration', async (
   const { run } = await fixture(t);
   const result = run({ BART_BRAVE_CORE_DIR: undefined }, ['--help']);
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Usage: bart doctor \[--claude\] \| config/);
+  assert.match(result.stdout, /Usage: bart doctor \[--claude\] \[--device <serial>/);
 });
 
 test('doctor protects the whole repository, including paths outside node and symlinks', async (t) => {

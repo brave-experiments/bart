@@ -1,7 +1,7 @@
 import { createCase, freezeCase } from './case-package.ts';
 import { readFile } from 'node:fs/promises';
 import { runAgent } from './agent.ts';
-import { doctor } from './doctor.ts';
+import { doctor, type DoctorDevice } from './doctor.ts';
 import { resolveConfig } from './config.ts';
 
 import { parseCheckOptions, runChecks, type CheckCommand } from './checks.ts';
@@ -15,8 +15,32 @@ if (['check-all', 'check-signatures', 'check-reviewdog', 'pr-ready'].includes(ar
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   }
-} else if (args[0] === 'doctor' && (args.length === 1 || (args.length === 2 && args[1] === '--claude'))) {
-  process.exitCode = await doctor(args[1] === '--claude');
+} else if (args[0] === 'doctor') {
+  let checkModel = false;
+  let serial: string | undefined;
+  let operatorPackage: string | undefined;
+  let valid = true;
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--claude' && !checkModel) checkModel = true;
+    else if (args[i] === '--device' && serial === undefined) {
+      serial = args[++i];
+      if (!serial) valid = false;
+    } else if (args[i] === '--operator-package' && operatorPackage === undefined) {
+      operatorPackage = args[++i];
+      if (!operatorPackage) valid = false;
+    } else valid = false;
+  }
+  if ((!serial && operatorPackage) ||
+      (serial !== undefined && !/^[A-Za-z0-9][A-Za-z0-9_.:-]*$/.test(serial)) ||
+      (operatorPackage !== undefined && !/^[A-Za-z0-9_.]+$/.test(operatorPackage))) valid = false;
+  if (!valid) {
+    console.error('Usage: bart doctor [--claude] [--device <serial> [--operator-package <package>]]');
+    process.exitCode = 1;
+  } else {
+    const device: DoctorDevice | undefined = serial === undefined ? undefined
+      : { serial, operatorPackage: operatorPackage ?? 'com.clawperator.operator' };
+    process.exitCode = await doctor(checkModel, device);
+  }
 } else if (args.length === 1 && args[0] === 'config') {
   try {
     console.log(JSON.stringify(await resolveConfig(), null, 2));
@@ -55,6 +79,6 @@ if (['check-all', 'check-signatures', 'check-reviewdog', 'pr-ready'].includes(ar
     process.exitCode = 1;
   }
 } else {
-  console.log('Checks: bart {check-all|pr-ready|check-signatures|check-reviewdog} [--base REF]\n  check-reviewdog also accepts --full\nSee docs/checks.md for setup and signature policy.\nUsage: bart doctor [--claude] | config | case-create <id> <url> <objective> | case-freeze <id> | agent-run <case-id> <instructions-file> [timeout-ms]\n  doctor  Check host readiness without a model request.\n  --claude  Probe a Claude reply (network and charges may apply; requires BART_AGENT=claude).\n  config  Validate and print resolved configuration.\n  agent-run  Run one agent task (default deadline: 120000 ms).');
+  console.log('Checks: bart {check-all|pr-ready|check-signatures|check-reviewdog} [--base REF]\n  check-reviewdog also accepts --full\nSee docs/checks.md for setup and signature policy.\nUsage: bart doctor [--claude] [--device <serial> [--operator-package <package>]] | config | case-create <id> <url> <objective> | case-freeze <id> | agent-run <case-id> <instructions-file> [timeout-ms]\n  doctor  Check host readiness without a model request.\n  --claude  Probe a Claude reply (network and charges may apply; requires BART_AGENT=claude).\n  --device  Check the named Android device and capture commands.\n  config  Validate and print resolved configuration.\n  agent-run  Run one agent task (default deadline: 120000 ms).');
   if (args.length && !(args.length === 1 && ['--help', '-h'].includes(args[0]!))) process.exitCode = 1;
 }

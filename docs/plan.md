@@ -41,18 +41,22 @@ whole BART repository, not just `node/`. Do not add a workspace framework.
 Add `./scripts/bart doctor` through a thin launcher for the Node.js/TypeScript
 CLI. Check the declared Node version requirement, reference checkout, work
 directory (explicitly configured), and availability and versions of Clawperator,
-GitHub CLI, and the selected agent (Claude Code by default, or OpenCode). Print clear results and fixes; exit nonzero when a
+GitHub CLI, `adb`, `ffmpeg`, `ffprobe`, and the selected agent (Claude Code by
+default, or OpenCode). Print clear results and fixes; exit nonzero when a
 required check fails. Tool availability does not prove authentication. Doctor
 also checks Claude authentication/provider configuration when Claude is selected.
 OpenCode requires no Claude installation or authentication; `doctor --claude`
 is rejected for that selection. An explicit
 `--claude` option checks a bounded model reply using the preparation
 flags, as described in [doctor](doctor.md). Only that opt-in model check sends a
-model request and may incur model charges. It does not prove device readiness or full
-agent integration. Do not install tools, edit configuration, or operate a device.
+model request and may incur model charges. An explicit `--device <serial>` check
+reads the named device, Operator version compatibility, and Android
+`screenrecord` and `screencap` capability. These checks do not prove a usable
+recording or full agent integration. Do not install tools or edit configuration.
+Plain doctor does not operate a device.
 The task runner supports execution and retained artifacts, not phase completion.
 Claude uses the restricted file-only profile; OpenCode uses its normal settings
-and model defaults. Device integration and task-result validation remain deferred.
+and model defaults. Device workflow integration and task-result validation remain deferred.
 
 Use two path variables:
 
@@ -126,7 +130,12 @@ Input: the case package, build requirements, designated target/package, and perm
 
 Reuse the existing APK-selection mechanism once its actual entry point is located. Download or accept an appropriate binary, record its source relationship and provenance, and verify installation and active package identity. A containing release supports retrospective verification; it does not establish exact PR-head testing.
 
-Create the run record. Check device and Operator readiness, Claude integration, capture tooling, installed Brave/Chromium versions, and applicable settings. Recheck flags after relaunch. Record reset authority when a reset is needed; do not make a clean reset the default for cases that depend on retained state.
+Create the run record. Check device and Operator readiness, Claude integration,
+capture tooling, installed Brave/Chromium versions, and applicable settings. Record,
+finalize, and inspect a short clip to verify rotation, cropping, and readability;
+tool availability alone does not prove usable capture. Recheck flags after relaunch.
+Record reset authority when a reset is needed; do not make a clean reset the default
+for cases that depend on retained state.
 
 Completion: the record identifies the actual build, target, relevant starting conditions, and readiness or specific blockers. Keep this separate from reusable case context because device state changes between runs.
 

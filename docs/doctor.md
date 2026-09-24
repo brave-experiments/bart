@@ -36,6 +36,20 @@ authentication or model access.
 This probe uses the network and may incur model charges or consume quota. It
 runs only after Claude's authentication/provider configuration check passes.
 
+To check one designated Android device, name its adb serial:
+
+```sh
+./scripts/bart doctor --device emulator-5554
+```
+
+Use `--operator-package com.clawperator.operator.dev` when the designated
+device has the development Operator. The default is
+`com.clawperator.operator`. The device check reads the connection state,
+compares the installed Operator version with the selected Clawperator CLI,
+and checks `screenrecord` and `screencap` availability. It does not record a
+clip or prove that its image is readable. Run preparation must record, finalize,
+and inspect a short clip before relying on capture for a case.
+
 ## Checks
 
 | Check | What it establishes |
@@ -44,13 +58,25 @@ runs only after Claude's authentication/provider configuration check passes.
 | `BART_BRAVE_CORE_DIR` | The configured path is a Brave Core checkout root with the expected package name and Git origin. |
 | `BART_WORK_DIR` | The explicit work path is outside BART and the reference checkout, and is writable. |
 | Clawperator, GitHub CLI, selected agent | Each executable returns a version within ten seconds. |
+| `adb` | Android SDK Platform-Tools are on PATH and return a version. |
+| `ffmpeg`, `ffprobe` | Both FFmpeg tools are on PATH and return a version. Clawperator checks both before starting video capture. |
+| Android device (`--device` only) | The named device is connected, the selected Operator is version compatible, `screenrecord` advertises size and time-limit options, and `screencap` is available. |
 | Claude authentication/provider configuration (Claude selected) | `auth status --json` reports configuration under the preparation flags within ten seconds. This alone does not validate provider credentials. |
 | Claude model response (`--claude` only) | A model request returns a successful JSON result with the exact reply `BART_READY`. Exit 0 alone does not pass. |
 
 Doctor prefers the pinned package-local Clawperator executable and falls back
-to PATH. GitHub CLI and the selected agent must be on PATH. Output uses ✅ for passing
+to PATH. GitHub CLI, `adb`, both FFmpeg tools, and the selected agent must be on PATH. Output uses ✅ for passing
 checks, ❌ for failures with suggested fixes, and ⚠️ for costs and scope limits.
 Raw Claude diagnostics are suppressed to avoid exposing account or credential data.
+
+On macOS, install missing `adb` with Android Studio's
+[SDK Manager](https://developer.android.com/tools) or
+`brew install --cask android-platform-tools`. Install both `ffmpeg` and
+`ffprobe` with `brew install ffmpeg` from the
+[Homebrew FFmpeg formula](https://formulae.brew.sh/formula/ffmpeg). Add the
+installed executables to PATH and rerun doctor. On other systems, install
+Android SDK Platform-Tools and FFmpeg from their platform packages. Doctor
+reports the commands but never installs them.
 
 ## Claude probe and limits
 
@@ -77,7 +103,9 @@ to recover those settings. For direct Anthropic access, use `claude auth login`
 in that environment. Bedrock users should follow [agent configuration](agent-configuration.md)
 and renew their AWS login when needed.
 
-Doctor does not log in, edit configuration, install tools, or operate devices.
+Plain doctor does not log in, edit configuration, install tools, or operate devices.
+`--device` reads the named device through adb and Clawperator's compatibility
+check. Neither mode starts a recording.
 Its path checks create the work directory if needed and create and remove a
 temporary writability probe. Claude may refresh credentials and write its own
 CLI state.
