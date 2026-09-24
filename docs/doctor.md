@@ -63,6 +63,7 @@ and inspect a short clip before relying on capture for a case.
 | `adb` | Android SDK Platform-Tools are on PATH and return a version. |
 | `ffmpeg`, `ffprobe` | Both FFmpeg tools are on PATH and return a version. Clawperator checks both before starting video capture. |
 | Android device (`--device` only) | The named device is connected, the selected Operator is version compatible, `screenrecord` advertises size and time-limit options, and `screencap` is available. |
+| Clawperator advice (`--device` only) | The selected Clawperator executable runs `doctor --check-only --output json` for the named device. BART suggests Clawperator's doctor when that report has warnings or failures. This advice does not change BART's exit status. |
 | Claude authentication/provider configuration (Claude selected) | `auth status --json` reports configuration under the preparation flags within ten seconds. This alone does not validate provider credentials. |
 | Claude model response (`--claude` only) | A model request returns a successful JSON result with the exact reply `BART_READY`. Exit 0 alone does not pass. |
 
@@ -73,9 +74,10 @@ this checkout to install the pinned version when the check fails. GitHub CLI,
 ✅ for passing checks, ❌ for failures with suggested fixes, and ⚠️ for costs
 and scope limits.
 Raw Claude diagnostics are suppressed to avoid exposing account or credential data.
-The closing line suggests `clawperator doctor --check-only` for Clawperator's
-own readiness checks. Pass `--device <serial>` and `--operator-package <package>`
-when needed.
+Clawperator's healthy report may include general next actions; BART suggests
+its doctor only when checks report warnings or failures. If BART cannot read the
+report, it prints a warning without claiming that Clawperator is ready. It keeps
+Clawperator logs for this probe under `BART_WORK_DIR/cases/doctor/runs/`.
 
 On macOS, install missing `adb` with Android Studio's
 [SDK Manager](https://developer.android.com/tools) or
@@ -112,8 +114,9 @@ in that environment. Bedrock users should follow [agent configuration](agent-con
 and renew their AWS login when needed.
 
 Plain doctor does not log in, edit configuration, install tools, or operate devices.
-`--device` reads the named device through adb and Clawperator's compatibility
-check. Neither mode starts a recording.
+`--device` uses adb and Clawperator's compatibility and readiness checks.
+Clawperator's `--check-only` does not apply fixes, but it can start the adb
+server, clear logcat, and ping the Operator. Neither mode starts a recording.
 Its path checks create the work directory if needed and create and remove a
 temporary writability probe. Claude may refresh credentials and write its own
 CLI state.

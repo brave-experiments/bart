@@ -40,6 +40,20 @@ if [ "$1" = version ] && [ "$2" = --check-compat ]; then
   [ "$TEST_OPERATOR" = incompatible ] && { echo '{"compatible":false}'; exit 1; }
   echo '{"compatible":true}'; exit
 fi
+if [ "$1" = doctor ] && [ "$2" = --check-only ]; then
+  [ "$3" = --device ] && [ "$4" = emulator-5554 ] &&
+  [ "$5" = --operator-package ] && [ "$7" = --output ] && [ "$8" = json ] || exit 9
+  case "$CLAWPERATOR_LOG_DIR" in
+    "$BART_WORK_DIR"/cases/doctor/runs/*/clawperator-logs) ;;
+    *) exit 9 ;;
+  esac
+  case "$TEST_CLAWPERATOR_DOCTOR" in
+    warn) echo '{"ok":true,"checks":[{"status":"warn"}],"nextActions":["Review setup"]}'; exit ;;
+    fail) echo '{"ok":false,"checks":[{"status":"fail"}]}'; exit 1 ;;
+    invalid) echo 'not json'; exit 1 ;;
+  esac
+  echo '{"ok":true,"checks":[{"status":"pass"}],"nextActions":["Try a snapshot"]}'; exit
+fi
 exit 9
 `, { mode: 0o755 });
   await writeFile(join(bin, 'adb'), `#!/bin/sh
@@ -159,6 +173,7 @@ test('explicit device check verifies the designated device, Operator, and captur
   assert.match(result.stdout, /Android screenrecord supports --size and --time-limit/);
   assert.match(result.stdout, /Android screencap is available/);
   assert.match(result.stdout, /A capture clip.*not checked/);
+  assert.doesNotMatch(result.stdout, /Clawperator reported readiness findings/);
   for (const [env, failed] of [
     [{ TEST_DEVICE: 'offline' }, /Device emulator-5554: unavailable/],
     [{ TEST_OPERATOR: 'incompatible' }, /Operator com\.clawperator\.operator: compatibility unverified/],
@@ -169,6 +184,24 @@ test('explicit device check verifies the designated device, Operator, and captur
     assert.equal(check.status, 1);
     assert.match(check.stdout, failed);
   }
+});
+
+test('device doctor suggests Clawperator diagnostics only for reported findings', async (t) => {
+  const { run } = await fixture(t);
+  const args = ['doctor', '--device', 'emulator-5554'];
+  const plain = run({ TEST_CLAWPERATOR_DOCTOR: 'warn' });
+  assert.equal(plain.status, 0);
+  assert.doesNotMatch(plain.stdout, /Clawperator reported readiness findings/);
+
+  for (const report of ['warn', 'fail']) {
+    const result = run({ TEST_CLAWPERATOR_DOCTOR: report }, args);
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.match(result.stdout.trimEnd(), /Clawperator reported readiness findings\. Run `clawperator doctor --device emulator-5554 --operator-package com\.clawperator\.operator --output pretty` to review them\.$/);
+  }
+  const invalid = run({ TEST_CLAWPERATOR_DOCTOR: 'invalid' }, args);
+  assert.equal(invalid.status, 0);
+  assert.match(invalid.stdout.trimEnd(), /Clawperator readiness findings could not be checked\.$/);
+  assert.doesNotMatch(invalid.stdout, /Run `clawperator doctor/);
 });
 
 test('doctor rejects incomplete or ambiguous device options before running checks', async (t) => {
