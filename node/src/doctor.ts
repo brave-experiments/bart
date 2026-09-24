@@ -1,5 +1,5 @@
 import { spawnSync, type SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkClaudeReadiness } from './claude-readiness.ts';
@@ -11,6 +11,17 @@ export interface DoctorDevice {
   operatorPackage: string;
 }
 
+function meetsClawperatorVersion(output: string, required: string): boolean {
+  const parse = (value: string) => /^(?:clawperator\s+)?v?(\d+)\.(\d+)\.(\d+)$/.exec(value.trim())?.slice(1).map(Number);
+  const installed = parse(output);
+  const minimum = parse(required);
+  if (!installed || !minimum) return false;
+  for (let part = 0; part < minimum.length; part++) {
+    if (installed[part] !== minimum[part]) return installed[part]! > minimum[part]!;
+  }
+  return true;
+}
+
 export async function doctor(checkModel = false, device?: DoctorDevice): Promise<number> {
   let failures = 0;
   function result(ok: boolean, message: string, fix: string) {
@@ -20,6 +31,7 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
 
   result(supportsNode(process.versions.node), nodeResult(), 'run nvm install && nvm use in the BART directory');
   const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const requiredClawperatorVersion: string = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')).dependencies.clawperator;
   const localClawperator = join(packageRoot, 'node_modules/.bin/clawperator');
   const clawperatorExecutable = existsSync(localClawperator) ? localClawperator : 'clawperator';
   const probeOptions: SpawnSyncOptionsWithStringEncoding = {
@@ -59,13 +71,14 @@ export async function doctor(checkModel = false, device?: DoctorDevice): Promise
     const versionArg = tool === 'ffmpeg' || tool === 'ffprobe' ? '-version' : '--version';
     const version = spawnSync(executable, [versionArg], probeOptions);
     const output = (version.stdout || version.stderr || '').trim().split(/\r?\n/)[0];
-    const ok = !version.error && version.status === 0 && Boolean(output);
+    const versionAvailable = !version.error && version.status === 0 && Boolean(output);
+    const ok = versionAvailable && (tool !== 'clawperator' || meetsClawperatorVersion(output, requiredClawperatorVersion));
     const detail = version.error ? version.error.message : `${versionArg} exited ${version.status ?? version.signal}${output ? `: ${output}` : ' without a version'}`;
-    const fix = tool === 'clawperator' ? 'run npm --prefix node ci in the BART repository root to restore the pinned executable, or make clawperator available on PATH'
+    const fix = tool === 'clawperator' ? `run npm --prefix node ci in this BART checkout to install Clawperator ${requiredClawperatorVersion} (required >=${requiredClawperatorVersion})`
       : tool === 'adb' ? 'install Android SDK Platform-Tools with Android Studio SDK Manager or `brew install --cask android-platform-tools` on macOS, then add adb to PATH'
       : tool === 'ffmpeg' || tool === 'ffprobe' ? 'install FFmpeg with `brew install ffmpeg` on macOS, then add both ffmpeg and ffprobe to PATH'
       : `install ${tool} or add its executable to PATH; check ${tool} --version`;
-    result(ok, `\`${tool}\`: ${ok ? output : detail}${executable === localClawperator ? ' (package-local)' : ''}`, fix);
+    result(ok, `\`${tool}\`: ${versionAvailable ? output : detail}${tool === 'clawperator' ? ` (required >=${requiredClawperatorVersion})` : ''}${executable === localClawperator ? ' (package-local)' : ''}`, fix);
     if (ok) available.add(tool);
     if (tool === 'claude' && ok) {
       if (checkModel) console.log('⚠️ Claude Haiku model check uses the network and may incur charges or consume quota (30s, one turn, Claude budget setting $0.01).');

@@ -193,7 +193,43 @@ test('doctor prefers the package-local Clawperator executable', async (t) => {
   await writeFile(local, '#!/bin/sh\nprintf "0.12.0\\n"\n', { mode: 0o755 });
   const result = run();
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /`clawperator`: 0.12.0 \(package-local\)/);
+  assert.match(result.stdout, /`clawperator`: 0.12.0 \(required >=0.12.0\) \(package-local\)/);
+});
+
+test('doctor rejects an older Clawperator selected from PATH or the local package', async (t) => {
+  const { app, bin, run } = await fixture(t);
+  const global = join(bin, 'clawperator');
+  await writeFile(global, '#!/bin/sh\necho 0.11.1\n', { mode: 0o755 });
+  const olderGlobal = run();
+  assert.equal(olderGlobal.status, 1);
+  assert.match(olderGlobal.stdout, /❌ `clawperator`: 0.11.1 \(required >=0.12.0\)/);
+  assert.match(olderGlobal.stdout, /Fix: run npm --prefix node ci/);
+
+  await writeFile(global, '#!/bin/sh\necho 0.12.0\n', { mode: 0o755 });
+  assert.equal(run().status, 0);
+  await writeFile(global, '#!/bin/sh\necho 0.13.0\n', { mode: 0o755 });
+  assert.equal(run().status, 0);
+  await writeFile(global, '#!/bin/sh\necho 0.12.0-beta.1\n', { mode: 0o755 });
+  const prerelease = run();
+  assert.equal(prerelease.status, 1);
+  assert.match(prerelease.stdout, /❌ `clawperator`: 0.12.0-beta.1/);
+  await writeFile(global, '#!/bin/sh\necho 0.12.0\n', { mode: 0o755 });
+  const local = join(app, 'node/node_modules/.bin/clawperator');
+  await writeFile(local, '#!/bin/sh\necho 0.11.1\n', { mode: 0o755 });
+  const olderLocal = run();
+  assert.equal(olderLocal.status, 1);
+  assert.match(olderLocal.stdout, /❌ `clawperator`: 0.11.1 \(required >=0.12.0\) \(package-local\)/);
+});
+
+test('doctor reads the Clawperator requirement from the package manifest', async (t) => {
+  const { app, run } = await fixture(t);
+  const manifestPath = join(app, 'node/package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  manifest.dependencies.clawperator = '1.2.4';
+  await writeFile(manifestPath, JSON.stringify(manifest));
+  const result = run();
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /❌ `clawperator`: clawperator 1.2.3 \(required >=1.2.4\)/);
 });
 
 test('Node check honors the declared minimum and upper bound', () => {

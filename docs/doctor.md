@@ -58,16 +58,20 @@ and inspect a short clip before relying on capture for a case.
 | Node package dependencies | The package-local TypeScript and lockfile-lint commands, YAML module, and pinned Clawperator package are present. Run `npm --prefix node ci` in each worktree when they are missing. |
 | `BART_BRAVE_CORE_DIR` | The configured path is a Brave Core checkout root with the expected package name and Git origin. |
 | `BART_WORK_DIR` | The explicit work path is outside BART and the reference checkout, and is writable. |
-| Clawperator, GitHub CLI, selected agent | Each executable returns a version within ten seconds. |
+| Clawperator | The selected executable returns a version within ten seconds and meets the version pinned in `node/package.json`. |
+| GitHub CLI, selected agent | Each executable returns a version within ten seconds. |
 | `adb` | Android SDK Platform-Tools are on PATH and return a version. |
 | `ffmpeg`, `ffprobe` | Both FFmpeg tools are on PATH and return a version. Clawperator checks both before starting video capture. |
 | Android device (`--device` only) | The named device is connected, the selected Operator is version compatible, `screenrecord` advertises size and time-limit options, and `screencap` is available. |
 | Claude authentication/provider configuration (Claude selected) | `auth status --json` reports configuration under the preparation flags within ten seconds. This alone does not validate provider credentials. |
 | Claude model response (`--claude` only) | A model request returns a successful JSON result with the exact reply `BART_READY`. Exit 0 alone does not pass. |
 
-Doctor prefers the pinned package-local Clawperator executable and falls back
-to PATH. GitHub CLI, `adb`, both FFmpeg tools, and the selected agent must be on PATH. Output uses ✅ for passing
-checks, ❌ for failures with suggested fixes, and ⚠️ for costs and scope limits.
+Doctor prefers the package-local Clawperator executable and falls back to PATH.
+It rejects an older version from either location. Run `npm --prefix node ci` in
+this checkout to install the pinned version when the check fails. GitHub CLI,
+`adb`, both FFmpeg tools, and the selected agent must be on PATH. Output uses
+✅ for passing checks, ❌ for failures with suggested fixes, and ⚠️ for costs
+and scope limits.
 Raw Claude diagnostics are suppressed to avoid exposing account or credential data.
 
 On macOS, install missing `adb` with Android Studio's
