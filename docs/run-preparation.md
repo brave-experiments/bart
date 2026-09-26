@@ -53,14 +53,6 @@ or the file-only task runner cannot substitute for this check. Recording pass
 requires a finalized, decoded and visually inspected calibration clip, including
 rotation, without assessing the product behavior reserved for later phases.
 
-The initial preparation used Claude 2.1.267. When selecting that adapter, use `--bare --restricted --disable-slash-commands
---strict-mcp-config` with an explicit Clawperator MCP configuration for this
-probe. Use `--tools "" --allowedTools mcp__clawperator__snapshot
---permission-mode dontAsk` to permit only the snapshot call, and pass the device
-and Operator package explicitly in that call. `--safe-mode` disables even
-explicit MCP servers in this version. Retain native tool results and check the
-device observation; a successful process exit can still contain no tool call.
-
 Clawperator 0.12.2 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
 6.1 or newer with a working libx264 encoder. Check the encoder capability probe
 before capture. Record the selected tool versions and retain failed clips.
@@ -69,6 +61,23 @@ and the final hold; black frames or a missing return to portrait block readiness
 even when the capture manifest says `complete`. Rotation retains the initial
 canvas and can show sideways content. Inspect every video artifact listed in
 the manifest; a display-size change can produce more than one clip.
+
+### Claude Code snapshot probe
+
+When using Claude Code for the integration check, configure a read-only
+Clawperator MCP snapshot probe. For Claude Code 2.1.267, use
+`--bare --restricted --disable-slash-commands --strict-mcp-config` with an
+explicit Clawperator MCP configuration. Use
+`--tools "" --allowedTools mcp__clawperator__snapshot --permission-mode dontAsk`
+to permit only the snapshot call, and pass the device and Operator package
+explicitly in that call. `--safe-mode` disables even explicit MCP servers in
+this version, so it cannot be used for this probe. Confirm supported flags with
+the installed CLI's help before using this configuration on another version.
+
+Retain native tool results and check the device observation; a successful
+process exit can still contain no tool call. These settings apply only to the
+read-only integration probe. Phase 3 needs separate configuration for its
+required device actions.
 
 ## Saved output (version 1)
 

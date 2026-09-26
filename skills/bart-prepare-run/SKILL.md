@@ -68,9 +68,8 @@ initial attempts and failures. Never edit a frozen package or erase old evidence
   model-only doctor reply cannot pass this check. Use the tool route and
   permissions available to you or the selected child; do not silently select
   another agent.
-  The [Phase 2 contract](../../docs/run-preparation.md) retains the initial Claude
-  adapter recipe for that product only. Confirm version-specific flags when using
-  it. Retain failures and mark integration blocked when not established.
+  For Claude Code, follow the [snapshot probe setup](../../docs/run-preparation.md#claude-code-snapshot-probe)
+  and confirm the flags for your installed version. Retain failures and mark integration blocked when not established.
 - Check capture using a short Clawperator evidence video, finalize it, decode it
   with ffprobe/ffmpeg and inspect frames including rotation. Preserve original
   clips and action receipts. Do not confuse Operator action recordings with video.
