@@ -8,7 +8,7 @@
 
 Support both reproducing a reported issue and verifying that a PR fixes it. Failure to reproduce means the issue was not observed under the tested conditions; it does not establish that the report is invalid.
 
-Claude Code directs and assesses runtime verification. The eventual orchestrator coordinates context gathering, build/device preparation, workflow development, verification captures, and reporting. Implement those phases incrementally as described in the [plan](plan.md).
+An agent directs and assesses runtime verification through shared skills and evidence contracts. No phase requires a particular agent product, model provider, or child-agent launch. The eventual orchestrator coordinates context gathering, build/device preparation, workflow development, verification captures, and reporting. Implement those phases incrementally as described in the [plan](plan.md).
 
 ## Reviewable result
 

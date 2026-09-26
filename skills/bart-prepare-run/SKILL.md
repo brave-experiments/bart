@@ -59,17 +59,18 @@ initial attempts and failures. Never edit a frozen package or erase old evidence
 - Observe Brave/Chromium versions, command line and variations at `brave://version`.
   Retain the fresh hierarchy and screenshots, then inspect them. Missing values
   remain null. Check the case's required settings, flags, locale and site state.
-- Establish Claude integration with a bounded child invocation that has explicit
-  Clawperator tools. Save its prompt, exact arguments, MCP configuration, native
-  output and device observation. The existing `agent-run` file-only profile and
-  `doctor --claude` cannot pass this check. Use `--bare`, `--restricted`, `--disable-slash-commands`, and
-  `--strict-mcp-config` with an explicit Clawperator MCP server. Set `--tools ""`,
-  `--allowedTools mcp__clawperator__snapshot`, and `--permission-mode dontAsk`
-  for a read-only snapshot probe. `--safe-mode` disables explicit MCP servers
-  in Claude 2.1.267 and cannot establish this integration. No arbitrary shell access is needed.
-  Use the installed Claude CLI help to confirm accepted flags. The child must
-  return an observed device fact backed by a successful tool result, not just a
-  `READY` reply. Retain failures and mark integration blocked when not established.
+- Verify that you can observe the target through a bounded read-only Clawperator
+  snapshot probe against the explicit device and Operator package. You can run
+  the probe directly or delegate it to a child agent. Retain the identity of the
+  agent that ran the probe, instructions, tool configuration, native result, and
+  an observed device fact backed by that result. If you delegate, also save the
+  child's exact launch arguments and profile. A version command, file-only `agent-run` invocation, or
+  model-only doctor reply cannot pass this check. Use the tool route and
+  permissions available to you or the selected child; do not silently select
+  another agent.
+  The [Phase 2 contract](../../docs/run-preparation.md) retains the initial Claude
+  adapter recipe for that product only. Confirm version-specific flags when using
+  it. Retain failures and mark integration blocked when not established.
 - Check capture using a short Clawperator evidence video, finalize it, decode it
   with ffprobe/ffmpeg and inspect frames including rotation. Preserve original
   clips and action receipts. Do not confuse Operator action recordings with video.

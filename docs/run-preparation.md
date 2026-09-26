@@ -44,13 +44,16 @@ For #39794, starting conditions must identify one current settings variant,
 video-fit Enabled, study assignments and flag checks after relaunch. Disabled
 and Enabled are successive conditions, never simultaneous starting conditions.
 Case prerequisites cover the frozen plan's remaining setup requirements. An
-integration pass requires a retained Claude invocation/profile and successful
-Clawperator observation from that child. A version command, doctor model reply,
+integration pass requires a successful Clawperator observation by the agent
+that will execute the workflow. Retain its identity, instructions, tool access
+configuration, native tool receipt, and observed device fact. Direct execution
+in the current agent session is valid; a child process is optional. For a child,
+also retain the launch arguments and profile. A version command, doctor model reply,
 or the file-only task runner cannot substitute for this check. Recording pass
 requires a finalized, decoded and visually inspected calibration clip, including
 rotation, without assessing the product behavior reserved for later phases.
 
-For Claude 2.1.267, use `--bare --restricted --disable-slash-commands
+The initial preparation used Claude 2.1.267. When selecting that adapter, use `--bare --restricted --disable-slash-commands
 --strict-mcp-config` with an explicit Clawperator MCP configuration for this
 probe. Use `--tools "" --allowedTools mcp__clawperator__snapshot
 --permission-mode dontAsk` to permit only the snapshot call, and pass the device

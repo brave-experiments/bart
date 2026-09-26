@@ -45,12 +45,11 @@ state this choice. An issue's closure does not change a reproduction request.
 
 ## Write the package
 
-The preparing agent (Claude Code in the intended BART workflow) authors the research
-and test guidance. Load [the package format](references/package-format.md) before
+Write the research and test guidance. Load [the package format](references/package-format.md) before
 writing. Its schema, finding/check IDs, explicit anchors and descriptive relative
 links are required instructions, not naming choices to invent per case. Helpers
 only allocate, validate and freeze files. Record who generated the package and the
-instruction version; another agent's output must not be labelled Claude-generated.
+instruction version; do not attribute output to a different agent.
 
 Use `case.json`, `test-plan.md`, `context/sources.json`, and
 `context/source-index.json`, `context/brief-index.json` and

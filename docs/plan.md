@@ -16,13 +16,13 @@ to verify its fix for issue #57449.
 
 Failure to reproduce does not establish that an issue is invalid. Reports must state the tested conditions and distinguish reproduction, expected behavior, causal attribution, and missing evidence.
 
-Claude Code directs and assesses device workflows. Clawperator provides Android actions, observations, screenshots, and recordings.
+The executing agent directs and assesses device workflows. Clawperator provides Android actions, observations, screenshots, and recordings.
 
 ## Implementation approach
 
 Use Node.js and TypeScript: one package, a small `bart` CLI, and Markdown skills. Choose a Node version compatible with the pinned Clawperator version. Prefer Clawperator's Node API where suitable; use its CLI when needed through a small integration module. No service, database, or general adapter framework is needed for the prototype.
 
-Code manages files, subprocesses, deadlines, run state, evidence capture, and result validation. Claude chooses actions from current observations and judges behavior. Runtime validation remains necessary for agent output and other external data.
+Code manages files, subprocesses, deadlines, run state, evidence capture, and result validation. The executing agent chooses actions from current observations and judges behavior. Runtime validation remains necessary for agent output and other external data.
 
 Implement the phases in order for one case, #39794. Each phase must produce usable inputs for the next phase before proceeding. Define its input, output, and completion condition first. Improve earlier phases when live work reveals missing information. Do not generalize each phase before trying the next one.
 
@@ -69,7 +69,7 @@ Set the reference checkout path in local configuration; use a placeholder in `.e
 
 Set both path variables explicitly; reject missing, empty, or whitespace-only values. Use placeholders for both paths in `.envrc.example`.
 
-Load configuration with `direnv` or source the local `.envrc` before starting the agent. Pass resolved paths explicitly to child Claude processes. Do not add a second configuration format or checkout discovery yet.
+Load configuration with `direnv` or source the local `.envrc` before starting the agent. Pass resolved paths explicitly to child agent processes, when used. Do not add a second configuration format or checkout discovery yet.
 
 Use this working layout:
 
@@ -140,7 +140,7 @@ relationship and provenance, and verify installation and active package identity
 A containing release supports retrospective verification; it does not establish
 exact PR-head testing. A general APK resolver remains deferred.
 
-Create the run record. Check device and Operator readiness, Claude integration,
+Create the run record. Check device and Operator readiness, integration of the executing agent with Clawperator,
 capture tooling, installed Brave/Chromium versions, and applicable settings. Record,
 finalize, and inspect a short clip to verify rotation, cropping, and readability;
 tool availability alone does not prove usable capture. Recheck flags after relaunch.
@@ -155,9 +155,13 @@ Proposed skill: `bart-develop-workflow`.
 
 Input: the case plan and prepared run.
 
-Claude explores through Clawperator, resolves current navigation and control locations, and develops a temporary agent-driven skill. Use the [com.android.settings.get-version-details-codex example](https://github.com/clawperator/clawperator-skills/blob/76bad61b5915e70dd53f38111eaf932c5ff92706/skills/com.android.settings.get-version-details-codex/SKILL.md) as a design reference, replacing programmatic `codex` invocation with programmatic `claude` invocation.
+The executing agent explores through Clawperator, resolves current navigation and control locations, and develops a temporary agent-driven skill. The current agent can execute the skill directly. A child agent is optional, not a phase requirement. Use the pinned [agent-driven example](https://github.com/clawperator/clawperator-skills/blob/76bad61b5915e70dd53f38111eaf932c5ff92706/skills/com.android.settings.get-version-details-codex/SKILL.md) for its observation/action loop and evidence handling, not its product-specific invocation.
 
-A thin launcher supplies instructions, target, run directory, and a bounded budget. Claude chooses actions from fresh observations. Helpers execute actions and retain evidence. The skill returns a structured result tied to evidence, which the launcher validates. Only one agent controls the target at a time.
+Define one execution contract for both direct and launched execution: instructions, explicit device/package, prepared run directory, setup authority, bounded budget, and structured results with evidence references. Helpers retain evidence and validate results regardless of which agent produced them. Only one agent controls the target at a time; a parent must stop device actions while a child owns the target.
+
+Keep executable names, CLI flags, authentication, tool configuration, and native output parsing in optional agent adapters. Reuse the existing task runner where suitable, but do not make its file-only profile the device execution contract. Unsupported launchers or missing action/observation capabilities must produce a clear blocker, never a silent switch to Claude or another agent. Record the actual agent and execution mode. Supporting direct skill execution does not establish a working launcher adapter for that product.
+
+Implement and exercise bounded discovery, not just a skill draft. Recheck mutable Phase 2 conditions and prove the executing agent can use the required Clawperator actions and observations. Validate the shared input/result contract independently of adapter output; process success alone cannot establish workflow completion. Exercise one available agent on the device and check that shared contracts and validation contain no product-specific requirements. Report which adapters were exercised and which remain unverified; do not require multiple live agents to control the device to finish this phase.
 
 Record preconditions, a suggested route, checks, observation points, and capture boundaries. Ground actions in current UI observations rather than treating historical coordinates or successful command exits as proof. Keep discovery logs and exploratory recordings under `exploration/`.
 
@@ -194,7 +198,7 @@ Generate a local Markdown report with the objective, device/OS, Brave/Chromium v
 
 Use per-check outcomes such as `pass`, `fail`, `blocked`, `inconclusive`, and `not_run`. For reproduction, state whether the reported behavior was reproduced under the tested conditions. Keep behavior, causal attribution, evidence completeness, and phase execution status separate. For example, both YouTube variants working may establish enabled behavior while leaving attribution inconclusive.
 
-Code can validate artifact existence, integrity, and result structure. Those checks do not prove a visual or behavioral conclusion; Claude must assess the observations. Report regeneration must use saved evidence without rerunning device actions.
+Code can validate artifact existence, integrity, and result structure. Those checks do not prove a visual or behavioral conclusion; the executing agent must assess the observations. Report regeneration must use saved evidence without rerunning device actions.
 
 Completion: the report's conclusions follow from inspectable evidence and match its stated scope. Use Brave QA's device/build, steps, actual-results, and screenshot/screencast conventions. GitHub publication is deferred.
 
