@@ -1,3 +1,4 @@
+import { startWorkflow, stepWorkflow, finishWorkflow, validateWorkflow } from './workflow.ts';
 import { createCase, freezeCase } from './case-package.ts';
 import { readFile } from 'node:fs/promises';
 import { runAgent } from './agent.ts';
@@ -41,6 +42,22 @@ if (['check-all', 'check-signatures', 'check-reviewdog', 'pr-ready'].includes(ar
     const device: DoctorDevice | undefined = serial === undefined ? undefined
       : { serial, operatorPackage: operatorPackage ?? 'com.clawperator.operator' };
     process.exitCode = await doctor(checkModel, device);
+  }
+} else if (['workflow-start', 'workflow-step', 'workflow-finish', 'validate-workflow'].includes(args[0] ?? '')) {
+  try {
+    const command = args[0];
+    if (args.length !== (command === 'validate-workflow' ? 2 : 3)) throw new Error('Usage: bart {workflow-start|workflow-step|workflow-finish} <directory> <input.json> | validate-workflow <directory>');
+    const input = command === 'validate-workflow' ? null : JSON.parse(await readFile(args[2]!, 'utf8'));
+    const result = command === 'workflow-start' ? await startWorkflow(args[1]!, input)
+      : command === 'workflow-step' ? await stepWorkflow(args[1]!, input)
+      : command === 'workflow-finish' ? await finishWorkflow(args[1]!, input)
+      : await validateWorkflow(args[1]!);
+    console.log(JSON.stringify(result, null, 2));
+    if ('code' in result && result.code !== 0) process.exitCode = 1;
+    if (command === 'workflow-finish' && 'status' in result && result.status !== 'ready') process.exitCode = 1;
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
   }
 } else if (args.length === 1 && args[0] === 'config') {
   try {
@@ -91,6 +108,6 @@ if (['check-all', 'check-signatures', 'check-reviewdog', 'pr-ready'].includes(ar
     process.exitCode = 1;
   }
 } else {
-  console.log('Checks: bart {check-all|pr-ready|check-signatures|check-reviewdog} [--base REF]\n  check-reviewdog also accepts --full\nSee docs/checks.md for setup and signature policy.\nUsage: bart doctor [--claude] [--device <serial> [--operator-package <package>]] | config | case-create <id> <url> <objective> | case-freeze <id> | prepare-run <case-id> <input.json> | validate-run <run-directory> | agent-run <case-id> <instructions-file> [timeout-ms]\n  doctor  Check host readiness without a model request.\n  --claude  Probe a Claude reply (network and charges may apply; requires BART_AGENT=claude).\n  --device  Check the named Android device and capture commands.\n  config  Validate and print resolved configuration.\n  agent-run  Run one agent task (default deadline: 120000 ms).');
+  console.log('Workflow: bart {workflow-start|workflow-step|workflow-finish} <directory> <input.json> | validate-workflow <directory>\nChecks: bart {check-all|pr-ready|check-signatures|check-reviewdog} [--base REF]\n  check-reviewdog also accepts --full\nSee docs/checks.md for setup and signature policy.\nUsage: bart doctor [--claude] [--device <serial> [--operator-package <package>]] | config | case-create <id> <url> <objective> | case-freeze <id> | prepare-run <case-id> <input.json> | validate-run <run-directory> | agent-run <case-id> <instructions-file> [timeout-ms]\n  doctor  Check host readiness without a model request.\n  --claude  Probe a Claude reply (network and charges may apply; requires BART_AGENT=claude).\n  --device  Check the named Android device and capture commands.\n  config  Validate and print resolved configuration.\n  agent-run  Run one agent task (default deadline: 120000 ms).');
   if (args.length && !(args.length === 1 && ['--help', '-h'].includes(args[0]!))) process.exitCode = 1;
 }

@@ -1,6 +1,6 @@
 # BART implementation plan
 
-Status: Phases 0–2 are complete. Configuration/readiness checks and a [task runner prototype](agent-configuration.md#task-runner) are also implemented. [Phase 2 preparation](run-preparation.md) records readiness or specific blockers; it does not establish a product verdict. Phase 3 workflow development is next. Phases 3 onward remain unimplemented.
+Status: Phases 0–2 are complete. Configuration/readiness checks and a [task runner prototype](agent-configuration.md#task-runner) are also implemented. [Phase 2 preparation](run-preparation.md) records readiness or specific blockers; it does not establish a product verdict. Phase 3 has a [shared skill and direct-execution helpers](workflow-development.md). Live discovery remains blocked: two unscored #39794 calibration trials did not establish native fullscreen entry; no gear taps or scored attempts ran. Phase 3 is not complete. Phases 4 onward remain unimplemented.
 
 ## Goal
 
@@ -151,7 +151,12 @@ Completion: the record identifies the actual build, target, relevant starting co
 
 ## Phase 3: develop the agent-driven workflow
 
-Proposed skill: `bart-develop-workflow`.
+Implemented skill: [bart-develop-workflow](../skills/bart-develop-workflow/SKILL.md).
+
+Direct execution retains command receipts, case-wide calibration limits, a temporary
+workflow, structured results and evidence hashes. The current #39794 exercise
+returned blocked; landscape controls, the gear target and transition capture
+remain unverified. No launcher adapter is implemented.
 
 Input: the case plan and prepared run.
 
@@ -237,8 +242,9 @@ publication.
 - Environment convention: `.envrc.example` in the Bravebot repository.
 - QA references: the `qa-resources` repository and its `qa-resources.wiki` checkout.
 
-Next, implement Phase 3 using the frozen #39794 plan and a validated Phase 2
-preparation. Recheck mutable device, package, flags, integration, and capture
+Next, resolve the blocked Phase 3 route using the retained #39794 evidence and
+a fresh Phase 2 preparation. The original two-trial calibration budget is spent;
+additional trials need an explicit plan revision. Recheck mutable device, package, flags, integration, and capture
 conditions before workflow discovery. Retain the temporary workflow and its
 observations under the case's run directory. Assessed Disabled/Enabled attempts
 and a product verdict remain work for Phases 4 and 5.
