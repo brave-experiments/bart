@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile, readdir, lstat, realpath, unlink } from 'no
 import { dirname, join, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
+import { validateLegacyWorkflowInput, validateLegacyReady, legacyAttemptBudget } from './workflow-v1.ts';
 import { sha256, validateRun } from './run-preparation.ts';
 
 function requireValue(value: unknown, message: string): asserts value { if (!value) throw new Error(message); }
@@ -15,28 +16,33 @@ function object(value: unknown): Record<string, any> {
 async function json(path: string) { return JSON.parse(await readFile(path, 'utf8')); }
 async function save(path: string, value: unknown) { await writeFile(path, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' }); }
 export interface WorkflowInput {
-  schemaVersion: 1;
+  schemaVersion: 2;
   instructions: string;
   agent: { name: string; mode: 'direct' | 'launched' };
   target: { deviceId: string; packageId: string; operatorPackage: string };
   authority: { allowedActions: string[]; reset: 'not-authorized' | 'authorized'; basis: string };
-  calibrationAuthorization?: { totalTrials: number; basis: string };
-  budget: { durationMs: number; actions: number; observations: number; calibrationTrials: number };
+  routeChecks: string[];
+  attemptBudget?: { total: number; basis: string };
+  budget: { durationMs: number; actions: number; observations: number };
 }
 export function validateWorkflowInput(raw: unknown): WorkflowInput {
   const input = object(raw);
-  requireValue(input.schemaVersion === 1 && text(input.instructions), 'Expected version 1 and instructions');
+  requireValue(input.schemaVersion === 2 && text(input.instructions), 'Expected version 2 and instructions; version 1 is read-only');
   requireValue(text(input.agent?.name) && ['direct', 'launched'].includes(input.agent.mode), 'Missing actual agent/mode');
   for (const key of ['deviceId', 'packageId', 'operatorPackage']) requireValue(text(input.target?.[key]) && /^[\w.:-]+$/.test(input.target[key]), `Invalid target.${key}`);
   requireValue(Array.isArray(input.authority?.allowedActions) && input.authority.allowedActions.every(text) && text(input.authority.basis) && ['authorized', 'not-authorized'].includes(input.authority.reset), 'Invalid authority');
-  for (const [key, max] of Object.entries({ durationMs: 7_200_000, actions: 200, observations: 300, calibrationTrials: 2 })) {
+  requireValue(Array.isArray(input.routeChecks) && input.routeChecks.length > 0 && input.routeChecks.every((key: unknown) => text(key) && /^[a-z][a-zA-Z0-9-]*$/.test(key)) && new Set(input.routeChecks).size === input.routeChecks.length, 'Expected distinct routeChecks');
+  requireValue(input.calibrationAuthorization === undefined && input.budget?.calibrationTrials === undefined, 'Use attemptBudget for case limits, not version 1 calibration fields');
+  for (const [key, max] of Object.entries({ durationMs: 7_200_000, actions: 200, observations: 300 })) {
     requireValue(Number.isInteger(input.budget?.[key]) && input.budget[key] > 0 && input.budget[key] <= max, `Invalid budget.${key}`);
   }
-  if (input.calibrationAuthorization !== undefined) {
-    const renewal = object(input.calibrationAuthorization);
-    requireValue(Number.isInteger(renewal.totalTrials) && renewal.totalTrials > 2 && renewal.totalTrials <= 10 && text(renewal.basis), 'Invalid calibration authorization');
+  if (input.attemptBudget !== undefined) {
+    requireValue(Number.isSafeInteger(input.attemptBudget.total) && input.attemptBudget.total > 0 && text(input.attemptBudget.basis), 'Invalid attemptBudget');
   }
   return input as WorkflowInput;
+}
+function validateSavedInput(raw: any) {
+  return raw.schemaVersion === 1 ? validateLegacyWorkflowInput(raw) : validateWorkflowInput(raw);
 }
 async function safeFile(root: string, path: string) {
   requireValue(text(path) && !isAbsolute(path) && !path.includes('\\') && path.split('/').every(p => p && p !== '.' && p !== '..'), 'Unsafe evidence path');
@@ -61,6 +67,8 @@ export async function startWorkflow(runDirectory: string, raw: unknown) {
   const preparation = await json(join(run, 'run.json'));
   requireValue(isDeepStrictEqual(input.target, preparation.target) && isDeepStrictEqual(input.authority, preparation.authority), 'Target/authority must match preparation; create a new preparation for changes');
   requireValue(dirname(dirname(run)).endsWith(`/cases/${preparation.caseId}`), 'Expected prepared case/run layout');
+  const attemptHistory = await caseAttempts(run);
+  requireValue(!attemptHistory.bounded || input.attemptBudget, 'Carry forward the case attemptBudget and authorization; prior limits cannot be omitted');
   const work = dirname(dirname(dirname(dirname(run))));
   const lockDirectory = join(work, 'device-controllers');
   await mkdir(lockDirectory, { recursive: true });
@@ -72,7 +80,7 @@ export async function startWorkflow(runDirectory: string, raw: unknown) {
     await mkdir(directory, { recursive: true });
     await mkdir(join(directory, 'receipts'));
     await mkdir(join(directory, 'skills'));
-    await save(join(directory, 'execution.json'), { ...input, run: '../..', startedAt: new Date().toISOString(), preparationSha256: await sha256(join(run, 'run.json')), lock });
+    await save(join(directory, 'execution.json'), { ...input, run: '../..', startedAt: new Date().toISOString(), preparationSha256: await sha256(join(run, 'run.json')), attemptHistory, lock });
     await writeFile(join(directory, 'instructions.md'), input.instructions, { flag: 'wx' });
     return { directory, status: 'active' };
   } catch (error) { await unlink(lock); throw error; }
@@ -80,13 +88,13 @@ export async function startWorkflow(runDirectory: string, raw: unknown) {
 const observationCommands = new Set(['snapshot', 'query', 'read', 'wait', 'screenshot', 'doctor', 'version']);
 const actionCommands = new Set(['open', 'click', 'type', 'press', 'back', 'close', 'swipe', 'scroll']);
 export type SequenceAction = { type: 'click'; x: number; y: number } | { type: 'sleep'; durationMs: number };
-export interface WorkflowStep { sequence?: SequenceAction[]; kind: 'observation' | 'action' | 'trial' | 'gear' | 'capture'; args: string[]; reason: string; evidence: string[] }
+export interface WorkflowStep { sequence?: SequenceAction[]; holdMs?: number; kind: 'observation' | 'action' | 'attempt' | 'capture'; args: string[]; reason: string; evidence: string[] }
 export function validateWorkflowStep(raw: unknown): WorkflowStep {
   const step = object(raw);
-  requireValue(['observation', 'action', 'trial', 'gear', 'capture'].includes(step.kind) && text(step.reason), 'Invalid step kind/reason');
+  requireValue(['observation', 'action', 'attempt', 'capture'].includes(step.kind) && text(step.reason), 'Invalid step kind/reason');
   requireValue(Array.isArray(step.args) && step.args.every(text) && Array.isArray(step.evidence) && step.evidence.every(text), 'Invalid step args/evidence');
   if (step.sequence !== undefined) {
-    requireValue(['action', 'gear'].includes(step.kind) && step.args.length === 0, 'Sequence requires action or gear with empty args');
+    requireValue(step.kind === 'action' && step.args.length === 0, 'Sequence requires action with empty args');
     requireValue(Array.isArray(step.sequence) && step.sequence.length > 0 && step.sequence.length <= 6, 'Sequence needs 1 to 6 actions');
     let clicks = 0; let delay = 0;
     for (const action of step.sequence) {
@@ -100,20 +108,21 @@ export function validateWorkflowStep(raw: unknown): WorkflowStep {
       }
     }
     requireValue(clicks > 0 && clicks <= 2 && delay <= 3000, 'Sequence exceeds click or delay limit');
-    requireValue(step.kind !== 'gear' || step.sequence.at(-1).type === 'click', 'Gear must be the final sequence action');
-  } else if (step.kind === 'trial') requireValue(step.args.length === 0, 'Trial marker has no command');
+  } else if (step.kind === 'attempt') requireValue(step.args.length === 0, 'Attempt marker has no command');
   else if (step.kind === 'observation') requireValue(observationCommands.has(step.args[0]), 'Unsupported observation');
   else if (step.kind === 'capture') requireValue(step.args[0] === 'evidence' && ['capture', 'video'].includes(step.args[1]), 'Unsupported capture');
-  else requireValue(actionCommands.has(step.args[0]) && (step.kind !== 'gear' || step.args[0] === 'click'), 'Unsupported action');
+  else requireValue(actionCommands.has(step.args[0]), 'Unsupported action');
   requireValue(!step.args.some((arg: string) => /^--(device|device-id|operator-package|output-dir|path|raw-path|session|timeout|log-dir)(=|$)/.test(arg)), 'Target, capture paths and timeout are supplied by the helper');
-  if (['action', 'gear'].includes(step.kind)) requireValue(step.evidence.length > 0, 'Actions need current observation evidence');
+  if (step.kind === 'action') requireValue(step.evidence.length > 0, 'Actions need current observation evidence');
+  if (step.holdMs !== undefined) requireValue(step.kind === 'action' && Number.isInteger(step.holdMs) && step.holdMs >= 0 && step.holdMs <= 60_000, 'Invalid action holdMs');
   return step as WorkflowStep;
 }
 export function workflowActionCost(step: Pick<WorkflowStep, 'kind' | 'sequence'>): number {
-  return ['action', 'gear'].includes(step.kind) ? (step.sequence?.filter(a => a.type === 'click').length ?? 1) : 0;
+  return step.kind === 'action' ? (step.sequence?.filter(a => a.type === 'click').length ?? 1) : 0;
 }
-async function caseTrialCount(run: string) {
+async function caseAttempts(run: string) {
   let count = 0;
+  const budgets: { total: number; basis: string }[] = [];
   for (const entry of await readdir(dirname(run), { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const exploration = join(dirname(run), entry.name, 'exploration');
@@ -123,12 +132,16 @@ async function caseTrialCount(run: string) {
     for (const session of sessions) {
       if (!session.isDirectory() || !session.name.startsWith('workflow-')) continue;
       const root = join(exploration, session.name);
+      const execution = await json(join(root, 'execution.json'));
+      validateSavedInput(execution);
+      const budget = execution.schemaVersion === 1 ? legacyAttemptBudget(execution) : execution.attemptBudget;
+      if (budget) budgets.push(budget);
       for (const file of await readdir(join(root, 'receipts'))) {
-        if (file.endsWith('.pending') && (await json(join(root, 'receipts', file))).kind === 'trial') count++;
+        if (file.endsWith('.pending') && ['trial', 'attempt'].includes((await json(join(root, 'receipts', file))).kind)) count++;
       }
     }
   }
-  return count;
+  return { count, bounded: budgets.length > 0, budgets };
 }
 async function receipts(directory: string) {
   return Promise.all((await readdir(join(directory, 'receipts'))).filter(p => p.endsWith('.json')).sort().map(p => json(join(directory, 'receipts', p))));
@@ -136,7 +149,7 @@ async function receipts(directory: string) {
 async function active(directory: string) {
   directory = resolve(directory);
   const execution = await json(join(directory, 'execution.json'));
-  validateWorkflowInput(execution);
+  validateSavedInput(execution);
   requireValue((await json(execution.lock)).directory === directory, 'Device controller ownership lost');
   requireValue(!(await readdir(directory)).includes('result.json'), 'Workflow already finished');
   return execution;
@@ -151,6 +164,10 @@ async function requireFinalCaptures(directory: string) {
     const manifest = await json(join(directory, file));
     requireValue(!['recording', 'starting', 'finalizing'].includes(manifest.status), 'Stop and finalize capture before finishing');
   }
+}
+function requireHoldComplete(history: any[]) {
+  const action = history.findLast(r => r.kind === 'action');
+  requireValue(!action || Date.now() >= Date.parse(action.finishedAt) + (action.holdMs ?? 0), 'Preserve the requested action hold before another command or finish');
 }
 async function runCommand(args: string[], timeout: number, logs: string) {
   const entry = fileURLToPath(new URL('../node_modules/clawperator/dist/cli/index.js', import.meta.url));
@@ -172,6 +189,7 @@ export async function stepWorkflow(directory: string, raw: unknown) {
   directory = resolve(directory);
   const step = validateWorkflowStep(raw);
   const execution = await active(directory);
+  requireValue(execution.schemaVersion === 2, 'Version 1 sessions are read-only; use their preserved implementation to close active work');
   const mutex = join(directory, 'step.lock');
   await writeFile(mutex, '', { flag: 'wx' });
   try {
@@ -185,13 +203,14 @@ export async function stepWorkflow(directory: string, raw: unknown) {
     const observations = previous.filter(r => ['observation', 'capture'].includes(r.kind)).length;
     requireValue(actions + workflowActionCost(step) <= execution.budget.actions, 'Action budget exhausted');
     requireValue(!['observation', 'capture'].includes(step.kind) || observations < execution.budget.observations, 'Observation budget exhausted');
-    const trials = previous.filter(r => r.kind === 'trial');
-    if (step.kind === 'trial') requireValue(trials.length < execution.budget.calibrationTrials && await caseTrialCount(resolve(directory, '../..')) < (execution.calibrationAuthorization?.totalTrials ?? 2), 'Calibration budget exhausted across case runs');
-    if (step.kind === 'gear') requireValue(trials.length && !previous.slice(previous.lastIndexOf(trials.at(-1))).some(r => r.kind === 'gear'), 'Only one gear tap per calibration trial');
-    const lastGear = previous.findLast(r => r.kind === 'gear');
-    requireValue(!lastGear || Date.now() >= Date.parse(lastGear.finishedAt) + 13_000, 'Preserve 10-second observation and 3-second hold before another command');
+    if (step.kind === 'attempt') {
+      requireValue(execution.attemptBudget, 'Attempt marker requires attemptBudget');
+      requireValue((await caseAttempts(resolve(directory, '../..'))).count < execution.attemptBudget.total, 'Attempt budget exhausted across case runs');
+    }
+    if (step.kind === 'action' && execution.attemptBudget) requireValue(previous.some(r => r.kind === 'attempt'), 'Reserve an attempt before actions for this bounded case');
+    requireHoldComplete(previous);
     for (const path of step.evidence) await safeFile(directory, path);
-    if (['action', 'gear'].includes(step.kind)) {
+    if (step.kind === 'action') {
       const last = previous.at(-1);
       requireValue(last && isUiObservation(last) && last.code === 0 && Date.now() - Date.parse(last.finishedAt) < 120_000 && step.evidence.includes(last.receipt), 'Refresh observation before each action; reference its receipt');
     }
@@ -227,12 +246,14 @@ export async function stepWorkflow(directory: string, raw: unknown) {
 
 export async function validateWorkflowResult(directory: string, raw: unknown) {
   const result = object(raw);
-  requireValue(result.schemaVersion === 1 && ['ready', 'blocked', 'incomplete'].includes(result.status), 'Invalid workflow result');
+  requireValue([1, 2].includes(result.schemaVersion) && ['ready', 'blocked', 'incomplete'].includes(result.status), 'Invalid workflow result');
   requireValue(text(result.summary) && Array.isArray(result.deviations) && result.deviations.every(text) && Array.isArray(result.limits) && result.limits.every(text), 'Missing summary/deviations/limits');
   requireValue(Array.isArray(result.blockers) && result.blockers.every(text) && (result.status !== 'blocked' || result.blockers.length > 0), 'Blocked result needs blockers');
   requireValue(result.productVerdict === 'not-assessed', 'Phase 3 cannot emit a product verdict');
   requireValue(['exercised', 'not-run'].includes(result.adapters?.direct) && result.adapters?.launched === 'not-implemented', 'Report actual execution paths');
   const execution = await json(join(directory, 'execution.json'));
+  validateSavedInput(execution);
+  requireValue(result.schemaVersion === execution.schemaVersion, 'Result version differs from execution');
   requireValue(isDeepStrictEqual(result.agent, execution.agent), 'Result agent differs from execution');
   requireValue(Array.isArray(result.observations), 'Missing observations');
   for (const observation of result.observations) {
@@ -240,27 +261,47 @@ export async function validateWorkflowResult(directory: string, raw: unknown) {
     for (const path of observation.evidence) await safeFile(directory, path);
   }
   requireValue(result.workflow?.startsWith('skills/'), 'Workflow must be retained under skills/');
-  for (const path of [result.workflow, result.handoff]) await safeFile(directory, path);
+  await safeFile(directory, result.workflow);
+  if (result.schemaVersion === 1) await safeFile(directory, result.handoff);
+  else {
+    requireValue(Array.isArray(result.unresolved) && result.unresolved.every(text), 'Missing unresolved checks');
+    requireValue(text(await readFile(join(directory, result.workflow), 'utf8')), 'Repeat instructions must not be empty');
+  }
   requireValue(Array.isArray(result.dependencies) && result.dependencies.length > 0 && result.dependencies.every(text), 'Missing dependencies/versions');
   const history = await receipts(directory);
   if (result.adapters.direct === 'exercised') {
     requireValue(history.some(r => ['action', 'gear'].includes(r.kind)) && history.some(r => isUiObservation(r)), 'Exercised direct path requires retained actions and observations');
   }
+  if (result.schemaVersion === 2) {
+    requireValue(isDeepStrictEqual(Object.keys(object(result.checks)).sort(), [...execution.routeChecks].sort()), 'Result checks must match requested routeChecks');
+    for (const key of execution.routeChecks) {
+      const check = object(result.checks[key]);
+      requireValue(['observed', 'unresolved'].includes(check.status) && text(check.detail) && Array.isArray(check.evidence), `Invalid route check ${key}`);
+      for (const path of check.evidence) await safeFile(directory, path);
+      if (check.status === 'observed') {
+        requireValue(check.evidence.some((path: string) => history.some(r => r.receipt === path && r.code === 0 && isUiObservation(r))), `Observed route check ${key} needs a successful UI observation receipt`);
+        for (const video of check.evidence.filter((path: string) => path.endsWith('.mp4'))) {
+          const manifestPath = await safeFile(directory, join(dirname(video), 'manifest.json'));
+          const manifest = await json(manifestPath);
+          const artifact = manifest.artifacts?.find((item: any) => item.kind === 'video' && join(dirname(video), item.path) === video);
+          requireValue(manifest.status === 'complete' && artifact?.sha256 === await sha256(join(directory, video)), 'Supporting video needs a complete manifest and matching hash');
+        }
+      }
+      if (result.status === 'ready') requireValue(check.status === 'observed', `Ready requires route check ${key}`);
+    }
+  }
   if (result.status === 'ready') {
     requireValue(result.adapters.direct === 'exercised', 'Ready requires exercised direct execution');
     requireValue(result.blockers.length === 0 && result.observations.length > 0, 'Ready cannot have blockers or lack observations');
-    for (const key of ['preconditions', 'actions', 'nativeFullscreen', 'landscapeControls', 'gearTarget', 'captureTransition']) {
-      const check = object(result.checks?.[key]);
-      requireValue(check.status === 'observed' && text(check.detail) && Array.isArray(check.evidence) && check.evidence.length > 0, `Ready requires ${key} evidence`);
-      for (const path of check.evidence) await safeFile(directory, path);
+    if (result.schemaVersion === 1) {
+      await validateLegacyReady(directory, result, history, path => safeFile(directory, path));
+    } else {
+      requireValue(result.unresolved.length === 0, 'Ready cannot have unresolved checks');
+      const actionIndex = history.findIndex(r => r.kind === 'action' && r.code === 0);
+      requireValue(actionIndex >= 0 && history.slice(actionIndex + 1).some(r => isUiObservation(r) && r.code === 0), 'Ready requires a successful action followed by a UI observation');
+      const pending = (await readdir(join(directory, 'receipts'))).filter(p => p.endsWith('.pending')).map(p => `receipts/${p.replace(/\.pending$/, '.json')}`).sort();
+      requireValue(isDeepStrictEqual(pending, history.map(r => r.receipt).sort()), 'Ready cannot contain an interrupted dispatch');
     }
-    const videos = result.checks.captureTransition.evidence.filter((path: string) => path.endsWith('.mp4'));
-    requireValue(videos.length > 0, 'Ready requires retained transition video');
-    for (const video of videos) {
-      const manifest = await json(join(directory, dirname(video), 'manifest.json'));
-      requireValue(manifest.status === 'complete' && manifest.artifacts?.some((artifact: any) => artifact.kind === 'video' && join(dirname(video), artifact.path) === video && artifact.sha256), 'Transition video must have a finalized capture manifest');
-    }
-    requireValue(history.some(r => r.kind === 'gear' && r.code === 0) && history.some(r => r.kind === 'observation' && r.code === 0), 'Ready requires exercised discovery');
   }
   return result;
 }
@@ -270,9 +311,8 @@ export async function finishWorkflow(directory: string, raw: unknown) {
   await writeFile(mutex, '', { flag: 'wx' });
   try {
     const execution = await active(directory);
-    const history = await receipts(directory);
-    const gear = history.findLast(r => r.kind === 'gear');
-    requireValue(!gear || Date.now() >= Date.parse(gear.finishedAt) + 13_000, 'Preserve final observation hold before finishing');
+    requireValue(execution.schemaVersion === 2, 'Version 1 sessions are read-only; use their preserved implementation to close active work');
+    requireHoldComplete(await receipts(directory));
     await requireFinalCaptures(directory);
     const result = await validateWorkflowResult(directory, raw);
     await save(join(directory, 'result.json'), result);
@@ -293,7 +333,7 @@ export async function validateWorkflow(directory: string) {
   requireValue(isDeepStrictEqual((await inventory(directory)).filter(p => p !== 'manifest.json'), Object.keys(files).sort()), 'Workflow inventory changed');
   for (const [path, hash] of Object.entries(files)) requireValue(await sha256(await safeFile(directory, path)) === hash, `Workflow hash mismatch: ${path}`);
   const execution = await json(join(directory, 'execution.json'));
-  validateWorkflowInput(execution);
+  validateSavedInput(execution);
   const run = resolve(directory, '../..');
   await validateRun(run);
   const preparation = await json(join(run, 'run.json'));

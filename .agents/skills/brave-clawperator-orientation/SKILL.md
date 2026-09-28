@@ -36,14 +36,15 @@ universal timeout. A reveal tap can hide controls that are already visible.
 End the sequence at the transition. Retain individual results and partial effects
 on failure; never automatically replay a sequence. BART provides a
 [bounded sequence contract](../../../docs/workflow-development.md) with click
-budgets and a special `gear` kind for the timed test action.
+budgets and optional action `holdMs` for a case-prescribed quiet interval.
 
 ## Native fullscreen and evidence
 
 Screen-filling video alone does not prove native fullscreen. Check browser chrome,
 orientation and native evidence such as the fullscreen exit message. Reacquire
-landscape controls and the gear before tapping. Start continuous capture before
-entry and retain the prescribed observation window and final hold. Inspect the
+controls after rotation before tapping. When the case requires transition
+evidence, start continuous capture before entry and retain its prescribed
+observation window and final hold. Inspect the
 finalized original across rotation; a complete manifest does not prove readable
 or correct behavior. Do not rescue timed attempts with Back, retaps or forced
 rotation.

@@ -1,11 +1,12 @@
 # Workflow development
 
-Phase 3 uses a shared direct-execution contract. It keeps agent executable names,
-authentication and native output parsing outside the contract. No launched
-adapter is implemented. The existing file-only task runner is not a device
-launcher.
+The shared contract helps an agent discover and exercise an Android interaction
+route through Clawperator and save instructions for repeating it. It does not
+assess product correctness. Executable names, authentication and native output
+parsing belong in optional adapters. Only direct execution is implemented; the
+file-only task runner is not a device launcher.
 
-## Commands
+## Commands and input
 
 ```text
 bart workflow-start <prepared-run-directory> <input.json>
@@ -14,94 +15,129 @@ bart workflow-finish <workflow-directory> <result.json>
 bart validate-workflow <workflow-directory>
 ```
 
-Start validates the Phase 2 record and creates a unique directory under its
-`exploration/`. It reserves the target in `BART_WORK_DIR/device-controllers/`.
-Only cooperating BART sessions respect this reservation; the executing agent
-must exclude other controllers. The helper does not make authority decisions
-from prose. Read the saved authority before each setup action.
+Start validates preparation, creates a unique directory in its `exploration/`,
+and reserves the device in `BART_WORK_DIR/device-controllers/`. The agent must
+exclude controllers that do not use BART. Read setup authority before acting;
+the helper cannot infer permission from prose.
 
-Input version 1 has `instructions` (text), `agent: {name, mode}` (direct or
-launched), the prepared `target: {deviceId, packageId, operatorPackage}` and
-`authority` unchanged, and `budget: {durationMs, actions, observations,
-calibrationTrials}`. Limits are two hours, 200 actions, 300 observations and two
-calibration trials. A launched mode fails explicitly before device work.
-Choose smaller bounds for the actual task. Budgets are ceilings, not permission
-to perform actions outside the frozen plan. The helper counts trial reservations across all runs of the case, including
-interrupted ones, so restarting a session does not reset the authorized cumulative ceiling.
+Input `schemaVersion: 2` has:
+
+- `instructions`: the requested route and its stopping rules.
+- `agent: {name, mode}`: actual agent and `direct` or `launched`. Unsupported
+  launched execution fails before device work.
+- `target: {deviceId, packageId, operatorPackage}` and `authority`: unchanged from
+  preparation.
+- `budget: {durationMs, actions, observations}`: positive session ceilings, at
+  most two hours, 200 actions and 300 observations. Choose bounds for the task.
+- `routeChecks`: distinct identifiers for the evidence needed to establish this
+  route, for example `["details-screen"]`. Each starts with a lowercase letter
+  and contains letters, digits or hyphens.
+- Optional `attemptBudget: {total, basis}`: a positive cumulative case ceiling
+  and the authority for it. No default attempt count applies to new cases.
+
+Existing case limits must be carried forward. Start records prior counts and
+limits in `execution.json` as `attemptHistory`; it rejects omission of a prior
+limit. Reservations across every run, including failed and interrupted attempts
+and legacy trials, consume the cumulative ceiling. Only explicit authorization
+can change that ceiling; `basis` must retain it. The helper records that basis,
+but cannot establish that the user granted it. Budgets never expand setup authority.
+
+## Steps and retained evidence
 
 Each step has `kind`, `args` (Clawperator argument array), `reason`, and `evidence`
-(relative file paths within the workflow directory). Kinds are `observation`,
-`action`, `trial`, `gear`, and `capture`. Trial is a marker with empty args. Gear
-must be a click and consumes the trial's one tap even if execution fails. Use
-observation for snapshot/query/read/wait/screenshot/doctor/version; action for
-open/click/type/press/back/close/swipe/scroll; capture for evidence capture or
-video start/status/stop. The helper supplies the target, screenshot destination,
-capture directory and video session. Each action requires the last successful
-observation receipt, at most two minutes old. Inspect its content before acting.
-The helper retains raw stdout, stderr, timestamps and failures; it does not retry.
+(relative session paths). Kinds are `observation`, `action`, `attempt`, `capture`.
+An attempt is a marker with empty args, used only with an attempt budget; mark it
+before actions in that session. Use observation for snapshot/query/read/wait/
+screenshot/doctor/version, action for open/click/type/press/back/close/swipe/scroll,
+and capture for evidence capture or video start/status/stop. The helper supplies
+the target, screenshot destination, capture directory and video session.
 
-A gear receipt blocks further commands for at least 13 seconds after completion,
-which conservatively retains the fixed 10-second window plus final hold. Record
-the actual dispatch interval and judge video timing from the original. A pending
-receipt without its final receipt blocks further execution; inspect effects and
-finish with a blocker instead of deleting the pending record or replaying it.
-A remaining `step.lock` marks an active or interrupted helper. Confirm no process
-or capture remains before manually releasing that lock; preserve its receipt.
+Each action references the last successful UI observation receipt, at most two
+minutes old. Inspect its contents before choosing targets. Raw stdout, stderr,
+timestamps and failures are retained; the helper does not retry. An optional
+action `holdMs` (0–60000) prevents subsequent commands and finish until that time
+after completion, even after failure. Use it only when the case needs a quiet
+observation window; there is no fixed transition timing.
 
-## Result
+A pending receipt without a final receipt blocks further execution. Inspect
+possible effects and finish blocked or incomplete instead of deleting the
+reservation or replaying the command. A remaining `step.lock` marks an active or
+interrupted helper. Confirm no process or capture remains before manually
+releasing that lock, and preserve receipts.
 
-Version 1 contains:
-
-- `status`: ready, blocked or incomplete; `summary`; string arrays `deviations`,
-  `limits`, `blockers`.
-- `agent`: identical to the input; `adapters: {direct: "exercised" | "not-run",
-  launched: "not-implemented"}`; `productVerdict: "not-assessed"`.
-- `observations`: objects with `claim`, `strength` (observed, inferred, unknown)
-  and nonempty `evidence` paths.
-- `workflow` and `handoff`: relative paths to retained documents;
-  `dependencies`: nonempty version/reference strings.
-- For ready only, `checks` keyed by preconditions, actions, nativeFullscreen,
-  landscapeControls, gearTarget and captureTransition. Each needs
-  `status: "observed"`, `detail`, and nonempty evidence paths. Ready also requires
-  an exercised gear action and observation and no blockers.
-
-Finish retains the result and a SHA-256 manifest of all session files and releases
-ownership. Stop capture before finishing so background writers cannot change
-sealed evidence. Validation checks the complete file inventory, hashes, safe
-relative paths, preparation identity and structured result. These checks establish
-integrity and consistency, not truth of visual conclusions. Missing live coverage
-must remain blocked or incomplete. Evidence, temporary skills and session reports
-belong under the run, not in durable documentation.
-
-## Transient controls
+### Transient controls
 
 An action may supply `sequence` with empty `args`: up to six ordered entries,
 at most two clicks and three seconds of total delay. A click is
 `{"type":"click","x":540,"y":740}`; a delay is
 `{"type":"sleep","durationMs":300}`. Each delay is at most two seconds.
 The helper sends one Clawperator execution envelope. Each click consumes the
-normal action budget, including clicks reserved in a failed sequence. Arbitrary
-Clawperator payloads, selectors, paths and package overrides are not accepted.
+action budget, including reservations in failed sequences. Arbitrary execution
+payloads, selectors, paths and target overrides are not accepted.
 
-Use a sequence only when current evidence establishes the layout and all targets.
-For example, reveal hidden video controls, wait 300 ms, then tap the fullscreen
-icon observed in that same layout. The delay is a tested starting value, not a
-promise about every player. Take the next observation after the sequence;
-reacquire targets after rotation, navigation or uncertain effects. Never replay
-a failed sequence automatically: earlier actions may already have run. A `gear`
-sequence ends with the single gear tap; any earlier click only reveals controls.
-The same 13-second hold applies after the sequence completes.
+Use sequences when current evidence establishes every target, such as revealing
+transient controls and tapping an observed button. Choose delay from route
+evidence, then observe after the sequence. Reacquire after layout changes or
+uncertain effects. Never automatically replay a failure: earlier clicks may have
+run. Use original screenshot geometry for input coordinates. Host `persistedAt`
+is write completion, not the device capture time. Check errors and observation
+completeness rather than assuming transport success proves a state.
 
-Two calibration trials remain the default cumulative case ceiling. An explicit
-user revision may supply `calibrationAuthorization: {totalTrials, basis}`.
-`totalTrials` is the revised cumulative ceiling (3 to 10), not an added allowance;
-`basis` records the user's authorization and scope. The per-session ceiling stays
-two. Preserve the old plan and receipts, record the revision in the handoff, and
-never infer renewal merely from a retry or a new session.
+## Result and readiness
 
-Clawperator 0.12.4 returns original screenshot dimensions and coordinate origin.
-Use those dimensions when converting a resized preview to input coordinates.
-`persistedAt` is the host write-completion time, not the capture instant.
-Text-entry and submission acknowledgments need a destination observation before
-claiming navigation. Full snapshot transport now checks correlated chunk bytes
-and hashes; still inspect errors and completeness rather than assuming success.
+Version 2 results contain:
+
+- `schemaVersion: 2`, `status` (ready, blocked or incomplete), `summary`, and string
+  arrays `deviations`, `limits`, `blockers`, `unresolved`.
+- `agent` identical to input; `adapters: {direct: "exercised" | "not-run",
+  launched: "not-implemented"}`; `productVerdict: "not-assessed"`.
+- `observations`: objects with `claim`, `strength` (observed, inferred, unknown)
+  and nonempty `evidence` paths.
+- `workflow`: a nonempty repeat-instruction file inside session `skills/`;
+  `dependencies`: nonempty version/reference strings.
+- `checks`: exactly the requested route check keys. Each has `status` (observed
+  or unresolved), `detail`, and `evidence` paths. An unresolved check may have no
+  evidence; explain what remains unknown.
+
+For example, a check for an app's details screen can be:
+
+```json
+{"details-screen":{"status":"observed","detail":"The details screen is visible.","evidence":["receipts/003.json","screens/details.xml"]}}
+```
+
+Paths must refer to actual retained files. Every observed check must reference a
+successful UI observation receipt; instructions or action receipts alone do not
+suffice. Referenced MP4 files also need a complete capture manifest with a matching
+artifact hash. Video is optional unless the requested route needs it.
+
+Ready requires all requested checks observed, no blockers or unresolved items,
+structured observations, and an exercised successful action followed by a
+successful UI observation. Interrupted dispatches prevent ready. Retained failures
+do not by themselves prevent readiness when later evidence establishes the route.
+The agent must judge whether observations support the claims: the validator
+cannot judge pixels or whether a chosen check covers the user's request.
+
+Finish requires stopped capture, retains the result and a SHA-256 manifest of the
+session inventory, and releases ownership. Validation checks safe paths, hashes,
+preparation identity and result consistency. Evidence and temporary instructions
+belong under the run. Keep discovery failures available for later product
+assessment. No handoff file, next skill, feature variant or product verdict is
+required to establish a usable route.
+
+## Saved version 1 sessions
+
+Version 1 encoded the Brave Core #39794 route. A small read-only validator retains
+its original requirements, including its checks, gear receipt, video and handoff.
+It does not reinterpret old ready or blocked results as version 2. Sealed evidence
+and hashes remain unchanged. New sessions use version 2; step and finish reject
+version 1 execution. Close an active old session with its preserved implementation
+before starting a new one; do not clear its ownership or rewrite its evidence to
+bypass this restriction.
+
+Legacy pending trial receipts still consume the case budget. The legacy ceiling
+is two unless its saved explicit authorization revises it. For a continuation,
+carry that authorization and total into `attemptBudget`; do not reset counts.
+Case-specific controls, timing, feature variants and follow-up checks belong in
+the retained case plan and run instructions under `BART_WORK_DIR`. They are not
+requirements for other routes. Contract tests use synthetic receipts to establish
+validation behavior; they do not establish device behavior or product correctness.

@@ -153,10 +153,10 @@ Completion: the record identifies the actual build, target, relevant starting co
 
 Implemented skill: [bart-develop-workflow](../skills/bart-develop-workflow/SKILL.md).
 
-Direct execution retains command receipts, case-wide calibration limits, a temporary
+Direct execution retains command receipts, optional case-wide attempt limits, a temporary
 workflow, structured results and evidence hashes. Bounded sequences support
-transient controls without a model round trip between taps. The scoped direct
-workflow has been exercised through native fullscreen entry, landscape controls,
+transient controls without a model round trip between taps. The #39794 direct
+workflow was exercised through native fullscreen entry, landscape controls,
 the gear action and continuous transition capture. Prior blocked trials remain
 retained with the later authorized continuation. No launcher adapter is implemented.
 
