@@ -20,6 +20,7 @@ export interface WorkflowInput {
   agent: { name: string; mode: 'direct' | 'launched' };
   target: { deviceId: string; packageId: string; operatorPackage: string };
   authority: { allowedActions: string[]; reset: 'not-authorized' | 'authorized'; basis: string };
+  calibrationAuthorization?: { totalTrials: number; basis: string };
   budget: { durationMs: number; actions: number; observations: number; calibrationTrials: number };
 }
 export function validateWorkflowInput(raw: unknown): WorkflowInput {
@@ -30,6 +31,10 @@ export function validateWorkflowInput(raw: unknown): WorkflowInput {
   requireValue(Array.isArray(input.authority?.allowedActions) && input.authority.allowedActions.every(text) && text(input.authority.basis) && ['authorized', 'not-authorized'].includes(input.authority.reset), 'Invalid authority');
   for (const [key, max] of Object.entries({ durationMs: 7_200_000, actions: 200, observations: 300, calibrationTrials: 2 })) {
     requireValue(Number.isInteger(input.budget?.[key]) && input.budget[key] > 0 && input.budget[key] <= max, `Invalid budget.${key}`);
+  }
+  if (input.calibrationAuthorization !== undefined) {
+    const renewal = object(input.calibrationAuthorization);
+    requireValue(Number.isInteger(renewal.totalTrials) && renewal.totalTrials > 2 && renewal.totalTrials <= 10 && text(renewal.basis), 'Invalid calibration authorization');
   }
   return input as WorkflowInput;
 }
@@ -74,18 +79,38 @@ export async function startWorkflow(runDirectory: string, raw: unknown) {
 }
 const observationCommands = new Set(['snapshot', 'query', 'read', 'wait', 'screenshot', 'doctor', 'version']);
 const actionCommands = new Set(['open', 'click', 'type', 'press', 'back', 'close', 'swipe', 'scroll']);
-export interface WorkflowStep { kind: 'observation' | 'action' | 'trial' | 'gear' | 'capture'; args: string[]; reason: string; evidence: string[] }
+export type SequenceAction = { type: 'click'; x: number; y: number } | { type: 'sleep'; durationMs: number };
+export interface WorkflowStep { sequence?: SequenceAction[]; kind: 'observation' | 'action' | 'trial' | 'gear' | 'capture'; args: string[]; reason: string; evidence: string[] }
 export function validateWorkflowStep(raw: unknown): WorkflowStep {
   const step = object(raw);
   requireValue(['observation', 'action', 'trial', 'gear', 'capture'].includes(step.kind) && text(step.reason), 'Invalid step kind/reason');
   requireValue(Array.isArray(step.args) && step.args.every(text) && Array.isArray(step.evidence) && step.evidence.every(text), 'Invalid step args/evidence');
-  if (step.kind === 'trial') requireValue(step.args.length === 0, 'Trial marker has no command');
+  if (step.sequence !== undefined) {
+    requireValue(['action', 'gear'].includes(step.kind) && step.args.length === 0, 'Sequence requires action or gear with empty args');
+    requireValue(Array.isArray(step.sequence) && step.sequence.length > 0 && step.sequence.length <= 6, 'Sequence needs 1 to 6 actions');
+    let clicks = 0; let delay = 0;
+    for (const action of step.sequence) {
+      const a = object(action);
+      if (a.type === 'click') {
+        requireValue(Object.keys(a).sort().join(',') === 'type,x,y' && [a.x, a.y].every(v => Number.isInteger(v) && v >= 0 && v <= 10000), 'Invalid sequence coordinate');
+        clicks++;
+      } else {
+        requireValue(a.type === 'sleep' && Object.keys(a).sort().join(',') === 'durationMs,type' && Number.isInteger(a.durationMs) && a.durationMs >= 0 && a.durationMs <= 2000, 'Invalid sequence delay');
+        delay += a.durationMs;
+      }
+    }
+    requireValue(clicks > 0 && clicks <= 2 && delay <= 3000, 'Sequence exceeds click or delay limit');
+    requireValue(step.kind !== 'gear' || step.sequence.at(-1).type === 'click', 'Gear must be the final sequence action');
+  } else if (step.kind === 'trial') requireValue(step.args.length === 0, 'Trial marker has no command');
   else if (step.kind === 'observation') requireValue(observationCommands.has(step.args[0]), 'Unsupported observation');
   else if (step.kind === 'capture') requireValue(step.args[0] === 'evidence' && ['capture', 'video'].includes(step.args[1]), 'Unsupported capture');
   else requireValue(actionCommands.has(step.args[0]) && (step.kind !== 'gear' || step.args[0] === 'click'), 'Unsupported action');
   requireValue(!step.args.some((arg: string) => /^--(device|device-id|operator-package|output-dir|path|raw-path|session|timeout|log-dir)(=|$)/.test(arg)), 'Target, capture paths and timeout are supplied by the helper');
   if (['action', 'gear'].includes(step.kind)) requireValue(step.evidence.length > 0, 'Actions need current observation evidence');
   return step as WorkflowStep;
+}
+export function workflowActionCost(step: Pick<WorkflowStep, 'kind' | 'sequence'>): number {
+  return ['action', 'gear'].includes(step.kind) ? (step.sequence?.filter(a => a.type === 'click').length ?? 1) : 0;
 }
 async function caseTrialCount(run: string) {
   let count = 0;
@@ -156,12 +181,12 @@ export async function stepWorkflow(directory: string, raw: unknown) {
     requireValue(pending.length === previous.length, 'Interrupted dispatch: inspect retained pending receipt and stop; never replay automatically');
     const elapsed = Date.now() - Date.parse(execution.startedAt);
     requireValue(elapsed < execution.budget.durationMs, 'Workflow deadline exhausted; finish with a blocker');
-    const actions = previous.filter(r => ['action', 'gear'].includes(r.kind)).length;
+    const actions = previous.reduce((sum, receipt) => sum + workflowActionCost(receipt), 0);
     const observations = previous.filter(r => ['observation', 'capture'].includes(r.kind)).length;
-    requireValue(!['action', 'gear'].includes(step.kind) || actions < execution.budget.actions, 'Action budget exhausted');
+    requireValue(actions + workflowActionCost(step) <= execution.budget.actions, 'Action budget exhausted');
     requireValue(!['observation', 'capture'].includes(step.kind) || observations < execution.budget.observations, 'Observation budget exhausted');
     const trials = previous.filter(r => r.kind === 'trial');
-    if (step.kind === 'trial') requireValue(trials.length < execution.budget.calibrationTrials && await caseTrialCount(resolve(directory, '../..')) < 2, 'Calibration budget exhausted across case runs');
+    if (step.kind === 'trial') requireValue(trials.length < execution.budget.calibrationTrials && await caseTrialCount(resolve(directory, '../..')) < (execution.calibrationAuthorization?.totalTrials ?? 2), 'Calibration budget exhausted across case runs');
     if (step.kind === 'gear') requireValue(trials.length && !previous.slice(previous.lastIndexOf(trials.at(-1))).some(r => r.kind === 'gear'), 'Only one gear tap per calibration trial');
     const lastGear = previous.findLast(r => r.kind === 'gear');
     requireValue(!lastGear || Date.now() >= Date.parse(lastGear.finishedAt) + 13_000, 'Preserve 10-second observation and 3-second hold before another command');
@@ -172,7 +197,11 @@ export async function stepWorkflow(directory: string, raw: unknown) {
     }
     const id = String(previous.length + 1).padStart(4, '0');
     const receipt = `receipts/${id}.json`;
-    const args = [...step.args];
+    const args = step.sequence ? ['exec', JSON.stringify({
+      commandId: `workflow-${id}-${randomUUID()}`, taskId: 'bart-workflow', source: 'direct',
+      expectedFormat: 'android-ui-automator', timeoutMs: Math.min(10000, execution.budget.durationMs - elapsed),
+      actions: step.sequence.map((action, index) => ({ id: `step-${index + 1}`, type: action.type, params: action.type === 'click' ? { coordinate: { x: action.x, y: action.y } } : { durationMs: action.durationMs } })),
+    })] : [...step.args];
     if (step.kind === 'capture') {
       if (args[1] === 'capture' || args[2] === 'start') args.push('--output-dir', join(directory, `capture-${id}`));
       else {
@@ -185,7 +214,7 @@ export async function stepWorkflow(directory: string, raw: unknown) {
       }
     }
     if (args[0] === 'screenshot') args.push('--path', join(directory, `screenshot-${id}.png`));
-    if (args.length) args.push('--device', execution.target.deviceId, '--operator-package', execution.target.operatorPackage);
+    if (args.length) args.push('--device', execution.target.deviceId, '--operator-package', execution.target.operatorPackage, '--no-daemon');
     const startedAt = new Date().toISOString();
     // Reserve before dispatch: an interrupted command still consumes its budget.
     await save(join(directory, 'receipts', `${id}.pending`), { ...step, args, receipt, startedAt });

@@ -43,7 +43,7 @@ function blocked() {
     schemaVersion: 1, status: 'blocked', summary: 'Native entry unresolved', deviations: [], limits: ['No scored coverage'], blockers: ['Native entry unknown'],
     agent: input.agent, adapters: { direct: 'not-run', launched: 'not-implemented' }, productVerdict: 'not-assessed',
     observations: [{ claim: 'Navigation unknown', strength: 'unknown', evidence: ['instructions.md'] }],
-    workflow: 'skills/SKILL.md', handoff: 'handoff.md', dependencies: ['Clawperator 0.12.2'],
+    workflow: 'skills/SKILL.md', handoff: 'handoff.md', dependencies: ['Clawperator 0.12.4'],
   };
 }
 async function documents(directory: string) {
@@ -121,5 +121,49 @@ test('finishing refuses a live video writer', async () => {
     await writeFile(join(directory, 'capture-0001/manifest.json'), JSON.stringify({ status: 'finalizing' }));
     await assert.rejects(finishWorkflow(directory, blocked()), /finalize capture/);
     assert.equal(JSON.parse(await readFile(join(f.root, 'device-controllers/test-device.json'), 'utf8')).directory, directory);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+test('bounded sequences count every click and reject arbitrary payloads', async () => {
+  const { workflowActionCost } = await import('../src/workflow.ts');
+  const step = { kind: 'action', args: [], reason: 'Reveal then enter fullscreen', evidence: ['receipts/0001.json'], sequence: [{ type: 'click', x: 540, y: 740 }, { type: 'sleep', durationMs: 300 }, { type: 'click', x: 954, y: 917 }] };
+  assert.equal(workflowActionCost(validateWorkflowStep(step)), 2);
+  assert.throws(() => validateWorkflowStep({ ...step, sequence: [{ type: 'click', x: 1, y: 2, path: '/tmp/escape' }] }), /coordinate/);
+  assert.throws(() => validateWorkflowStep({ ...step, sequence: [{ type: 'open', packageId: 'other' }] }), /delay/);
+  assert.throws(() => validateWorkflowStep({ ...step, sequence: [...step.sequence, { type: 'click', x: 1, y: 2 }] }), /limit/);
+  assert.throws(() => validateWorkflowStep({ ...step, kind: 'gear', sequence: [...step.sequence, { type: 'sleep', durationMs: 300 }] }), /final/);
+  const f = await fixture();
+  try {
+    const { directory } = await startWorkflow(f.run, { ...input, budget: { ...input.budget, actions: 1 } });
+    await assert.rejects(stepWorkflow(directory, step), /Action budget/);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+test('renewed calibration authority retains the cumulative case count', async () => {
+  const f = await fixture();
+  try {
+    const marker = { kind: 'trial', args: [], reason: 'Unscored trial', evidence: [] };
+    for (const totalTrials of [undefined, 4]) {
+      const renewal = totalTrials ? { calibrationAuthorization: { totalTrials, basis: 'Explicit user continuation, two additional trials' } } : {};
+      const { directory } = await startWorkflow(f.run, { ...input, ...renewal });
+      await stepWorkflow(directory, marker);
+      await stepWorkflow(directory, marker);
+      await documents(directory);
+      await finishWorkflow(directory, blocked());
+    }
+    const { directory } = await startWorkflow(f.run, { ...input, calibrationAuthorization: { totalTrials: 4, basis: 'Same authorization' } });
+    await assert.rejects(stepWorkflow(directory, marker), /across case runs/);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+test('failed sequences keep all reserved clicks charged before another dispatch', async () => {
+  const f = await fixture();
+  try {
+    const { directory } = await startWorkflow(f.run, input);
+    const failed = { kind: 'action', args: ['exec'], sequence: [{ type: 'click', x: 1, y: 1 }, { type: 'click', x: 2, y: 2 }], code: 1, stdout: '{"status":"failed","stepResults":[{"id":"step-1","success":true}]}', finishedAt: new Date().toISOString() };
+    await writeFile(join(directory, 'receipts/0001.pending'), JSON.stringify(failed));
+    await writeFile(join(directory, 'receipts/0001.json'), JSON.stringify(failed));
+    await assert.rejects(stepWorkflow(directory, { kind: 'action', args: ['click', '--text', 'Next'], evidence: ['instructions.md'], reason: 'Would replay uncertain sequence' }), /Action budget/);
+    assert.equal(JSON.parse(await readFile(join(directory, 'receipts/0001.json'), 'utf8')).stdout, failed.stdout);
   } finally { await rm(f.root, { recursive: true, force: true }); }
 });

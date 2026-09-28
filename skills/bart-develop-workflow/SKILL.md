@@ -6,6 +6,8 @@ description: Develop and exercise a bounded Android workflow through Clawperator
 # Develop a workflow
 
 Read the prepared run, its retained plan and context, and [the execution contract](../../docs/workflow-development.md).
+For Brave/Chromium navigation and video controls, read the
+[orientation skill](../../.agents/skills/brave-clawperator-orientation/SKILL.md).
 Validate the preparation with `bart validate-run`. Treat every device observation
 as historical. Recheck device, installed build, foreground package, flags after
 relaunch, study assignments, site state and capture before discovery. Create a
@@ -24,7 +26,7 @@ device actions while a child owns it. Never clear a lock just because a process
 has exited; inspect pending commands and active capture first.
 
 Use the pinned [observation/action example](https://github.com/clawperator/clawperator-skills/blob/76bad61b5915e70dd53f38111eaf932c5ff92706/skills/com.android.settings.get-version-details-codex/SKILL.md)
-for fresh observation, one bounded action, reacquisition and retained failures.
+for fresh observation, bounded actions, reacquisition and retained failures.
 Its launcher and authentication are not part of this contract.
 
 1. Select the pinned Clawperator CLI, explicit device and compatible Operator.
@@ -34,12 +36,15 @@ Its launcher and authentication are not part of this contract.
 2. Observe current UI. Inspect full retained hierarchy and screenshots where
    needed. Check foreground, overlays, completeness and target bounds. A receipt
    exit code does not prove the desired state. Reference the current observation
-   when choosing each action; reacquire after transitions or uncertain effects.
+   when choosing each action or bounded sequence; reacquire after transitions or
+   uncertain effects. For transient controls, use the sequence contract instead
+   of adding a screenshot round trip between every tap.
 3. Retain every command, failure, timestamp and original capture under the session
    in `exploration/`. A malformed observation permits one bounded read-only
    recovery; never replay its preceding mutation. Stop if recovery fails.
 4. Mark each calibration trial before entering its route. For #39794, use at most
-   two trials across sessions, with one exploratory gear tap each. Use `gear`,
+   two trials across sessions unless the user explicitly revises the cumulative
+   budget. Preserve that authorization and prior trials. Use one exploratory gear tap each. Use `gear`,
    never ordinary `action`, for that tap. Start continuous capture before native
    fullscreen entry. Establish native fullscreen, landscape controls and a
    current gear target. Preserve 10 seconds from dispatch and a further 3-second

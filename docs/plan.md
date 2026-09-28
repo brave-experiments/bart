@@ -1,6 +1,6 @@
 # BART implementation plan
 
-Status: Phases 0–2 are complete. Configuration/readiness checks and a [task runner prototype](agent-configuration.md#task-runner) are also implemented. [Phase 2 preparation](run-preparation.md) records readiness or specific blockers; it does not establish a product verdict. Phase 3 has a [shared skill and direct-execution helpers](workflow-development.md). Live discovery remains blocked: two unscored #39794 calibration trials did not establish native fullscreen entry; no gear taps or scored attempts ran. Phase 3 is not complete. Phases 4 onward remain unimplemented.
+Status: Phases 0–3 are complete for the scoped direct-execution path. Configuration/readiness checks and a [task runner prototype](agent-configuration.md#task-runner) are implemented. [Phase 2 preparation](run-preparation.md) records readiness or specific blockers. [Phase 3](workflow-development.md) retains a validated temporary workflow and unscored device evidence. No launched adapter is implemented. Scored verification and product assessment remain work for Phases 4 and 5.
 
 ## Goal
 
@@ -154,9 +154,11 @@ Completion: the record identifies the actual build, target, relevant starting co
 Implemented skill: [bart-develop-workflow](../skills/bart-develop-workflow/SKILL.md).
 
 Direct execution retains command receipts, case-wide calibration limits, a temporary
-workflow, structured results and evidence hashes. The current #39794 exercise
-returned blocked; landscape controls, the gear target and transition capture
-remain unverified. No launcher adapter is implemented.
+workflow, structured results and evidence hashes. Bounded sequences support
+transient controls without a model round trip between taps. The scoped direct
+workflow has been exercised through native fullscreen entry, landscape controls,
+the gear action and continuous transition capture. Prior blocked trials remain
+retained with the later authorized continuation. No launcher adapter is implemented.
 
 Input: the case plan and prepared run.
 
@@ -242,9 +244,9 @@ publication.
 - Environment convention: `.envrc.example` in the Bravebot repository.
 - QA references: the `qa-resources` repository and its `qa-resources.wiki` checkout.
 
-Next, resolve the blocked Phase 3 route using the retained #39794 evidence and
-a fresh Phase 2 preparation. The original two-trial calibration budget is spent;
-additional trials need an explicit plan revision. Recheck mutable device, package, flags, integration, and capture
-conditions before workflow discovery. Retain the temporary workflow and its
-observations under the case's run directory. Assessed Disabled/Enabled attempts
-and a product verdict remain work for Phases 4 and 5.
+Next, implement Phase 4 using the retained temporary workflow and fresh Phase 2
+preparations. Recheck mutable device, package, flags, integration and capture
+conditions. Preserve cumulative calibration counts and any explicit user revision;
+a new session never resets them. Keep unscored discovery separate from assessed
+Disabled/Enabled attempts and the harmless-option check. Product assessment
+remains Phase 5.

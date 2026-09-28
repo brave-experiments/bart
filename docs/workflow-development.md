@@ -27,7 +27,7 @@ calibrationTrials}`. Limits are two hours, 200 actions, 300 observations and two
 calibration trials. A launched mode fails explicitly before device work.
 Choose smaller bounds for the actual task. Budgets are ceilings, not permission
 to perform actions outside the frozen plan. The helper counts trial reservations across all runs of the case, including
-interrupted ones, so restarting a session does not reset the two-trial ceiling.
+interrupted ones, so restarting a session does not reset the authorized cumulative ceiling.
 
 Each step has `kind`, `args` (Clawperator argument array), `reason`, and `evidence`
 (relative file paths within the workflow directory). Kinds are `observation`,
@@ -72,3 +72,36 @@ relative paths, preparation identity and structured result. These checks establi
 integrity and consistency, not truth of visual conclusions. Missing live coverage
 must remain blocked or incomplete. Evidence, temporary skills and session reports
 belong under the run, not in durable documentation.
+
+## Transient controls
+
+An action may supply `sequence` with empty `args`: up to six ordered entries,
+at most two clicks and three seconds of total delay. A click is
+`{"type":"click","x":540,"y":740}`; a delay is
+`{"type":"sleep","durationMs":300}`. Each delay is at most two seconds.
+The helper sends one Clawperator execution envelope. Each click consumes the
+normal action budget, including clicks reserved in a failed sequence. Arbitrary
+Clawperator payloads, selectors, paths and package overrides are not accepted.
+
+Use a sequence only when current evidence establishes the layout and all targets.
+For example, reveal hidden video controls, wait 300 ms, then tap the fullscreen
+icon observed in that same layout. The delay is a tested starting value, not a
+promise about every player. Take the next observation after the sequence;
+reacquire targets after rotation, navigation or uncertain effects. Never replay
+a failed sequence automatically: earlier actions may already have run. A `gear`
+sequence ends with the single gear tap; any earlier click only reveals controls.
+The same 13-second hold applies after the sequence completes.
+
+Two calibration trials remain the default cumulative case ceiling. An explicit
+user revision may supply `calibrationAuthorization: {totalTrials, basis}`.
+`totalTrials` is the revised cumulative ceiling (3 to 10), not an added allowance;
+`basis` records the user's authorization and scope. The per-session ceiling stays
+two. Preserve the old plan and receipts, record the revision in the handoff, and
+never infer renewal merely from a retry or a new session.
+
+Clawperator 0.12.4 returns original screenshot dimensions and coordinate origin.
+Use those dimensions when converting a resized preview to input coordinates.
+`persistedAt` is the host write-completion time, not the capture instant.
+Text-entry and submission acknowledgments need a destination observation before
+claiming navigation. Full snapshot transport now checks correlated chunk bytes
+and hashes; still inspect errors and completeness rather than assuming success.
