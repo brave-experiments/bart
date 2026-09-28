@@ -58,7 +58,7 @@ and Operator package explicitly in that call. `--safe-mode` disables even
 explicit MCP servers in this version. Retain native tool results and check the
 device observation; a successful process exit can still contain no tool call.
 
-Clawperator 0.12.2 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
+Clawperator 0.12.5 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
 6.1 or newer with a working libx264 encoder. Check the encoder capability probe
 before capture. Record the selected tool versions and retain failed clips.
 Decode success does not prove usable capture. Inspect both rotation transitions
