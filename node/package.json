@@ -15,7 +15,7 @@
     "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https --validate-package-names --validate-integrity"
   },
   "dependencies": {
-    "clawperator": "0.12.4"
+    "clawperator": "0.12.5"
   },
   "devDependencies": {
     "@types/node": "24.13.5",

@@ -53,7 +53,7 @@ or the file-only task runner cannot substitute for this check. Recording pass
 requires a finalized, decoded and visually inspected calibration clip, including
 rotation, without assessing the product behavior reserved for later phases.
 
-Clawperator 0.12.4 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
+Clawperator 0.12.5 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
 6.1 or newer with a working libx264 encoder. Check the encoder capability probe
 before capture. Record the selected tool versions and retain failed clips.
 Decode success does not prove usable capture. Inspect both rotation transitions

@@ -74,7 +74,7 @@ initial attempts and failures. Never edit a frozen package or erase old evidence
   with ffprobe/ffmpeg and inspect frames including rotation. Preserve original
   clips and action receipts. Do not confuse Operator action recordings with video.
   A video start receipt is not proof of a usable finalized recording.
-  Clawperator 0.12.4 requires scrcpy 3.0+, ffprobe and FFmpeg 6.1+ with a
+  Clawperator 0.12.5 requires scrcpy 3.0+, ffprobe and FFmpeg 6.1+ with a
   working libx264 encoder. Check the encoder capability probe before capture,
   record tool versions and preserve failed clips before retrying.
   Inspect landscape frames too. Rotation retains the initial canvas and can show
