@@ -27,6 +27,7 @@ Load only the guidance needed for the next decision:
 | Assess an existing build | [Verify](../../../docs/verify.md) |
 | Select an APK, build or install | [Builds](../../../docs/builds.md) |
 | Capture and interpret observations | [Evidence](../../../docs/evidence.md) |
+| Change system theme, rotate or navigate Brave settings | [Action recipes](../../../docs/recipes.md) |
 
 For Android actions, use installed `androperator-agent-orientation` when unfamiliar and `androperator-agent-control-loop` for adaptive execution. Their maintained [host guidance](https://docs.androperator.com/host-agents/) is the fallback. The current agent chooses actions and judges results; no child agent or saved runtime skill is needed.
 

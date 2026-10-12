@@ -14,7 +14,7 @@ A source eligibility condition is not proof that a feature is active. Identify d
 
 For each useful check, identify the action, intended observation and evidence needed. Use current UI observations for navigation. Bound retries when timing or external state makes reproduction uncertain; record changed conditions rather than pick a favorable timing rule after seeing the outcomes.
 
-Preserve the reported trigger and foreground state. For theme/lifecycle checks, changing Android's system theme while the affected settings page stays open is different from changing Brave's Appearance setting and returning to that page. Determine which event matters from source, STR/TP and reference media; document an authorized ADB/API trigger when it is needed to avoid navigation that invalidates the check. Re-entry-only coverage cannot establish foreground restoration.
+Preserve the reported trigger and foreground state. Use [action recipes](recipes.md) for system-theme changes, rotation and settings navigation when applicable, with the issue's STR/TP taking precedence. Determine which event matters from source and reference media; re-entry-only coverage cannot establish foreground restoration.
 
 Observe the result after the action. Do not manually rescue the transition being assessed and then attribute success to the app. Capture the transition and result using [evidence](evidence.md); a screenshot of a final state may not establish how it was reached.
 

@@ -22,7 +22,7 @@ Androperator exposes UI hierarchies, screenshots, semantic selection, gestures, 
 
 Select an explicit device and matching Operator, then use readiness for the needed capability. Interactive UI work and background observations have different gates; consult current Androperator guidance rather than require every tool for every task. Keep one controller on the device and one writer in the build workspace. Resolve conflicting use before acting.
 
-Find settings from the current UI, not a fixed tap sequence. Hierarchy labels help target controls; screenshots are needed for visual shape, color, focus or occlusion. [Evidence](evidence.md) covers how to support conclusions.
+Use [action recipes](recipes.md) for system theme, rotation and adaptive Brave settings navigation. Find controls from current UI rather than fixed taps. Hierarchy labels help target controls; screenshots are needed for visual shape, color, focus or occlusion. [Evidence](evidence.md) covers how to support conclusions.
 
 ## Work and delivery
 

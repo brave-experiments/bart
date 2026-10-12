@@ -84,3 +84,5 @@ Notes can begin with the objective, important sources, selected targets and next
 For a requested local HTML verification report, use a dedicated attempt directory and the [HTML delivery guidance](reporting.md#local-html-verification-report). Keep its captured media and supporting receipts locally so the directory remains readable when moved. This format is requested output, not a prerequisite for other tasks.
 
 For sessions using Androperator, keep the [usage notes](evidence.md#androperator-usage-notes) alongside task artifacts. Use a session-specific subdirectory if multiple sessions share the task. Androperator's own logs remain in its configured location; the notes link to them and capture useful API/docs feedback and fallbacks.
+
+Save useful newly discovered methods in optional task-local [recipe notes](recipes.md#save-recipe-candidates-from-a-session), with observed applicability and evidence. Link them from a report/export when present; they are candidates for later review, not automatically shared instructions.

@@ -19,6 +19,8 @@ Create only needed files/directories. `SKILL.md` leads with the goal and expecte
 
 Use portable relative files or accessible remote links. Include helpers only for a concrete mechanical need, with explicit inputs and source or retrievable versioned dependencies. Remove hard-coded local/device paths and credentials from shared contents. [Build identity](builds.md) and [evidence](evidence.md) explain what the original receipts support.
 
+Include relevant task-local [recipe candidates](recipes.md#save-recipe-candidates-from-a-session) when they help a future attempt, or incorporate their necessary adaptive actions and restoration steps. Keep observed evidence/limits with them; an exported candidate does not automatically become a maintained BART recipe.
+
 ## Creation, reuse and sharing
 
 Writing the package can complete a request to save instructions. Check that links and dependencies are available and the observations distinguish success, failure and uncertainty. A ZIP is optional when transport benefits from it.
