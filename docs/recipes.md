@@ -24,6 +24,20 @@ Run one transition at a time. Start evidence before the action and retain a visi
 
 This command route was exercised on an Android 17 Pixel during Wallet verification. Other Android/OEM versions need capability checks and actual observation. If unsupported, choose an authorized route that preserves the required state or report that trigger coverage is unavailable.
 
+## Announce an external action
+
+Use a brief Androperator toast when an offscreen ADB action would otherwise be unclear in a recording. For example, after starting capture and retaining the baseline, announce the intended theme transition, then execute it without leaving the tested page:
+
+```sh
+androperator toast "BART: change device theme to light" --duration short \
+  --device "$SERIAL" --operator-package "$OPERATOR_PACKAGE"
+adb -s "$SERIAL" shell cmd uimode night no
+```
+
+This text announces intent, not success. If the ADB command fails, preserve the failure rather than let the toast imply a completed transition. Read back and observe the actual theme/app state. Avoid adding a label operation between a timing-critical trigger and its outcome; it could delay or obscure the behavior being assessed. Use a pre-trigger announcement or omit it when necessary.
+
+Native durations are `short` or `long`, not milliseconds. Toasts replace the previous API toast and can be truncated or rate-limited. Cancel a task-owned toast with `androperator toast --cancel --device "$SERIAL" --operator-package "$OPERATOR_PACKAGE"` when it obstructs a later observation; cancellation acknowledgement is not proof of disappearance. Inspect current pixels before an unobstructed final capture. Use [capture labels](evidence.md#on-device-capture-labels) for persistent version/device context and their visibility limits.
+
 ## Force display rotation
 
 Read window-manager help and save the original user-rotation mode/value before changing it:

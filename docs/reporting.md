@@ -114,6 +114,8 @@ Use the [verification summary format](#verification-summary-format) at the top: 
 
 State how decisive video was inspected, including sampled-frame inspection rather than continuous playback when applicable. Put any resulting timing/transition limit with the media/results it affects, not only in a footer. Presentation must not make uninspected intervals look verified.
 
+When captures contain [on-device labels](evidence.md#on-device-capture-labels), identify them as BART/Operator annotations. An announced action or displayed version label does not replace observed results and build receipts. Do not present annotation text as app-generated content.
+
 Write a final blocked or partial HTML report even if the APK, target, prerequisites or capture fails, using available evidence and specific next actions. Do not leave a success-looking placeholder. Verify that the HTML opens locally and all report media/receipt references resolve inside the delivered directory; inspect rendered layout/media with available tools and state any unperformed visual check. Finish with the report's absolute path, assessed outcome and important remaining scope. Local delivery includes no GitHub upload, PR comment or reproduction package unless separately requested.
 
 ## Prototype and draft PR

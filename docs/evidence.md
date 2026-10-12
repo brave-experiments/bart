@@ -18,6 +18,31 @@ Keep useful action receipts and fresh hierarchies/screenshots. Correlation and t
 
 Uninspected media supports no visual conclusion. Tool completion does not establish behavior; the agent must assess the actual observations. If decisive evidence is missing, report the limit or perform a new scoped attempt, not a reconstructed transition.
 
+## On-device capture labels
+
+Use Androperator's diagnostic panel or native toast when it helps a reviewer understand a capture. These are agent-added annotations, not app UI or evidence that an action succeeded. Keep them out of the region being judged; omit them when they could obscure geometry, transient messages or a decisive transition. Preserve an unobstructed observation for visual measurements.
+
+The maintained [on-screen log API](https://docs.androperator.com/api/on-screen-logs/) supports live templates for foreground app package, version name/code, icon and device metadata. Use `--template`, not literal `--text`, for placeholders. An illustrative small label is:
+
+```sh
+androperator on-screen-log set --template 'BART capture
+{{foreground_app.package_name}} | {{foreground_app.version_name}}
+{{device.model}}' --anchor right --width-dp 240 --font-size-sp 10 \
+  --ttl-ms 120000 --device "$SERIAL" --operator-package "$OPERATOR_PACKAGE"
+```
+
+The supported key is `{{foreground_app.package_name}}`, not a generic topmost-window ID. The template follows sampled foreground app context, excluding keyboard/its own overlay; system panels may retain the last verified app, and metadata may initially be unavailable. Inspect the captured label and separately retain [build identity](builds.md); the label is not proof of source revision, instant focus history or installed-byte identity.
+
+Await separate set → capture → clear executions. Do not combine set, screenshot and clear into one action list: screenshot pixels may be acquired after the list finishes and the panel is cleared. `rendered: "true"` acknowledges drawing, and `operator_overlay_visible` reports panel state; neither proves it appears in the recorded pixels. Inspect the actual image/clip, retain the relevant receipts and clear the panel at the end:
+
+```sh
+androperator on-screen-log clear --device "$SERIAL" --operator-package "$OPERATOR_PACKAGE"
+```
+
+Use the [toast action contract](https://docs.androperator.com/api/actions/#show_toast) for brief action announcements, with `short` or `long` native duration. Toast submission does not wait for display/dismissal; Android can truncate or rate-limit it. If a toast is absent from a capture, do not claim it was visible. Its Operator icon is not the identity of the app being tested. See [the recipe](recipes.md#announce-an-external-action) for an ADB theme-change announcement.
+
+Clear/cancel only the current annotations created for the task. Both APIs replace their previous annotation for the selected Operator; resolve other controller use first. API/CLI syntax was checked against maintained docs and installed CLI help; capture inclusion and live template/toast behavior still require observation on the selected device. Missing labeling support is a usage-notes finding, not a reason to block otherwise useful QA.
+
 ## Measured observations
 
 When a measurable property helps investigate the reported behavior, retain the actual measurements alongside visible evidence. Useful properties include identified view bounds, distance to a relevant boundary, exact text/value, enabled state or observed transition timing. Use supported Androperator observations when available; document another authorized measurement source or fallback accurately.
