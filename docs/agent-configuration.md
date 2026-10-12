@@ -1,16 +1,16 @@
 # Agent configuration
 
-BART will use agents inside its skills to orchestrate Clawperator. A skill will
+BART will use agents inside its skills to orchestrate Androperator. A skill will
 supply the objective, instructions, target device, run directory and limits.
 The agent will choose actions from current observations and assess the result;
-Clawperator will execute device actions and return observations, screenshots
+Androperator will execute device actions and return observations, screenshots
 and recordings. BART will retain that evidence and validate the saved results.
 The [implementation plan](plan.md) describes how these skills will fit together.
 
-This follows Clawperator's [agent operating loop](https://docs.clawperator.com/quickstart/):
-observe, decide, then act. See its [host-agent guidance](https://docs.clawperator.com/host-agents/)
+This follows Androperator's [agent operating loop](https://docs.androperator.com/quickstart/):
+observe, decide, then act. See its [host-agent guidance](https://docs.androperator.com/host-agents/)
 for choosing between runtime skills, MCP and direct CLI use, and its
-[skill authoring guide](https://docs.clawperator.com/skills/authoring/) for building
+[skill authoring guide](https://docs.androperator.com/skills/authoring/) for building
 reusable workflows.
 
 Claude Code is BART's intended device-assessment runtime. The task runner also supports OpenCode. The model provider is a separate
@@ -119,7 +119,7 @@ For a skill-driven preparation:
    Require a valid, non-error result and validate the output package separately.
 
 The file-only profile supports work on saved evidence. It does not provide
-shell-based research or Clawperator device access. The task runner uses this same profile for Claude. It grants only the run
+shell-based research or Androperator device access. The task runner uses this same profile for Claude. It grants only the run
 directory; include required reference material in the instructions or copy it
 into the run as part of an authorized task. A path in the environment does not
 grant file access. Later skills must define and verify their own required tools. Do not remove restrictions just to make a failing check pass.

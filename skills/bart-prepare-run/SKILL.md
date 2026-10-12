@@ -16,7 +16,7 @@ permitted setup. The output is a validated preparation record, including blocker
 Resolve target and setup authority from the request or existing local configuration.
 If either is missing, ask at that boundary and continue file-only work. Preserve
 app data unless reset authority is explicit. Use one device throughout; never let
-ADB or Clawperator select implicitly. Record every setup action and its time.
+ADB or Androperator select implicitly. Record every setup action and its time.
 
 Brave Android package IDs:
 
@@ -47,34 +47,34 @@ run's `preparation/`. Supply those receipts to a new final preparation. Preserve
 initial attempts and failures. Never edit a frozen package or erase old evidence.
 
 - Save device model, Android/API, ABI and explicit serial from ADB read-only
-  metadata. Save Clawperator `doctor --device SERIAL --operator-package PACKAGE`
+  metadata. Save Androperator `doctor --device SERIAL --operator-package PACKAGE`
   JSON. Require exit zero and `criticalOk: true`; if it fails, retain diagnostics
-  and block Clawperator UI actions until setup is repaired. Do not use `--fix` or
+  and block Androperator UI actions until setup is repaired. Do not use `--fix` or
   upgrade as an implicit recovery action.
 - With setup authority, install the selected APK using the existing provisioning
   route or `adb -s SERIAL install -r APK`. Never uninstall to overcome signature
   conflicts. Pull the installed base APK and compare its hash to the selected APK;
   split packages need their own complete split identity receipts. Save package
-  metadata and observe the active foreground package through Clawperator.
+  metadata and observe the active foreground package through Androperator.
 - Observe Brave/Chromium versions, command line and variations at `brave://version`.
   Retain the fresh hierarchy and screenshots, then inspect them. Missing values
   remain null. Check the case's required settings, flags, locale and site state.
 - Establish Claude integration with a bounded child invocation that has explicit
-  Clawperator tools. Save its prompt, exact arguments, MCP configuration, native
+  Androperator tools. Save its prompt, exact arguments, MCP configuration, native
   output and device observation. The existing `agent-run` file-only profile and
   `doctor --claude` cannot pass this check. Use `--bare`, `--restricted`, `--disable-slash-commands`, and
-  `--strict-mcp-config` with an explicit Clawperator MCP server. Set `--tools ""`,
-  `--allowedTools mcp__clawperator__snapshot`, and `--permission-mode dontAsk`
+  `--strict-mcp-config` with an explicit Androperator MCP server. Set `--tools ""`,
+  `--allowedTools mcp__androperator__snapshot`, and `--permission-mode dontAsk`
   for a read-only snapshot probe. `--safe-mode` disables explicit MCP servers
   in Claude 2.1.267 and cannot establish this integration. No arbitrary shell access is needed.
   Use the installed Claude CLI help to confirm accepted flags. The child must
   return an observed device fact backed by a successful tool result, not just a
   `READY` reply. Retain failures and mark integration blocked when not established.
-- Check capture using a short Clawperator evidence video, finalize it, decode it
+- Check capture using a short Androperator evidence video, finalize it, decode it
   with ffprobe/ffmpeg and inspect frames including rotation. Preserve original
   clips and action receipts. Do not confuse Operator action recordings with video.
   A video start receipt is not proof of a usable finalized recording.
-  Clawperator 0.12.5 requires scrcpy 3.0+, ffprobe and FFmpeg 6.1+ with a
+  Androperator 1.2.0 requires scrcpy 3.0+, ffprobe and FFmpeg 6.1+ with a
   working libx264 encoder. Check the encoder capability probe before capture,
   record tool versions and preserve failed clips before retrying.
   Inspect landscape frames too. Rotation retains the initial canvas and can show

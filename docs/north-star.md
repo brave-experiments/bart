@@ -1,6 +1,6 @@
 # bart north star
 
-**bart means Brave Automated Runtime Tester.** Given a Brave Android issue or PR, an agent should exercise the relevant behavior through Clawperator and deliver evidence that lets a QA reviewer assess the conclusion.
+**bart means Brave Automated Runtime Tester.** Given a Brave Android issue or PR, an agent should exercise the relevant behavior through Androperator and deliver evidence that lets a QA reviewer assess the conclusion.
 
 ## Target invocation
 

@@ -1,8 +1,8 @@
 # Development setup
 
 Use Node.js 24.16.0 (`nvm install && nvm use` if you use nvm), npm, and Git.
-[`clawperator`](https://github.com/clawperator/clawperator) is pinned to 0.12.5,
-which requires Node >=24.0.0. BART currently invokes Clawperator only to read its version. From the repository root, install
+[`@androperator/cli`](https://github.com/androperator/androperator) is pinned to 1.2.0,
+which requires Node >=24.0.0. BART uses its CLI for version, compatibility, and readiness checks. From the repository root, install
 the locked dependencies:
 
 ```sh

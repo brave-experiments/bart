@@ -2,7 +2,7 @@
 
 Build toward the goal in [docs/north-star.md](docs/north-star.md). Use [docs/plan.md](docs/plan.md) for phase scope and completion conditions when implementing work. The project is in planning; `/bart-verify` does not exist yet.
 
-- Use Node.js and TypeScript. Claude Code directs runtime verification through Clawperator.
+- Use Node.js and TypeScript. Claude Code directs runtime verification through Androperator.
 - Keep GitHub access read-only and reference checkouts unchanged. External publication is deferred.
 - Tie behavioral conclusions to observed evidence. Preserve failed attempts and report missing coverage; successful commands alone do not prove a pass.
 - Keep machine-specific paths in local configuration and generated files under `BART_WORK_DIR`, with runs inside their cases.

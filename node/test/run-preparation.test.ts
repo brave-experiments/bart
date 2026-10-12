@@ -20,7 +20,7 @@ async function fixture() {
   const evidence = join(root, 'receipt.json');
   await writeFile(evidence, '{"observation":"fixture"}');
   const input = {
-    schemaVersion: 1, target: { deviceId: 'emulator-5554', packageId: 'com.brave.browser_nightly', operatorPackage: 'com.clawperator.operator' },
+    schemaVersion: 1, target: { deviceId: 'emulator-5554', packageId: 'com.brave.browser_nightly', operatorPackage: 'com.androperator.operator' },
     authority: { allowedActions: [], reset: 'not-authorized', basis: 'Test fixture' }, build: null as any, checks: {} as any,
     observations: { androidVersion: null as string | null, braveVersion: null as string | null, chromiumVersion: null as string | null, activePackage: null as string | null, settingsVariant: null as string | null, settings: [] as string[], performedActions: [] },
   };
