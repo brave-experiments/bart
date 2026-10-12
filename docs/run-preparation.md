@@ -45,20 +45,20 @@ video-fit Enabled, study assignments and flag checks after relaunch. Disabled
 and Enabled are successive conditions, never simultaneous starting conditions.
 Case prerequisites cover the frozen plan's remaining setup requirements. An
 integration pass requires a retained Claude invocation/profile and successful
-Clawperator observation from that child. A version command, doctor model reply,
+Androperator observation from that child. A version command, doctor model reply,
 or the file-only task runner cannot substitute for this check. Recording pass
 requires a finalized, decoded and visually inspected calibration clip, including
 rotation, without assessing the product behavior reserved for later phases.
 
 For Claude 2.1.267, use `--bare --restricted --disable-slash-commands
---strict-mcp-config` with an explicit Clawperator MCP configuration for this
-probe. Use `--tools "" --allowedTools mcp__clawperator__snapshot
+--strict-mcp-config` with an explicit Androperator MCP configuration for this
+probe. Use `--tools "" --allowedTools mcp__androperator__snapshot
 --permission-mode dontAsk` to permit only the snapshot call, and pass the device
 and Operator package explicitly in that call. `--safe-mode` disables even
 explicit MCP servers in this version. Retain native tool results and check the
 device observation; a successful process exit can still contain no tool call.
 
-Clawperator 0.12.5 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
+Androperator 1.2.0 recording requires scrcpy 3.0 or newer, ffprobe, and FFmpeg
 6.1 or newer with a working libx264 encoder. Check the encoder capability probe
 before capture. Record the selected tool versions and retain failed clips.
 Decode success does not prove usable capture. Inspect both rotation transitions

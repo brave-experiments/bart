@@ -16,11 +16,11 @@ to verify its fix for issue #57449.
 
 Failure to reproduce does not establish that an issue is invalid. Reports must state the tested conditions and distinguish reproduction, expected behavior, causal attribution, and missing evidence.
 
-Claude Code directs and assesses device workflows. Clawperator provides Android actions, observations, screenshots, and recordings.
+Claude Code directs and assesses device workflows. Androperator provides Android actions, observations, screenshots, and recordings.
 
 ## Implementation approach
 
-Use Node.js and TypeScript: one package, a small `bart` CLI, and Markdown skills. Choose a Node version compatible with the pinned Clawperator version. Prefer Clawperator's Node API where suitable; use its CLI when needed through a small integration module. No service, database, or general adapter framework is needed for the prototype.
+Use Node.js and TypeScript: one package, a small `bart` CLI, and Markdown skills. Choose a Node version compatible with the pinned Androperator version. Prefer Androperator's Node API where suitable; use its CLI when needed through a small integration module. No service, database, or general adapter framework is needed for the prototype.
 
 Code manages files, subprocesses, deadlines, run state, evidence capture, and result validation. Claude chooses actions from current observations and judges behavior. Runtime validation remains necessary for agent output and other external data.
 
@@ -40,7 +40,7 @@ whole BART repository, not just `node/`. Do not add a workspace framework.
 
 Add `./scripts/bart doctor` through a thin launcher for the Node.js/TypeScript
 CLI. Check the declared Node version requirement, reference checkout, work
-directory (explicitly configured), and availability and versions of Clawperator,
+directory (explicitly configured), and availability and versions of Androperator,
 GitHub CLI, `adb`, `ffmpeg`, `ffprobe`, and the selected agent (Claude Code by
 default, or OpenCode). Print clear results and fixes; exit nonzero when a
 required check fails. Tool availability does not prove authentication. Doctor
@@ -155,7 +155,7 @@ Proposed skill: `bart-develop-workflow`.
 
 Input: the case plan and prepared run.
 
-Claude explores through Clawperator, resolves current navigation and control locations, and develops a temporary agent-driven skill. Use the [com.android.settings.get-version-details-codex example](https://github.com/clawperator/clawperator-skills/blob/76bad61b5915e70dd53f38111eaf932c5ff92706/skills/com.android.settings.get-version-details-codex/SKILL.md) as a design reference, replacing programmatic `codex` invocation with programmatic `claude` invocation.
+Claude explores through Androperator, resolves current navigation and control locations, and develops a temporary agent-driven skill. Use the [Androperator Settings version details example](https://github.com/androperator/androperator/blob/7e0a13bb6adab388673fd4e7b53798d3073f0c7b/examples/skills/com.android.settings.get-version-details/SKILL.md) as a design reference, adapting its current-agent workflow for BART's Claude-directed checks.
 
 A thin launcher supplies instructions, target, run directory, and a bounded budget. Claude chooses actions from fresh observations. Helpers execute actions and retain evidence. The skill returns a structured result tied to evidence, which the launcher validates. Only one agent controls the target at a time.
 
@@ -202,7 +202,7 @@ Completion: the report's conclusions follow from inspectable evidence and match 
 
 After the first complete run, prove fresh-session reuse and try a contrasting case before adding the orchestrator. The scrim case (#39665) tests visual judgment. The new-tab race (#57997, fixed by #39462) tests timing limits and honest uncertainty; successful ordinary taps do not prove that the internal race window was exercised.
 
-Use Clawperator's release orchestrator as a coordination reference: establish identity, preserve each phase's checks, pass explicit outputs forward, and resume from the appropriate incomplete phase. Re-observe mutable device state on resume. An interrupted transition needs a new attempt.
+Use Androperator's release orchestrator as a coordination reference: establish identity, preserve each phase's checks, pass explicit outputs forward, and resume from the appropriate incomplete phase. Re-observe mutable device state on resume. An interrupted transition needs a new attempt.
 
 Unlike a release workflow, a product failure must proceed to assessment and reporting. Setup blockers also receive a diagnostic report. Never infer completion from an agent exit code alone.
 
@@ -228,8 +228,8 @@ publication.
 ## References and current gaps
 
 - Historical research: `.context/bart-handoff-2026-09-21/START-HERE.md` and its linked guide. This plan records the subsequent agreed implementation sequence.
-- Orchestrator reference: `.agents/skills/release-orchestrator/SKILL.md` in the Clawperator repository.
-- Agent-driven skill reference: [com.android.settings.get-version-details-codex in clawperator-skills](https://github.com/clawperator/clawperator-skills/tree/76bad61b5915e70dd53f38111eaf932c5ff92706/skills/com.android.settings.get-version-details-codex), pinned to commit `76bad61b5915e70dd53f38111eaf932c5ff92706`.
+- Orchestrator reference: `.agents/skills/release-orchestrator/SKILL.md` in the Androperator repository.
+- Agent-driven skill reference: [Androperator example skills](https://github.com/androperator/androperator/tree/7e0a13bb6adab388673fd4e7b53798d3073f0c7b/examples/skills), including [Settings version details](https://github.com/androperator/androperator/blob/7e0a13bb6adab388673fd4e7b53798d3073f0c7b/examples/skills/com.android.settings.get-version-details/SKILL.md), pinned to commit `7e0a13bb6adab388673fd4e7b53798d3073f0c7b`.
 - Environment convention: `.envrc.example` in the Bravebot repository.
 - QA references: the `qa-resources` repository and its `qa-resources.wiki` checkout.
 

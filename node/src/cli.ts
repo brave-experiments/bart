@@ -39,7 +39,7 @@ if (['check-all', 'check-signatures', 'check-reviewdog', 'pr-ready'].includes(ar
     process.exitCode = 1;
   } else {
     const device: DoctorDevice | undefined = serial === undefined ? undefined
-      : { serial, operatorPackage: operatorPackage ?? 'com.clawperator.operator' };
+      : { serial, operatorPackage: operatorPackage ?? 'com.androperator.operator' };
     process.exitCode = await doctor(checkModel, device);
   }
 } else if (args.length === 1 && args[0] === 'config') {
