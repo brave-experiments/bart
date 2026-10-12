@@ -26,29 +26,63 @@ Use per-check `pass`, `fail`, `blocked`, `inconclusive` and `not run`, with reas
 - Completed checks versus omitted/blocked checks.
 - App assessment versus publication status.
 
-A compact example, with placeholders rather than claimed results:
+## Verification summary format
+
+Start a QA verification report with the compact summary below, before detailed source analysis, attempt logs or the full check matrix. Use the same order in Markdown comments and local HTML. Keep the unofficial BART notice immediately beside the headline so the familiar QA format does not imply official sign-off.
+
+Use `#### <emoji> Verification <OUTCOME> using the following:` in Markdown, or an equivalent visible heading in HTML. Select the emoji and outcome from the assessment, not command completion:
+
+| Headline | Meaning |
+| --- | --- |
+| 🟢 Verification PASSED | The stated behavioral scope was exercised and met expectations. Qualify a scoped pass immediately; do not imply broader coverage. |
+| 🔴 Verification FAILED | An assessed behavior did not meet expectations. Preserve the failure even if another check passes or coverage is incomplete. |
+| 🟠 Verification BLOCKED | A prerequisite prevented a meaningful attempt of the stated scope. |
+| 🟡 Verification INCONCLUSIVE | An attempt was made, but observations cannot settle the stated behavioral expectation. |
+| 🟡 Verification PARTIAL | Some scope was assessed, with remaining selected checks unrun/blocked and no observed failure hidden by this label. Describe individual outcomes. |
+
+These non-pass emoji are BART's reporting convention; the linked examples establish the green-pass format. Always include the outcome text so color/emoji is not the only signal. A scoped pass can list unrequested historical or internal checks as limitations without claiming they were required for present-day QA.
+
+Below the headline, show a compact **Device/OS and Brave identity block**. In HTML, render a small two-column field/value table: Device/OS, Brave Build, Chromium, Channel/architecture, Revision/build relationship and Scope/conditions. Use actual observed values; include Android OS build when available and write unknown values with their limits rather than invent them. Avoid burying the tested version in a long provenance paragraph. Link full artifact/installation receipts from the detail section.
+
+Then use these visible section labels:
+
+- **STEPS:** numbered actions actually performed. Link the specific STR (steps to reproduce) or TP (test plan) used, plus material variations. “Follow STR/TP; verify” is enough only when that linked procedure describes the actual trigger; otherwise summarize the decisive actions, setup and observation. Record an ADB/API trigger explicitly when used.
+- **ACTUAL RESULTS:** short, concrete observed-behavior bullets. Tie results to tested variants and state important failure, uncertainty or omitted scope here, not only in a collapsed detail section.
+- **SCREENSHOT / SCREENCAST:** relevant labeled captures. Use a comparison table or responsive side-by-side media grid when variants benefit from it, such as Signed out / Signed in or System light / System dark. A single decisive clip is sufficient when it shows the scope clearly; do not require extra variants or duplicate media just to fill a table.
+
+An illustrative Markdown summary follows. Replace the outcome and placeholders from evidence; this is not a recorded pass:
 
 ```markdown
-## Automated BART assessment - not an official QA sign-off
+#### 🟢 Verification PASSED using the following:
 
-Scope/outcome: <checks assessed and outcome>
-Device/OS: <model / Android>
-Brave / Chromium: <versions>
-Build/source: <artifact and supported relationship to change>
-Conditions: <relevant flags, settings and setup>
+Automated BART assessment - not an official QA sign-off.
+Scope: <behavior/variants assessed; important limits>
 
-### Checks and actual results
-- <action>: expected <behavior>; observed <result>; <outcome>.
-- Not run/blocked: <scope and reason>.
+Device/OS:
+- <model / Android version / OS build when observed>
 
-### Evidence
-- <readable screenshot or decisive clip>
+Brave:
+- Build: <observed Brave version>
+- Chromium: <observed Chromium version / build type / architecture>
+- Channel: <observed channel>
+- Revision/build relationship: <observed revision; current Nightly containing fix>
 
-Limits: <coverage, trigger or causal uncertainty>
-Delivery: <returned locally, posted URL or blocker>
+#### STEPS:
+1. Follow <specific STR/TP link>; <material setup or variation>.
+2. <decisive action and observation, including actual trigger>.
+
+#### ACTUAL RESULTS:
+- Verified <concrete behavior under tested conditions>.
+- <failure, uncertainty or omitted scope where relevant>.
+
+#### SCREENSHOT / SCREENCAST:
+
+| <tested condition A> | <tested condition B> |
+|:-:|:-:|
+| <relevant image/video link> | <relevant image/video link> |
 ```
 
-For format references, see QA comments on [57872](https://github.com/brave/brave-browser/issues/57872#issuecomment-5607870886), [58827](https://github.com/brave/brave-browser/issues/58827#issuecomment-5637985692) and [58370](https://github.com/brave/brave-browser/issues/58370#issuecomment-5728374687). They are examples, not BART evidence. Do not apply official QA labels or sign-off merely because the assessment passes.
+The explicit headline/section layout comes from QA comments on [57449](https://github.com/brave/brave-browser/issues/57449#issuecomment-6005588417) and [57747](https://github.com/brave/brave-browser/issues/57747#issuecomment-5345309104). Other concise examples are [57872](https://github.com/brave/brave-browser/issues/57872#issuecomment-5607870886), [58827](https://github.com/brave/brave-browser/issues/58827#issuecomment-5637985692) and [58370](https://github.com/brave/brave-browser/issues/58370#issuecomment-5728374687). These are format/coverage references, not BART evidence. [QA resources](qa-resources.md) supplies optional regression context; do not apply official QA labels or sign-off merely because the assessment passes.
 
 ## Local HTML verification report
 
@@ -65,12 +99,14 @@ When the user requests HTML with local captures, create a dedicated attempt dire
 
 Create directories as their contents arise. Retain the selected APK under `builds/` or reference a local cache in its receipt; the report must identify its origin/hash/source relationship without requiring the binary just to read the report. Copy useful capture bundles into the attempt or retain them there initially, preserving original manifest hashes/relative contents. Reference Androperator's actual log files/IDs in usage notes rather than copy its entire logs. Keep ordinary task notes distinct from those tool-feedback notes.
 
-Make the first viewport show the PR/issue, unofficial automated-assessment notice, scoped outcome and key limits. Include:
+Use the [verification summary format](#verification-summary-format) at the top: emoji/outcome heading and unofficial notice, compact build/device table, STEPS, ACTUAL RESULTS and labeled media. Make the first viewport show the PR/issue, scoped outcome, key limits and tested identity; place the full check matrix, provenance and attempt history after this concise summary. Keep summary media useful and readable, with additional galleries below when needed. Include:
 
 - Tested build/device and supported relationship to the change, relevant setup and conditions, and local receipt links.
 - The checks actually performed, steps, expected/observed behavior, individual outcomes and omitted/blocked checks. Separate source/test assertions from observed app behavior.
 - A readable, labeled screenshot gallery and playable `<video controls>` clips where transitions matter, with download/open links and captions identifying build/condition/attempt. State missing decisive media; do not manufacture captures for skipped work.
 - Relevant failures, mixed results, coverage/causal limits and links to supporting receipts and session usage notes. Label imported reference media as reported behavior, not observations from this run.
+
+State how decisive video was inspected, including sampled-frame inspection rather than continuous playback when applicable. Put any resulting timing/transition limit with the media/results it affects, not only in a footer. Presentation must not make uninspected intervals look verified.
 
 Write a final blocked or partial HTML report even if the APK, target, prerequisites or capture fails, using available evidence and specific next actions. Do not leave a success-looking placeholder. Verify that the HTML opens locally and all report media/receipt references resolve inside the delivered directory; inspect rendered layout/media with available tools and state any unperformed visual check. Finish with the report's absolute path, assessed outcome and important remaining scope. Local delivery includes no GitHub upload, PR comment or reproduction package unless separately requested.
 

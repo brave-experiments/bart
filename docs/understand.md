@@ -12,6 +12,8 @@ Establish enough intended behavior, implementation context and conditions to cho
 
 Use the host's authorized GitHub read tools, normally `gh`. Consult current issue/PR view and API help; list comments/reviews separately when needed. Research access does not imply publication.
 
+For feature/regression expectations beyond the issue, consult the relevant [QA resources](qa-resources.md) section. Check actual platform/content and currency before adopting a check; avoid expanding a scoped request into a release-wide checklist.
+
 ## Source revisions and tests
 
 Read pinned local Git objects without switching a working checkout just to inspect history:

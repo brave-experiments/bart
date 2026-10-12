@@ -14,9 +14,11 @@ A source eligibility condition is not proof that a feature is active. Identify d
 
 For each useful check, identify the action, intended observation and evidence needed. Use current UI observations for navigation. Bound retries when timing or external state makes reproduction uncertain; record changed conditions rather than pick a favorable timing rule after seeing the outcomes.
 
+Preserve the reported trigger and foreground state. For theme/lifecycle checks, changing Android's system theme while the affected settings page stays open is different from changing Brave's Appearance setting and returning to that page. Determine which event matters from source, STR/TP and reference media; document an authorized ADB/API trigger when it is needed to avoid navigation that invalidates the check. Re-entry-only coverage cannot establish foreground restoration.
+
 Observe the result after the action. Do not manually rescue the transition being assessed and then attribute success to the app. Capture the transition and result using [evidence](evidence.md); a screenshot of a final state may not establish how it was reached.
 
-Select nearby regression checks proportionate to the change. A non-reproducing baseline weakens causal comparison. An external site change or inaccessible setup can limit historical verification. State which trigger/condition was established rather than imply an internal race was exercised by ordinary taps.
+Select nearby regression checks proportionate to the change, using applicable [QA resources](qa-resources.md) as leads. A non-reproducing baseline weakens causal comparison. An external site change or inaccessible setup can limit historical verification. State which trigger/condition was established rather than imply an internal race was exercised by ordinary taps.
 
 ## Complete the assessment
 
