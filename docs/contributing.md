@@ -6,7 +6,7 @@ Keep the collection small and usable by the current agent. Skill bodies lead wit
 
 - `.agents/skills/`: canonical entry points. `.claude/skills` and `CLAUDE.md` are relative links, not second instruction sources.
 - `docs/`: durable shared knowledge. Configuration/discovery belongs in setup, source research in understand, build identity in builds, capture/interpretation in evidence, delivery/outcomes in reporting, package/reuse semantics in reproduction.
-- External task directory: candidate test plans, research, notes, observed results, receipts and media. Keep those out of maintained docs except concise demonstrated capability status.
+- Task directory selected through setup, either external or ignored `.work/`: candidate test plans, research, notes, observed results, receipts and media. Keep those out of maintained docs except concise demonstrated capability status.
 - `scripts/`: a helper only after repeated mechanical work demonstrates its need. Use Node.js/TypeScript, explicit inputs and meaningful behavior/failure checks. No required runtime package or custom documentation checker exists.
 
 ## Check a change

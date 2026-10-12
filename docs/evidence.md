@@ -20,13 +20,13 @@ Uninspected media supports no visual conclusion. Tool completion does not establ
 
 ## Retain and share
 
-Store notes/attempts in the external directory selected through [setup](setup.md#task-artifacts). Keep relative links and existing Androperator receipts where useful; record relevant conditions/source identity using [builds](builds.md). For remote device hosts, retrieve artifacts through the supported transport; a host-local path is not automatically readable by the agent or reviewer.
+Store notes/attempts in the task directory selected through [setup](setup.md#task-artifacts). Keep relative links and existing Androperator receipts where useful; record relevant conditions/source identity using [builds](builds.md). For remote device hosts, retrieve artifacts through the supported transport; a host-local path is not automatically readable by the agent or reviewer.
 
 [Reporting](reporting.md#publication) owns authorized publication, destination selection and accessible links. Keep raw evidence local and select useful, task-appropriate material for delivery. Package historical results separately from future instructions using [reproduction](reproduction.md).
 
 ## Androperator usage notes
 
-When using Androperator, maintain one `androperator-usage-notes.md` per agent session in the external task directory. A single session can keep it at the task root; use session-specific subdirectories when several sessions share a task. Resume the same notes for a continued session and preserve earlier entries. Start with the goal, session identifier or start time, CLI/Operator versions and transport; update it as useful findings occur rather than reconstruct them only at the end.
+When using Androperator, maintain one `androperator-usage-notes.md` per agent session in the task directory. A single session can keep it at the task root; use session-specific subdirectories when several sessions share a task. Resume the same notes for a continued session and preserve earlier entries. Start with the goal, session identifier or start time, CLI/Operator versions and transport; update it as useful findings occur rather than reconstruct them only at the end.
 
 Record actionable feedback about Androperator: missing or limited API capabilities, documentation gaps, unexpected results, feature requests and workarounds. For each finding, include:
 

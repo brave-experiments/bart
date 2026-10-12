@@ -36,13 +36,13 @@ The default config location is relative to the real BART skill source, independe
 | Setting | Meaning |
 | --- | --- |
 | `workspace.brave_core_dir` | Default Core checkout root, normally `<workspace>/src/brave`. |
-| `workspace.work_dir` | Optional external root for task notes, downloads and evidence. |
+| `workspace.work_dir` | Optional root for task notes, downloads and evidence, including BART's ignored `.work/`. |
 | `publication.qa.repository`, `.destination` | Default QA/investigation posting repository and item type. |
 | `publication.pr.repository`, `.destination` | Independent prototype/PR posting repository and item type. |
 
 Choose the checkout from explicit task selection, then config, then cwd if it is inside Core. Check repository root/content (including Core's `package.json`) and instructions/status; accept fork remotes. If configured checkout differs from cwd, state the selected checkout before product writes. Ambiguity or invalid selected paths need correction, not silent substitution.
 
-Choose the task artifact directory from an explicit task directory, then configured work root. Select a suitable external directory when files are needed and neither exists; ask only if the host/request leaves that choice unresolved. Keep it outside BART and the selected Core/Chromium source trees. A text-only task does not need one. Source changes and build outputs stay in the build tool's normal workspace paths.
+Choose the task artifact directory from an explicit task directory, then configured work root. Select a suitable directory when files are needed and neither exists; ask only if the host/request leaves that choice unresolved. An external root or BART's ignored `.work/` is supported. Keep artifacts outside tracked source and the selected Core/Chromium source trees; check ignore coverage before writing inside BART. A text-only task does not need one. Source changes and build outputs stay in the build tool's normal workspace paths.
 
 Missing config is supported. Use available checkout/device context and create/select artifacts only when needed. Resolve publication settings only for a publication request. A missing explicitly selected file or malformed relevant setting needs a clear correction; continue independent work with known inputs. Do not rewrite local config as incidental task work. BART configuration does not configure the host's credentials, provider or Androperator transport.
 
@@ -77,5 +77,7 @@ Create only files that help the work. A suggested layout under the selected root
 ```
 
 Notes can begin with the objective, important sources, selected targets and next action. Keep relative evidence links and existing tool receipts where useful. Separate attempts when source/conditions change their interpretation. No required case/run schema, first-pass copy or automatic cleanup exists. Historical notes can guide continuation, but mutable device state needs fresh observation.
+
+For a requested local HTML verification report, use a dedicated attempt directory and the [HTML delivery guidance](reporting.md#local-html-verification-report). Keep its captured media and supporting receipts locally so the directory remains readable when moved. This format is requested output, not a prerequisite for other tasks.
 
 For sessions using Androperator, keep the [usage notes](evidence.md#androperator-usage-notes) alongside task artifacts. Use a session-specific subdirectory if multiple sessions share the task. Androperator's own logs remain in its configured location; the notes link to them and capture useful API/docs feedback and fallbacks.

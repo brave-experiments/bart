@@ -10,6 +10,8 @@ For a retrieved APK, retain relevant artifact/release/job URL, retrieval time, A
 
 ### Existing release assets
 
+For a merged PR, follow release-bot comments such as “Released in v…” to the linked `brave-browser` release and inspect its actual assets before asking the user for an APK. A release mentioned on the PR can be the intended containing-release route even when no binary is linked directly in the PR body. Confirm source relationship and device compatibility; do not call it an exact PR-head build. If that release lacks a suitable APK, investigate supported alternatives and report the specific gap.
+
 Inspect actual assets rather than construct a guessed filename:
 
 ```sh
@@ -17,7 +19,7 @@ gh release view "$TAG" --repo brave/brave-browser --json url,tagName,assets
 gh release download "$TAG" --repo brave/brave-browser --pattern "$ASSET" --dir "$DOWNLOAD_DIR"
 ```
 
-Select the tag/asset and new external download directory before running the download. Resolve missing APKs, unsupported ABI or digest mismatch explicitly. A later containing release can support retrospective assessment when its relationship is established and the scope permits it; label that assessment accordingly.
+Select the tag/asset and new task download directory before running the download. Resolve missing APKs, unsupported ABI or digest mismatch explicitly. A later containing release can support retrospective assessment when its relationship is established and the scope permits it; label that assessment accordingly.
 
 ### Existing PR builds
 

@@ -48,6 +48,30 @@ Delivery: <returned locally, posted URL or blocker>
 
 For format references, see QA comments on [57872](https://github.com/brave/brave-browser/issues/57872#issuecomment-5607870886), [58827](https://github.com/brave/brave-browser/issues/58827#issuecomment-5637985692) and [58370](https://github.com/brave/brave-browser/issues/58370#issuecomment-5728374687). They are examples, not BART evidence. Do not apply official QA labels or sign-off merely because the assessment passes.
 
+## Local HTML verification report
+
+When the user requests HTML with local captures, create a dedicated attempt directory containing `report.html` and the assets/receipts that support it. Use embedded CSS and minimal optional JavaScript; no CDN, remote font or hosted app media should be required to read the assessment. The report plus its relative local assets is the portable deliverable; embedding large media into one file is unnecessary.
+
+```text
+<attempt>/
+  report.html
+  notes.md
+  androperator-usage-notes.md
+  builds/                 # artifact selection/identity and installation receipts
+  evidence/               # retained capture bundles, original images/video and receipts
+```
+
+Create directories as their contents arise. Retain the selected APK under `builds/` or reference a local cache in its receipt; the report must identify its origin/hash/source relationship without requiring the binary just to read the report. Copy useful capture bundles into the attempt or retain them there initially, preserving original manifest hashes/relative contents. Reference Androperator's actual log files/IDs in usage notes rather than copy its entire logs. Keep ordinary task notes distinct from those tool-feedback notes.
+
+Make the first viewport show the PR/issue, unofficial automated-assessment notice, scoped outcome and key limits. Include:
+
+- Tested build/device and supported relationship to the change, relevant setup and conditions, and local receipt links.
+- The checks actually performed, steps, expected/observed behavior, individual outcomes and omitted/blocked checks. Separate source/test assertions from observed app behavior.
+- A readable, labeled screenshot gallery and playable `<video controls>` clips where transitions matter, with download/open links and captions identifying build/condition/attempt. State missing decisive media; do not manufacture captures for skipped work.
+- Relevant failures, mixed results, coverage/causal limits and links to supporting receipts and session usage notes. Label imported reference media as reported behavior, not observations from this run.
+
+Write a final blocked or partial HTML report even if the APK, target, prerequisites or capture fails, using available evidence and specific next actions. Do not leave a success-looking placeholder. Verify that the HTML opens locally and all report media/receipt references resolve inside the delivered directory; inspect rendered layout/media with available tools and state any unperformed visual check. Finish with the report's absolute path, assessed outcome and important remaining scope. Local delivery includes no GitHub upload, PR comment or reproduction package unless separately requested.
+
 ## Prototype and draft PR
 
 Read the target Core repository's current template and relevant review practices. Explain the problem, focused change, rationale, issue relationship, actual validation and known prototype limits. Keep tests with the behavior they establish and report missing runtime coverage.
