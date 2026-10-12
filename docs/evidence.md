@@ -70,7 +70,7 @@ If comparing builds, keep relevant state and geometry comparable and identify ea
 
 Store notes/attempts in the task directory selected through [setup](setup.md#task-artifacts). Keep relative links and existing Androperator receipts where useful; record relevant conditions/source identity using [builds](builds.md). For remote device hosts, retrieve artifacts through the supported transport; a host-local path is not automatically readable by the agent or reviewer.
 
-[Reporting](reporting.md#publication) owns authorized publication, destination selection and accessible links. Keep raw evidence local and select useful, task-appropriate material for delivery. Package historical results separately from future instructions using [reproduction](reproduction.md).
+[Reporting](reporting.md#publication) owns authorized publication, destination selection and accessible links. Follow its [report privacy guidance](reporting.md#assessment-and-investigation): physical-device serials and other PII must be excluded from reports and shareable captures/receipts. Keep originals private and create clearly labeled redacted delivery copies without obscuring the behavior being assessed. Package historical results separately from future instructions using [reproduction](reproduction.md).
 
 ## Androperator usage notes
 

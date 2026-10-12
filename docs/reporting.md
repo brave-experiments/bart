@@ -14,6 +14,8 @@ An automated assessment must state: **Automated BART assessment - not an officia
 
 Include relevant device/Android, Brave/Chromium versions, Androperator CLI version used, actual build/source relationship, starting conditions, checks performed, intended versus observed results, useful evidence and omissions. An investigation also names the source-backed mechanism/hypothesis, conflicts, next action and limits. Do not confuse reports by others with observations from this attempt.
 
+Never include personally identifying information in bug reports, QA assessments, PR descriptions or their shared attachments. Identify a physical device by make/model and Android version/build, not its serial number. Redact serials from command examples, receipts, screenshots, videos and other report-linked assets; use `<device-serial>` in commands. Exact serials may remain in ignored local configuration or private execution receipts needed to target the device, but must not appear in the report or its shareable assets, including local HTML reports. Inspect selected content before delivery and retain original diagnostic evidence privately.
+
 For normal QA, describe current-Nightly behavior on the actual tested version. Keep a PR's first-containing release as source context, not a claimed tested build. Absence of a historical control limits causal attribution; it does not itself make present-day behavioral verification incomplete.
 
 Use per-check `pass`, `fail`, `blocked`, `inconclusive` and `not run`, with reasons. An overall `partial` assessment means coverage is incomplete. Preserve mixed outcomes and relevant failures. Keep these distinctions explicit:
