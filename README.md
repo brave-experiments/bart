@@ -6,6 +6,25 @@ The current agent reasons, edits code and assesses results. [Androperator](https
 
 ## Use an ordinary request
 
+Use the same entry point for autonomous execution and developer collaboration. A feature description, design reference or app observation can start the work; a GitHub issue or PR is optional.
+
+### Develop a feature locally
+
+```text
+/brave-core-bart Implement <feature description> in this Brave Android checkout.
+Use emulator-5554. Build, install and inspect the result locally.
+Keep everything local; do not push or create a PR.
+```
+
+### Discuss an approach before implementation
+
+```text
+/brave-core-bart Help me develop <feature description>.
+Inspect the relevant source and discuss the approach with me before editing.
+```
+
+### Investigate an issue or verify a PR
+
 ```text
 /brave-core-bart look at https://github.com/brave/brave-browser/issues/59445.
 Prototype a fix in a draft PR
@@ -16,6 +35,8 @@ Prototype a fix in a draft PR
 ```
 
 Understanding, acting and reporting are capabilities, not ordered phases. Start with the code or app, return to research when an observation raises questions, and revise the approach as needed.
+
+The agent continues authorized implementation and validation without routine approval pauses. A developer can request a discussion checkpoint or contribute code/app observations during the work. Local development finishes with the implementation, requested checks/runtime inspection and a concise summary; publication and reproduction packages remain separately scoped. See the [developer quick start](docs/setup.md#developer-quick-start).
 
 ## Skills
 

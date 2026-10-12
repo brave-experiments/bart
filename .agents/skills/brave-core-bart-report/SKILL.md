@@ -5,7 +5,7 @@ description: Report Brave Android assessments, investigations and prototypes, or
 
 # Report Brave Android work
 
-Produce the requested result from intended behavior, build/source identity, actual observations and retained evidence. Select an assessment, investigation summary, prototype demonstration or draft PR using [reporting](../../../docs/reporting.md). Resolve links from this skill's real source directory through any discovery symlink.
+Produce the requested result from intended behavior, build/source identity, actual observations and retained evidence. Select a local development summary, assessment, investigation summary, prototype demonstration or draft PR using [reporting](../../../docs/reporting.md). Resolve links from this skill's real source directory through any discovery symlink.
 
 Use current conversation and saved evidence. Inspect decisive media using [evidence guidance](../../../docs/evidence.md); a referenced file or successful command is not a behavior assessment. Keep observations, attribution, coverage and delivery status distinct. Missing footage remains missing; do not invent a transition or rerun the app just to regenerate prose.
 

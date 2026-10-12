@@ -19,6 +19,14 @@ Claude Code also supports session-local `--add-dir <bart-checkout>` discovery. S
 
 In a fresh normal session started in Core, confirm that the main skill appears and a linked doc can be read. Resolve doc links relative to the **real skill source**, not cwd or the symlink's parent. `../../../docs/builds.md` from a canonical skill resolves inside BART. If a host cannot follow the links, grant its supported additional-directory access or use the real source paths. Do not copy isolated skill files and strand their docs. Loading these instructions does not launch another agent.
 
+## Developer quick start
+
+Use your existing build-capable Core workspace and normal coding-agent session. Make the BART skills discoverable as above; have Androperator and an explicit device/emulator available when you want app inspection. Follow the [build guidance](builds.md) for your current Core environment rather than install a separate BART build system.
+
+Invoke `/brave-core-bart` with the feature description and desired endpoint: implement locally, discuss before editing, inspect an existing change, or deliver a draft PR. For local build/install work, name the checkout (or explicitly use the current one) and device and include those operations in the request. There is no requirement to provide a GitHub URL, planning transcript or publication access. The maintained skills/docs supply shared context; the feature request and current checkout/app supply task context.
+
+Optional workspace defaults below can save repeated paths. Publication settings are unnecessary for a local-only task. [Develop](develop.md#feature-intent-and-developer-collaboration) covers feedback and collaboration; choosing a local endpoint does not reduce autonomous execution or required observation checks.
+
 ## Configuration
 
 Optional `<bart-checkout>/config.toml` supplies defaults. Start from [config.example.toml](../config.example.toml) without overwriting an existing local file. Omit unused fields. The current agent reads this small TOML file through its host tools; there is no BART config command.

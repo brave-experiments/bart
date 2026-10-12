@@ -1,13 +1,15 @@
 ---
 name: brave-core-bart
-description: Investigate, develop or verify Brave Android using source and the running app.
+description: Develop Brave Android features, investigate bugs or verify changes using source and the running app.
 metadata:
   opencode/slash: "true"
 ---
 
 # Brave Android work
 
-Complete the user's requested explanation, investigation, prototype, fix or verification using the current agent's tools. Assess actual observations and deliver the requested result, including unresolved blockers or coverage limits. Stay within review-only or draft-only scope when requested.
+Complete the user's requested feature, explanation, investigation, prototype, fix or verification using the current agent's tools. Assess actual observations and deliver the requested result, including unresolved blockers or coverage limits. Stay within review-only, discussion-before-editing or draft-only scope when requested.
+
+Accept a plain feature description, design reference, source context or app observation without requiring an issue/PR. Continue authorized implementation and validation autonomously unless the user requests a checkpoint or a consequential choice/blocker needs input. Use the same guidance for local developer collaboration; [develop](../../../docs/develop.md) explains how to incorporate feedback without adding routine approval gates.
 
 Resolve links from this skill's real source directory, following discovery symlinks. BART's root is three directories above it. Use [setup and configuration](../../../docs/setup.md#configuration) to select the checkout, working root and any publication defaults. Missing config is supported. Read the selected Core checkout's own instructions before product work. If development posting would substitute a preview for a requested PR, state that mismatch early and follow [delivery scope](../../../docs/reporting.md#delivery-scope).
 
@@ -30,7 +32,7 @@ For Android actions, use installed `androperator-agent-orientation` when unfamil
 
 ## Finish the requested work
 
-Use `brave-core-bart-report` for an assessment, investigation summary, prototype demonstration or draft PR. Read its [instructions](../brave-core-bart-report/SKILL.md) directly if native loading is unavailable. An ordinary verification ends with an assessment, not automatic posting or code changes.
+For local development, return the concise [development summary](../../../docs/reporting.md#local-development-summary). Use `brave-core-bart-report` when an assessment, saved report, prototype demonstration or draft PR is useful/requested. Read its [instructions](../brave-core-bart-report/SKILL.md) directly if native loading is unavailable. An ordinary verification ends with an assessment, not automatic posting or code changes.
 
 Use `brave-core-bart-reproduce` when saving adaptive instructions is requested or useful. Its [instructions](../brave-core-bart-reproduce/SKILL.md) distinguish package creation, reuse testing and sharing. Do not add those tasks to every investigation.
 

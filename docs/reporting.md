@@ -2,6 +2,12 @@
 
 Deliver the result the user requested, with conclusions supported by inspectable observations. Select the form and depth for the audience; do not turn every task into a broad QA report.
 
+## Local development summary
+
+A local feature/prototype/fix request normally finishes with a concise session summary: what changed and where, checks/tests run, actual build/device and observed app behavior when exercised, evidence locations and remaining limits. State requested work that remains blocked or unrun. Save a separate document only when useful or requested.
+
+Local delivery does not require a QA-style assessment, published media, PR or reproduction package. Keep the same evidence standards and build-identity distinctions for behavior claims. Follow request/Core/host conventions for local commits; keep a local-only task local even if publication defaults exist. If a formal QA assessment is requested, use the form below.
+
 ## Assessment and investigation
 
 An automated assessment must state: **Automated BART assessment - not an official QA sign-off.** Use Brave QA's concise device/build, steps, actual results and media conventions.
@@ -54,6 +60,7 @@ For a real PR, select the base repository/branch and actual head repository/bran
 
 | Request | Completion |
 | --- | --- |
+| Develop locally | Focused implementation, requested checks/build/install/runtime inspection and a concise local summary, or specific blockers/limits. No automatic push or publication. |
 | Verify | Return an evidence-backed assessment in the session or useful saved document. No automatic posting, edits or package. |
 | Verify and post findings | Assessment plus publication at the resolved destination with accessible evidence and confirmed URL, or a precise delivery blocker. |
 | Prototype in a draft PR | Warranted change/validation and a real draft PR; if no change is warranted, report that supported conclusion. |

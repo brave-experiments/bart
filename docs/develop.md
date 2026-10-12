@@ -1,6 +1,14 @@
 # Develop through source and app
 
-Complete the requested prototype or fix with a focused change and inspect what it does in the running app. Continue the inspect → edit → build/install → observe → revise loop as evidence requires; return to [understanding](understand.md) whenever assumptions change.
+Complete the requested feature, prototype or fix with a focused change and inspect what it does in the running app when runtime validation is in scope. Continue the inspect → edit → build/install → observe → revise loop as evidence requires; return to [understanding](understand.md) whenever assumptions change.
+
+## Feature intent and developer collaboration
+
+Start from the supplied description, design, source or app context; no issue/PR is required. Establish intended user-visible behavior and relevant constraints. Inspect source and existing patterns to resolve routine implementation choices. Ask about consequential product ambiguity that the available evidence cannot settle, while continuing independent investigation.
+
+Default to completing authorized work, including requested build/install/runtime inspection. Do not stop at a proposed approach or request approval for each edit or iteration. If the developer asks to discuss the approach before editing, honor that checkpoint; resume implementation when it is authorized. Local-only requests use the same development loop and evidence standards as autonomous tasks, with [local delivery](reporting.md#local-development-summary).
+
+Incorporate developer feedback, supplied screenshots and manual checks as context, identifying developer-reported observations separately from agent-inspected evidence. The developer may navigate the app or edit code between iterations. Take turns controlling the device; reacquire current UI after handoff and inspect changed source before acting. Resolve conflicting writes instead of overwriting them. Collaboration does not require a separate mode or a human confirmation at every step.
 
 ## Choose a reviewable change
 
@@ -8,7 +16,7 @@ Select the checkout using [setup](setup.md#configuration), read its instructions
 
 Use relevant Core docs/best practices and ownership patterns. Prefer an existing Brave-owned seam over unnecessary Chromium patches or a broad refactor. For Android UI work, trace the current resource/theme/context and callbacks before choosing the change. Follow Core's current source-registration rules when adding files.
 
-Keep the PR boundary focused on one meaningful behavior, with tests appropriate to its risk. Separate mechanical cleanup only when it improves review. If runtime/source evidence shows no change is warranted, explain that finding rather than invent a fix.
+Keep the change focused on one meaningful behavior, with tests appropriate to its risk, whether it stays local or becomes a PR. Separate mechanical cleanup only when it improves review. If runtime/source evidence shows no change is warranted, explain that finding rather than invent a fix.
 
 ## Iterate and validate
 
@@ -22,4 +30,4 @@ Builds, installs, syncs and repairs follow the current task's checkout/device au
 
 ## Deliver
 
-Follow Core/host commit rules and commit only the intended source change and relevant tests. [Reporting](reporting.md) owns draft-PR descriptions, validation details, media and publication scope. A prototype can reveal remaining defects; report them. A truthful failed prototype does not prove a fix, but can demonstrate useful development work.
+Follow the request and Core/host commit rules; any commit contains only the intended source change and relevant tests. [Reporting](reporting.md) defines the lightweight local summary and requested reports/PRs. Local-only work does not imply a QA document, posting, push or reproduction package. A prototype can reveal remaining defects; report them. A truthful failed prototype does not prove a fix, but can demonstrate useful development work.
