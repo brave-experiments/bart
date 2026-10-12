@@ -22,12 +22,25 @@ Uninspected media supports no visual conclusion. Tool completion does not establ
 
 Use Androperator's diagnostic panel or native toast when it helps a reviewer understand a capture. These are agent-added annotations, not app UI or evidence that an action succeeded. Keep them out of the region being judged; omit them when they could obscure geometry, transient messages or a decisive transition. Preserve an unobstructed observation for visual measurements.
 
-The maintained [on-screen log API](https://docs.androperator.com/api/on-screen-logs/) supports live templates for foreground app package, version name/code, icon and device metadata. Use `--template`, not literal `--text`, for placeholders. An illustrative small label is:
+### Default panel placement
+
+For English/LTR QA captures, start with the panel anchored to the right and text right-aligned, near the vertical middle of the usable screen. Browser controls and common bug targets are often at the top/bottom; a compact middle-right label can leave them visible. This is a starting placement, not a guarantee of non-occlusion. Move, reduce or omit it when the assessed content occupies that region; consider the actual layout for RTL or other UI configurations.
+
+Keep the translucent background confined to the panel, only wide enough for readable debug content. Start around 200 dp wide with 10 sp text and an 8 dp edge inset; use short lines, separate package and version, then adjust width to avoid clipping/truncation. Do not extend the annotation background across the display or imitate a full-screen app scrim. Do not reduce text below readability merely to fit it.
+
+The current API exposes `--top-offset-dp`, not a vertical-center anchor. Compute an approximate offset from current usable display geometry and panel height, excluding system-bar/cutout insets: `(usableHeightPx - panelHeightPx) / (2 * densityScale)` where `densityScale = densityDpi / 160`. Round to an integer and respect the supported offset range. Estimate height for initial placement, then use the returned physical-pixel `bounds` and an inspected screenshot to refine it. Do not pass native pixels directly as dp or hard-code one phone's midpoint for every device. Re-evaluate after rotation, display-size or font-scale changes; the API retains logical offsets rather than automatically re-centering the panel.
+
+Before assessed recording, inspect an annotated baseline for readability, truncation, overlap with the app and possible toast region. Reposition before the trigger, not between a timing-critical action and its result. Clear the panel for an unobstructed final observation when needed. If reliable placement needs an unavailable API, record that gap in usage notes rather than invent a center flag.
+
+The maintained [on-screen log API](https://docs.androperator.com/api/on-screen-logs/) supports live templates for foreground app package, version name/code, icon and device metadata. Use `--template`, not literal `--text`, for placeholders. With `PANEL_TOP_DP` calculated for the current display, an illustrative small label is:
 
 ```sh
 androperator on-screen-log set --template 'BART capture
-{{foreground_app.package_name}} | {{foreground_app.version_name}}
-{{device.model}}' --anchor right --width-dp 240 --font-size-sp 10 \
+{{foreground_app.package_name}}
+{{foreground_app.version_name}} | {{device.model}}' \
+  --anchor right --text-align right --top-offset-dp "$PANEL_TOP_DP" \
+  --edge-offset-dp 8 --width-dp 200 --font-size-sp 10 \
+  --background-color '#B3000000' \
   --ttl-ms 120000 --device "$SERIAL" --operator-package "$OPERATOR_PACKAGE"
 ```
 
