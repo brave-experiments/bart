@@ -67,6 +67,7 @@ Create only files that help the work. A suggested layout under the selected root
 ```text
 <task-name>/
   notes.md
+  androperator-usage-notes.md
   builds/
   attempts/<label>/
   report.md
@@ -76,3 +77,5 @@ Create only files that help the work. A suggested layout under the selected root
 ```
 
 Notes can begin with the objective, important sources, selected targets and next action. Keep relative evidence links and existing tool receipts where useful. Separate attempts when source/conditions change their interpretation. No required case/run schema, first-pass copy or automatic cleanup exists. Historical notes can guide continuation, but mutable device state needs fresh observation.
+
+For sessions using Androperator, keep the [usage notes](evidence.md#androperator-usage-notes) alongside task artifacts. Use a session-specific subdirectory if multiple sessions share the task. Androperator's own logs remain in its configured location; the notes link to them and capture useful API/docs feedback and fallbacks.

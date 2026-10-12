@@ -30,6 +30,8 @@ Load only the guidance needed for the next decision:
 
 For Android actions, use installed `androperator-agent-orientation` when unfamiliar and `androperator-agent-control-loop` for adaptive execution. Their maintained [host guidance](https://docs.androperator.com/host-agents/) is the fallback. The current agent chooses actions and judges results; no child agent or saved runtime skill is needed.
 
+During Androperator work, maintain per-session [usage notes](../../../docs/evidence.md#androperator-usage-notes) for API/docs gaps, feature requests and concrete fallbacks such as `adb`, referencing existing logs rather than duplicating them.
+
 ## Finish the requested work
 
 For local development, return the concise [development summary](../../../docs/reporting.md#local-development-summary). Use `brave-core-bart-report` when an assessment, saved report, prototype demonstration or draft PR is useful/requested. Read its [instructions](../brave-core-bart-report/SKILL.md) directly if native loading is unavailable. An ordinary verification ends with an assessment, not automatic posting or code changes.
