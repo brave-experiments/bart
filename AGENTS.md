@@ -1,27 +1,21 @@
-# Working on bart
+# Working on BART
 
-Build toward the goal in [docs/north-star.md](docs/north-star.md). Use [docs/plan.md](docs/plan.md) for phase scope and completion conditions when implementing work. The project is in planning; `/bart-verify` does not exist yet.
+Build toward [the project goal](docs/north-star.md) and track implemented and demonstrated capabilities in [the plan](docs/plan.md). BART supplies skills to the current coding agent. Use Androperator's maintained guidance for Android execution and Core's instructions for product work.
 
-- Use Node.js and TypeScript. Claude Code directs runtime verification through Androperator.
-- Keep GitHub access read-only and reference checkouts unchanged. External publication is deferred.
-- Tie behavioral conclusions to observed evidence. Preserve failed attempts and report missing coverage; successful commands alone do not prove a pass.
-- Keep machine-specific paths in local configuration and generated files under `BART_WORK_DIR`, with runs inside their cases.
-- Name branches and worktrees for the work they contain. Do not include coding agent names anywhere in those names, regardless of separator. For example, neither `claude/feature-name` nor `claude-feature-name` is allowed.
-- Create all worktrees under `.worktrees/` in the main repository checkout.
+- Make instructions outcome-led and proportional. Understanding, acting and reporting can alternate; they are not required stages. Keep detailed conditional guidance in its owning document and link to it from skills.
+- Follow the host's and selected checkout's authority rules. Skill discovery and local configuration grant no new permissions. Continue authorized work without repeated confirmation; resolve real target, scope or local-work conflicts.
+- Tie behavior claims to inspected observations. Evidence conventions belong in [evidence](docs/evidence.md); outcome and delivery semantics belong in [reporting](docs/reporting.md).
+- Keep machine paths in ignored `config.toml`. Put task notes, downloaded APKs and evidence in an external working directory selected using [setup](docs/setup.md#configuration). Source changes and build tools use the selected Core workspace's own paths.
+- Put durable shared knowledge in `docs/`, canonical skills in `.agents/skills/`, and any concrete mechanical helper in `scripts/` using Node.js/TypeScript. Add executable tooling only for a demonstrated need.
+- Keep investigation notes, session reports and case-specific test plans outside this repository's durable docs. Use historical observations as context, not current device state.
+- Name branches and worktrees for their work, without agent/model attribution. Create BART worktrees under `.worktrees/` in the main checkout.
 
-## Documentation
+## Writing and checks
 
-- Put only durable documentation in `docs/`, such as setup instructions, design decisions, and maintained project plans.
-- Put non-durable information, including investigation notes, temporary findings, session reports, and execution evidence, under `BART_WORK_DIR`. Keep run-specific information inside its case/run directory.
-
-## Writing
-
-Use plain English in documentation, reports, commit messages, and user-facing responses. Prefer short, familiar words and active voice. Cut words that add no meaning and avoid stock figures of speech. Preserve facts, qualifications, and technical terms when simpler wording would lose precision. Explain what changed and why without achievement language.
+Use plain English, active voice and one source line per paragraph/list item. Preserve facts, qualifications and technical terms. Avoid generic process reminders and duplicated rules. See [contributing](docs/contributing.md) for checks appropriate to a skills collection.
 
 ## Commits
 
-- Use Conventional Commits, such as `feat:`, `fix:`, and `docs:`.
-- Commit completed, checked work at logical breakpoints. Stage only files that belong to the change.
-- Add new commits for changes. Do not amend or otherwise rewrite existing commits unless the user explicitly asks.
-- Attempt signed commits first. If signing cannot complete because the user is unavailable, an unsigned commit is allowed. Prefix its subject with `🚧`, keeping the Conventional Commit format after it, for example: `🚧 docs: clarify run setup`.
-- Before an unsigned fallback, confirm the signed attempt did not create a commit. Do not bypass checks or hooks, and report why the commit is unsigned.
+Commit completed, checked work at logical breakpoints using Conventional Commits. Stage only the change's files. Add new commits; do not amend or rewrite history unless requested. Push only when requested.
+
+Attempt signed commits first. If signing cannot complete, confirm the attempt created no commit and all non-signing checks passed before one unsigned fallback. Prefix its subject with `🚧`, followed by the Conventional Commit subject. Preserve hooks and report the signing failure.

@@ -1,23 +1,24 @@
-# bart north star
+# BART's goal
 
-**bart means Brave Automated Runtime Tester.** Given a Brave Android issue or PR, an agent should exercise the relevant behavior through Androperator and deliver evidence that lets a QA reviewer assess the conclusion.
+An agent already working in Brave Core should be able to take an ordinary Brave Android request, use source and the running app, and deliver a useful result with evidence that supports its claims.
 
-## Target invocation
+That result may be an explanation, bug investigation, code change, prototype, scoped verification assessment or draft PR. A well-observed failure or a supported finding that no change is needed can be a useful result. Completion follows the request, not a required product pass.
 
-> Run the `/bart-verify` skill on PR https://github.com/brave/brave-core/pull/39794
+## Responsibilities
 
-Support both reproducing a reported issue and verifying that a PR fixes it. Failure to reproduce means the issue was not observed under the tested conditions; it does not establish that the report is invalid.
+| Component | Responsibility |
+| --- | --- |
+| Current host agent | Reason, inspect/edit source, choose tools/actions, iterate and assess outcomes. |
+| Androperator | Execute explicit Android actions and return observations, results and evidence. |
+| BART | Supply Brave-specific knowledge, workflow judgment and reporting/reproduction guidance. |
+| Core and existing development tools | Build, install, retrieve artifacts and perform authorized repository operations. |
 
-Claude Code directs and assesses runtime verification. The eventual orchestrator coordinates context gathering, build/device preparation, workflow development, verification captures, and reporting. Implement those phases incrementally as described in the [plan](plan.md).
+Use the smallest useful skill set. One-off work needs no formal preparation package or saved reproduction skill. There is no API compatibility requirement and no need for a BART runtime framework.
 
-## Reviewable result
+## Working model
 
-Produce concise, named videos of assessed verification attempts, supporting screenshots, and a report containing device/build identity, steps, expected and actual behavior, and omitted checks. Keep exploratory workflow development separate from the main videos and preserve relevant failures.
+Understanding, acting and reporting are capabilities that the agent can revisit freely. A runtime surprise can lead back to source; a code change can require new setup research; a report can reveal missing evidence. The next action follows current evidence and the user's scope.
 
-For #39794, provide captures named `kBraveYoutubeFullscreenSettingsWorkaround - Disabled` and `kBraveYoutubeFullscreenSettingsWorkaround - Enabled`. The enabled expectation is fullscreen exit followed by settings opening without agent rescue. If both variants work, report that the control did not reproduce the issue and attribution remains inconclusive.
+Development can iterate through inspect → edit → build/install → observe → revise. Verification can assess an existing build without editing it. Reuse sufficient context and capture evidence while the behavior happens.
 
-The [README's illustrative QA comment](../README.md#intended-result) shows the intended output, following the device/build, steps, actual-results, and screencast structure of [this Brave QA verification](https://github.com/brave/brave-browser/issues/57747#issuecomment-5345309104). It is a format example, not a recorded BART pass.
-
-A completed assessment can report a product failure. Blocked setup, uncertain observations, and missing evidence must remain explicit. Agent exit codes and artifact hashes cannot establish behavioral correctness.
-
-Reports are local first. GitHub posting is a later delivery capability. The project is in planning, and `/bart-verify` does not exist yet.
+Useful delivery is readable, scoped and truthful about the actual build, observations, failures and omissions. Requested publication has accessible evidence and a confirmed destination. An automated BART assessment is not an official QA sign-off. [Reporting](reporting.md) defines these distinctions.

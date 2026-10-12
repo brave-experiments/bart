@@ -1,65 +1,40 @@
-# bart
+# BART
 
-**Brave Automated Runtime Tester.**
+BART is a collection of skills that help an existing coding agent understand, develop, investigate and verify Brave Android through source code and the running app.
 
-A bot that investigates reported Brave Android issues and checks whether PRs fix them. The aim is to assist Brave QA with automated checks and evidence to help decide whether an issue can be closed.
+The current agent reasons, edits code and assesses results. [Androperator](https://docs.androperator.com/host-agents/) supplies Android actions, observations and evidence. Brave Core and existing development tools supply builds, installs and repository operations.
 
-The project is in early development.
+## Use an ordinary request
 
-The goal and example result below describe the project's [north star](docs/north-star.md).
-
-## Goal
-
-> Run the `/bart-verify` skill on PR https://github.com/brave/brave-core/pull/39794
-
-The same workflow should also check whether a reported issue can be reproduced. It gathers context, prepares the build and device, develops an agent-driven workflow, records verification runs, and reports what happened.
-
-## Intended result
-
-The result should be a GitHub comment like this, with details and video links from the run. This is an example, not an actual test result: it assumes the issue occurs with the workaround disabled and the check passes with it enabled.
-
-```markdown
-#### 🟢 Verification PASSED for the scoped checks
-
-Device/OS: <device / Android version>
-Brave: <version> | Chromium: <version>
-Build/source: <tested revision and relationship to PR #39794>
-
-#### STEPS
-1. Open the same video on m.youtube.com with the workaround Disabled, enter fullscreen, and tap the settings gear.
-2. Repeat with the workaround Enabled after relaunch and flag verification.
-3. Select a harmless settings option after the enabled transition.
-
-#### ACTUAL RESULTS
-- Disabled: reproduced the settings gear failing to open the menu.
-- Enabled: fullscreen exited and settings opened without agent intervention.
-- The selected settings option worked.
-- Repeated-entry and non-fullscreen checks: not run. Full-case verification remains incomplete.
-
-#### SCREENSHOT / SCREENCAST
-- kBraveYoutubeFullscreenSettingsWorkaround - Disabled: <video link>
-- kBraveYoutubeFullscreenSettingsWorkaround - Enabled: <video link>
-- Supporting screenshots and run details: <report link>
+```text
+/brave-core-bart look at https://github.com/brave/brave-browser/issues/59445.
+Prototype a fix in a draft PR
 ```
 
-## Current capabilities
+```text
+/brave-core-bart verify the fix in https://github.com/brave/brave-core/pull/40517.
+```
 
-BART can check host readiness, run agent tasks, prepare cases from primary
-sources, and save run preparation with readiness evidence. Use
-[bart-prepare-case](skills/bart-prepare-case/SKILL.md) with an issue or PR URL and
-a testing objective, then [bart-prepare-run](skills/bart-prepare-run/SKILL.md)
-to prepare the build and device. Preparation records readiness or specific
-blockers; it does not establish a product verdict. Device verification and
-`/bart-verify` remain unimplemented.
+Understanding, acting and reporting are capabilities, not ordered phases. Start with the code or app, return to research when an observation raises questions, and revise the approach as needed.
 
-## Get started
+## Skills
 
-Follow [development setup](docs/development.md) to install dependencies and configure
-local paths, then run `./scripts/bart doctor` and `npm --prefix node run check`.
+| Skill | Purpose |
+| --- | --- |
+| [brave-core-bart](.agents/skills/brave-core-bart/SKILL.md) | Main entry point for Brave Android work. Loads relevant guidance as needed. |
+| [brave-core-bart-report](.agents/skills/brave-core-bart-report/SKILL.md) | Assessments, investigations, prototype demonstrations and draft PRs. |
+| [brave-core-bart-reproduce](.agents/skills/brave-core-bart-reproduce/SKILL.md) | Optional adaptive reproduction instructions for another attempt. |
 
-- [Case preparation](docs/case-preparation.md): research, package format, and freezing.
-- [Run preparation](docs/run-preparation.md): build identity, readiness evidence, and handoff.
-- [Agent configuration](docs/agent-configuration.md): agent selection, providers, and task execution.
-- [Presubmit checks](docs/checks.md): local checks, security scans, and commit signatures.
-- [Readiness checks](docs/doctor.md): checks, limits, and troubleshooting.
-- [Implementation plan](docs/plan.md): scope and completion conditions.
+Follow [setup](docs/setup.md) to make the skills available to the agent working in Core. There is no BART CLI, agent launcher or required Node installation. Shared guidance lives in `docs/`; skills link to it rather than duplicate it.
+
+## Local configuration
+
+Optional `config.toml` selects the Core checkout, artifact directory and independent QA/PR posting defaults. [config.example.toml](config.example.toml) directs development publication to BART issues. A source issue or PR URL does not select the write destination.
+
+Verification returns an assessment; posting requires a posting request. A BART issue containing a PR description is a preview, not completion of a request to create a real draft PR. See [reporting and delivery](docs/reporting.md).
+
+## Status
+
+The skills, configuration guidance and supporting documents are available. Fresh-session source/app workflows, exact PR APK retrieval, publication and reproduction reuse still need live validation. The examples above are requests to try, not recorded results. See the [maintained plan](docs/plan.md) and [project goal](docs/north-star.md).
+
+Contributors: read [AGENTS.md](AGENTS.md) and [contributing](docs/contributing.md). [bart-issue-create](.agents/skills/bart-issue-create/SKILL.md) is a repository-local contributor skill, separate from the runtime collection.

@@ -1,0 +1,37 @@
+---
+name: brave-core-bart
+description: Investigate, develop or verify Brave Android using source and the running app.
+metadata:
+  opencode/slash: "true"
+---
+
+# Brave Android work
+
+Complete the user's requested explanation, investigation, prototype, fix or verification using the current agent's tools. Assess actual observations and deliver the requested result, including unresolved blockers or coverage limits. Stay within review-only or draft-only scope when requested.
+
+Resolve links from this skill's real source directory, following discovery symlinks. BART's root is three directories above it. Use [setup and configuration](../../../docs/setup.md#configuration) to select the checkout, working root and any publication defaults. Missing config is supported. Read the selected Core checkout's own instructions before product work. If development posting would substitute a preview for a requested PR, state that mismatch early and follow [delivery scope](../../../docs/reporting.md#delivery-scope).
+
+## Choose the next useful action
+
+Move freely between understanding, acting and reporting. They are capabilities, not ordered phases. Start with source or app; return to issue research when a runtime surprise changes your hypothesis; revisit setup after a change; inspect an evidence gap while reporting. No phase-completion gate or mandatory research package is required. Reuse sufficient conversation and saved context.
+
+Load only the guidance needed for the next decision:
+
+| Need | Guidance |
+| --- | --- |
+| Locate source, tools or Android capabilities | [Orientation](../../../docs/orientation.md) |
+| Understand an issue, PR, expectation or mechanism | [Understand](../../../docs/understand.md) |
+| Change code and inspect the result | [Develop](../../../docs/develop.md) |
+| Assess an existing build | [Verify](../../../docs/verify.md) |
+| Select an APK, build or install | [Builds](../../../docs/builds.md) |
+| Capture and interpret observations | [Evidence](../../../docs/evidence.md) |
+
+For Android actions, use installed `androperator-agent-orientation` when unfamiliar and `androperator-agent-control-loop` for adaptive execution. Their maintained [host guidance](https://docs.androperator.com/host-agents/) is the fallback. The current agent chooses actions and judges results; no child agent or saved runtime skill is needed.
+
+## Finish the requested work
+
+Use `brave-core-bart-report` for an assessment, investigation summary, prototype demonstration or draft PR. Read its [instructions](../brave-core-bart-report/SKILL.md) directly if native loading is unavailable. An ordinary verification ends with an assessment, not automatic posting or code changes.
+
+Use `brave-core-bart-reproduce` when saving adaptive instructions is requested or useful. Its [instructions](../brave-core-bart-reproduce/SKILL.md) distinguish package creation, reuse testing and sharing. Do not add those tasks to every investigation.
+
+Continue authorized iteration until the requested scope is assessed or a concrete blocker prevents it. If no code change is warranted, report the supported finding rather than manufacture a fix. State what was observed, what remains unknown and where useful retained evidence lives.
