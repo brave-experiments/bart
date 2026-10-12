@@ -155,7 +155,7 @@ Proposed skill: `bart-develop-workflow`.
 
 Input: the case plan and prepared run.
 
-Claude explores through Androperator, resolves current navigation and control locations, and develops a temporary agent-driven skill. Use the [com.android.settings.get-version-details-codex example](https://github.com/clawperator/clawperator-skills/blob/76bad61b5915e70dd53f38111eaf932c5ff92706/skills/com.android.settings.get-version-details-codex/SKILL.md) as a design reference, replacing programmatic `codex` invocation with programmatic `claude` invocation.
+Claude explores through Androperator, resolves current navigation and control locations, and develops a temporary agent-driven skill. Use the [Androperator Settings version details example](https://github.com/androperator/androperator/blob/7e0a13bb6adab388673fd4e7b53798d3073f0c7b/examples/skills/com.android.settings.get-version-details/SKILL.md) as a design reference, adapting its current-agent workflow for BART's Claude-directed checks.
 
 A thin launcher supplies instructions, target, run directory, and a bounded budget. Claude chooses actions from fresh observations. Helpers execute actions and retain evidence. The skill returns a structured result tied to evidence, which the launcher validates. Only one agent controls the target at a time.
 
@@ -229,7 +229,7 @@ publication.
 
 - Historical research: `.context/bart-handoff-2026-09-21/START-HERE.md` and its linked guide. This plan records the subsequent agreed implementation sequence.
 - Orchestrator reference: `.agents/skills/release-orchestrator/SKILL.md` in the Androperator repository.
-- Agent-driven skill reference: [com.android.settings.get-version-details-codex in clawperator-skills](https://github.com/clawperator/clawperator-skills/tree/76bad61b5915e70dd53f38111eaf932c5ff92706/skills/com.android.settings.get-version-details-codex), pinned to commit `76bad61b5915e70dd53f38111eaf932c5ff92706`.
+- Agent-driven skill reference: [Androperator example skills](https://github.com/androperator/androperator/tree/7e0a13bb6adab388673fd4e7b53798d3073f0c7b/examples/skills), including [Settings version details](https://github.com/androperator/androperator/blob/7e0a13bb6adab388673fd4e7b53798d3073f0c7b/examples/skills/com.android.settings.get-version-details/SKILL.md), pinned to commit `7e0a13bb6adab388673fd4e7b53798d3073f0c7b`.
 - Environment convention: `.envrc.example` in the Bravebot repository.
 - QA references: the `qa-resources` repository and its `qa-resources.wiki` checkout.
 
