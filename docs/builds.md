@@ -4,13 +4,17 @@ Use an artifact that fits the requested observation and identify the build actua
 
 ## Select and identify an APK
 
+For ordinary QA verification of a merged fix, assess the current Nightly, not a historical snapshot. Check the installed Nightly and the newest suitable published Nightly at execution time. Reuse the installed build if current, including when it is newer than the available release inventory and its identity/source relationship supports the check. If a newer compatible Nightly is available, update in place within the task's install scope and preserve app data. Do not downgrade to the first release containing the fix merely because the PR links to it. State a newer unavailable build or update blocker rather than describe an older tested build as latest.
+
 Distinguish an exact PR-head build, a synthetic merge build, a local prototype and a release known to contain the change. An issue's reported version is a lead; a release comment does not prove an available APK or its source revision. Never silently replace an exact-build request with a later release assessment.
+
+Use an exact PR build or historical before/after comparison when explicitly requested or needed for a specific causal investigation. Lack of that comparison does not block a current-Nightly behavior assessment. Report the build actually tested and whether it contains the fix; observing correct behavior now does not prove which intervening change caused it.
 
 For a retrieved APK, retain relevant artifact/release/job URL, retrieval time, ABI, package/version/minimum API, signer and measured SHA-256. Compare a publisher digest when available. A hash identifies bytes, not source ancestry. Retain the job revision or supported release/source relationship separately. For a local prototype, record Core/Chromium revisions, relevant local diff, build arguments and actual output/receipt. Avoid copying a whole configuration or credentials into a report.
 
 ### Existing release assets
 
-For a merged PR, follow release-bot comments such as “Released in v…” to the linked `brave-browser` release and inspect its actual assets before asking the user for an APK. A release mentioned on the PR can be the intended containing-release route even when no binary is linked directly in the PR body. Confirm source relationship and device compatibility; do not call it an exact PR-head build. If that release lacks a suitable APK, investigate supported alternatives and report the specific gap.
+For a merged PR, follow release-bot comments such as “Released in v…” to establish when the fix became available and help confirm its inclusion in current Nightly. For normal QA, inspect the newest suitable Nightly assets, not only that first-containing release. The linked release's own assets remain useful when a historical build is requested. Follow these available routes before asking the user for an APK; confirm source relationship and device compatibility and keep exact PR-head claims separate.
 
 Inspect actual assets rather than construct a guessed filename:
 
@@ -19,7 +23,7 @@ gh release view "$TAG" --repo brave/brave-browser --json url,tagName,assets
 gh release download "$TAG" --repo brave/brave-browser --pattern "$ASSET" --dir "$DOWNLOAD_DIR"
 ```
 
-Select the tag/asset and new task download directory before running the download. Resolve missing APKs, unsupported ABI or digest mismatch explicitly. A later containing release can support retrospective assessment when its relationship is established and the scope permits it; label that assessment accordingly.
+Select the tag/asset and new task download directory before running the download. Identify the channel from release/package information; the GitHub `latest` release or `prerelease` flag alone is not a Nightly selector. Paginate releases as needed, compare actual versions and inspect asset availability. Resolve missing APKs, unsupported ABI or digest mismatch explicitly. A current containing release supports present-day QA without an exact PR artifact; record the actual build and source relationship.
 
 ### Existing PR builds
 

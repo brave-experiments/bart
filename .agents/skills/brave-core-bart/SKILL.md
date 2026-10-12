@@ -30,6 +30,8 @@ Load only the guidance needed for the next decision:
 
 For Android actions, use installed `androperator-agent-orientation` when unfamiliar and `androperator-agent-control-loop` for adaptive execution. Their maintained [host guidance](https://docs.androperator.com/host-agents/) is the fallback. The current agent chooses actions and judges results; no child agent or saved runtime skill is needed.
 
+Ordinary QA of a merged fix uses current Nightly, including a newer installed build than the PR's release comment. Follow [build selection](../../../docs/builds.md#select-and-identify-an-apk); exact/historical testing is a distinct requested scope.
+
 During Androperator work, maintain per-session [usage notes](../../../docs/evidence.md#androperator-usage-notes) for API/docs gaps, feature requests and concrete fallbacks such as `adb`, referencing existing logs rather than duplicating them.
 
 ## Finish the requested work

@@ -37,12 +37,15 @@ The default config location is relative to the real BART skill source, independe
 | --- | --- |
 | `workspace.brave_core_dir` | Default Core checkout root, normally `<workspace>/src/brave`. |
 | `workspace.work_dir` | Optional root for task notes, downloads and evidence, including BART's ignored `.work/`. |
+| `android.device_id`, `.operator_package` | Optional device and matching Operator defaults; pass the resolved selections explicitly to Android tools. |
 | `publication.qa.repository`, `.destination` | Default QA/investigation posting repository and item type. |
 | `publication.pr.repository`, `.destination` | Independent prototype/PR posting repository and item type. |
 
 Choose the checkout from explicit task selection, then config, then cwd if it is inside Core. Check repository root/content (including Core's `package.json`) and instructions/status; accept fork remotes. If configured checkout differs from cwd, state the selected checkout before product writes. Ambiguity or invalid selected paths need correction, not silent substitution.
 
 Choose the task artifact directory from an explicit task directory, then configured work root. Select a suitable directory when files are needed and neither exists; ask only if the host/request leaves that choice unresolved. An external root or BART's ignored `.work/` is supported. Keep artifacts outside tracked source and the selected Core/Chromium source trees; check ignore coverage before writing inside BART. A text-only task does not need one. Source changes and build outputs stay in the build tool's normal workspace paths.
+
+Select the Android target from explicit task selection, then `android.device_id`, then the sole usable device. Multiple candidates without a selection require a choice. Use an explicitly selected Operator, then `android.operator_package`, otherwise the release default from maintained Androperator guidance. Recheck the selected target and compatibility/readiness when execution starts; config is not a historical readiness receipt. It selects device/package, not transport setup or permission to reset/install apps.
 
 Missing config is supported. Use available checkout/device context and create/select artifacts only when needed. Resolve publication settings only for a publication request. A missing explicitly selected file or malformed relevant setting needs a clear correction; continue independent work with known inputs. Do not rewrite local config as incidental task work. BART configuration does not configure the host's credentials, provider or Androperator transport.
 

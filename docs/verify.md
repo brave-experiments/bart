@@ -4,7 +4,7 @@ Produce a scoped assessment of the requested behavior using actual app observati
 
 ## Establish the conditions that matter
 
-Use [builds](builds.md) to identify the app actually tested and its relationship to the issue/PR. Select the explicit target and current Androperator capability readiness through [orientation](orientation.md). Setup success is not a behavior verdict.
+Use [builds](builds.md) to select current Nightly for ordinary merged-fix QA and identify the app actually tested and its relationship to the issue/PR. Exact/historical builds are for explicitly scoped work, not a default verification prerequisite. Select the explicit target and current Androperator capability readiness through [orientation](orientation.md). Setup success is not a behavior verdict.
 
 Observe applicable flags, settings, theme, locale, navigation mode, profile/site/account state and device/API constraints. Compiled defaults, rollout proposals and current runtime state are distinct. Verify required flag state after relaunch; successive variants are different conditions, not simultaneous starting state. Preserve retained data for cases that depend on it; use disposable state for destructive checks within scope.
 
