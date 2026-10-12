@@ -12,7 +12,7 @@ Local delivery does not require a QA-style assessment, published media, PR or re
 
 An automated assessment must state: **Automated BART assessment - not an official QA sign-off.** Use Brave QA's concise device/build, steps, actual results and media conventions.
 
-Include relevant device/Android, Brave/Chromium versions, actual build/source relationship, starting conditions, checks performed, intended versus observed results, useful evidence and omissions. An investigation also names the source-backed mechanism/hypothesis, conflicts, next action and limits. Do not confuse reports by others with observations from this attempt.
+Include relevant device/Android, Brave/Chromium versions, Androperator CLI version used, actual build/source relationship, starting conditions, checks performed, intended versus observed results, useful evidence and omissions. An investigation also names the source-backed mechanism/hypothesis, conflicts, next action and limits. Do not confuse reports by others with observations from this attempt.
 
 For normal QA, describe current-Nightly behavior on the actual tested version. Keep a PR's first-containing release as source context, not a claimed tested build. Absence of a historical control limits causal attribution; it does not itself make present-day behavioral verification incomplete.
 
@@ -42,7 +42,7 @@ Use `#### <emoji> Verification <OUTCOME> using the following:` in Markdown, or a
 
 These non-pass emoji are BART's reporting convention; the linked examples establish the green-pass format. Always include the outcome text so color/emoji is not the only signal. A scoped pass can list unrequested historical or internal checks as limitations without claiming they were required for present-day QA.
 
-Below the headline, show a compact **Device/OS and Brave identity block**. In HTML, render a small two-column field/value table: Device/OS, Brave Build, Chromium, Channel/architecture, Revision/build relationship and Scope/conditions. Use actual observed values; include Android OS build when available and write unknown values with their limits rather than invent them. Avoid burying the tested version in a long provenance paragraph. Link full artifact/installation receipts from the detail section.
+Below the headline, show a compact **Device, build and conditions block**. In HTML, render a small two-column field/value table: Device/OS, Brave Build, Chromium, Channel/architecture, Revision/build relationship, Androperator and Scope/conditions. The Androperator row identifies the CLI version used in the tested session. Operator version/package details belong in supporting setup receipts or usage notes when relevant, not the summary. Use actual observed values; include Android OS build when available and write unknown values with their limits rather than invent them. Avoid burying tested versions in a long provenance paragraph. Link full artifact/installation receipts from the detail section.
 
 Then use these visible section labels:
 
@@ -66,6 +66,9 @@ Brave:
 - Chromium: <observed Chromium version / build type / architecture>
 - Channel: <observed channel>
 - Revision/build relationship: <observed revision; current Nightly containing fix>
+
+Androperator:
+- CLI: <observed version>
 
 #### STEPS:
 1. Follow <specific STR/TP link>; <material setup or variation>.
