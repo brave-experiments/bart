@@ -84,6 +84,12 @@ Brave:
 
 The explicit headline/section layout comes from QA comments on [57449](https://github.com/brave/brave-browser/issues/57449#issuecomment-6005588417) and [57747](https://github.com/brave/brave-browser/issues/57747#issuecomment-5345309104). Other concise examples are [57872](https://github.com/brave/brave-browser/issues/57872#issuecomment-5607870886), [58827](https://github.com/brave/brave-browser/issues/58827#issuecomment-5637985692) and [58370](https://github.com/brave/brave-browser/issues/58370#issuecomment-5728374687). These are format/coverage references, not BART evidence. [QA resources](qa-resources.md) supplies optional regression context; do not apply official QA labels or sign-off merely because the assessment passes.
 
+## Additional measurement evidence
+
+After the standard verification summary, include a measurement table when useful, with the measured property, actual values for each observed build/condition, units/method and evidence references. A single current-build column is valid; before/after columns are appropriate only when both were actually measured. State source-derived expectations separately from measured values.
+
+Keep this section factual: describe what was measured and observed, including unavailable properties and uncertainty. Do not add a measurement-derived conclusion, “proof of fix,” inferred internal state or causal claim. A separate requested QA assessment keeps its own scope and evidence limits. Follow [measurement guidance](evidence.md#measured-observations) for source/coordinate distinctions and retained receipts.
+
 ## Local HTML verification report
 
 When the user requests HTML with local captures, create a dedicated attempt directory containing `report.html` and the assets/receipts that support it. Use embedded CSS and minimal optional JavaScript; no CDN, remote font or hosted app media should be required to read the assessment. The report plus its relative local assets is the portable deliverable; embedding large media into one file is unnecessary.

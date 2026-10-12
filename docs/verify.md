@@ -20,6 +20,8 @@ Observe the result after the action. Do not manually rescue the transition being
 
 Select nearby regression checks proportionate to the change, using applicable [QA resources](qa-resources.md) as leads. A non-reproducing baseline weakens causal comparison. An external site change or inaccessible setup can limit historical verification. State which trigger/condition was established rather than imply an internal race was exercised by ordinary taps.
 
+Add [measured observations](evidence.md#measured-observations) when an exposed property supplies useful additional facts, such as geometry for a placement issue or exact preference values after recreation. Retain the measurements and conditions without inferring a fix verdict or causation from them. Do not require measurements or historical comparisons when they add no useful evidence.
+
 ## Complete the assessment
 
 Return the checks, observations and limits using [reporting](reporting.md). A product failure or supported non-reproduction can complete an assessment; unavailable setup produces blocked/partial coverage. Preserve mixed outcomes. Posting and optional reproduction packaging are separately scoped work.

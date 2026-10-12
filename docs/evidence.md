@@ -18,6 +18,16 @@ Keep useful action receipts and fresh hierarchies/screenshots. Correlation and t
 
 Uninspected media supports no visual conclusion. Tool completion does not establish behavior; the agent must assess the actual observations. If decisive evidence is missing, report the limit or perform a new scoped attempt, not a reconstructed transition.
 
+## Measured observations
+
+When a measurable property helps investigate the reported behavior, retain the actual measurements alongside visible evidence. Useful properties include identified view bounds, distance to a relevant boundary, exact text/value, enabled state or observed transition timing. Use supported Androperator observations when available; document another authorized measurement source or fallback accurately.
+
+Identify the object measured, method, units/coordinate space, capture dimensions/scale, build/device, conditions and observation time or capture ID. Link raw receipts and relevant screenshots; label annotations or derived calculations. State unavailable values as unavailable rather than infer them from a different object. Accessibility-node bounds, window bounds and painted pixel coverage are different observations; do not substitute one for another or claim internal layout properties were read when they were not exposed.
+
+Report measurement facts without drawing a conclusion from them. For example: “The identified region's bottom edge was 2320 px in capture A and 2400 px in capture B; the display bottom was 2400 px in both.” Do not turn that into “this proves the fix works,” “the bug is fixed” or a causal attribution. Keep any separately scoped QA assessment distinct from the measurement record. Record uncertainty, rounding/tolerance and timing limits when relevant.
+
+If comparing builds, keep relevant state and geometry comparable and identify each actual build. Historical comparison is optional and follows the requested scope; ordinary current-Nightly QA does not require a downgrade or old-build run. A measurement is useful only when its source exposes the relevant property; an absent/incomplete hierarchy is not evidence that a view is absent.
+
 ## Retain and share
 
 Store notes/attempts in the task directory selected through [setup](setup.md#task-artifacts). Keep relative links and existing Androperator receipts where useful; record relevant conditions/source identity using [builds](builds.md). For remote device hosts, retrieve artifacts through the supported transport; a host-local path is not automatically readable by the agent or reviewer.
