@@ -42,9 +42,8 @@ To check one designated Android device, name its adb serial:
 ./scripts/bart doctor --device emulator-5554
 ```
 
-Use `--operator-package com.androperator.operator.dev` when the designated
-device has the development Operator. The default is
-`com.androperator.operator`. The device check reads the connection state,
+Use the release Operator APK with package `com.androperator.operator`. BART uses
+that package by default. The device check reads the connection state,
 compares the installed Operator version with the selected Androperator CLI,
 and checks `screenrecord` and `screencap` availability. It does not record a
 clip or prove that its image is readable. Run preparation must record, finalize,

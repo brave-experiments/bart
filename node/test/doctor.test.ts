@@ -166,10 +166,10 @@ test('doctor reports missing Node dependencies in a new worktree', async (t) => 
 
 test('explicit device check verifies the designated device, Operator, and capture commands', async (t) => {
   const { run } = await fixture(t);
-  const result = run({}, ['doctor', '--device', 'emulator-5554', '--operator-package', 'com.androperator.operator.dev']);
+  const result = run({}, ['doctor', '--device', 'emulator-5554', '--operator-package', 'com.androperator.operator']);
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.match(result.stdout, /Device emulator-5554: connected/);
-  assert.match(result.stdout, /Operator com\.androperator\.operator\.dev: compatible/);
+  assert.match(result.stdout, /Operator com\.androperator\.operator: compatible/);
   assert.match(result.stdout, /Android screenrecord supports --size and --time-limit/);
   assert.match(result.stdout, /Android screencap is available/);
   assert.match(result.stdout, /A capture clip.*not checked/);
