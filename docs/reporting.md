@@ -171,6 +171,7 @@ For a real PR, select the base repository/branch and actual head repository/bran
 | Request | Completion |
 | --- | --- |
 | Develop locally | Focused implementation, requested checks/build/install/runtime inspection and a concise local summary, or specific blockers/limits. No automatic push or publication. |
+| Implement and create a QA evidence pack | Changed-build runtime assessment plus local HTML, captures, receipts and text-only context ZIP under [development delivery guidance](develop.md#requested-qa-evidence-pack). Commit only when requested or required by Core/host rules; no automatic publication. |
 | Verify | Return an evidence-backed assessment in the session or useful saved document. No automatic posting, edits or package. |
 | Verify and post findings | Assessment plus publication at the resolved destination with accessible evidence and confirmed URL, or a precise delivery blocker. |
 | Prototype in a draft PR | Warranted change/validation and a real draft PR; if no change is warranted, report that supported conclusion. |

@@ -45,6 +45,8 @@ During Androperator work, maintain per-session [usage notes](../../../docs/evide
 
 For local development, return the concise [development summary](../../../docs/reporting.md#local-development-summary). Use `brave-core-bart-report` when an assessment, saved report, prototype demonstration or draft PR is useful/requested. Read its [instructions](../brave-core-bart-report/SKILL.md) directly if native loading is unavailable. An ordinary verification ends with an assessment, not automatic posting or code changes.
 
+When a development task requests a [QA evidence pack](../../../docs/develop.md#requested-qa-evidence-pack), continue through changed-build installation/runtime assessment and the local HTML/capture/context export. Follow “this checkout/current branch” selection in development guidance rather than redirect to a configured different checkout. Report incomplete work honestly; do not treat the requested completion evidence as a required pass verdict.
+
 Use `brave-core-bart-reproduce` when saving adaptive instructions is requested or useful. Its [instructions](../brave-core-bart-reproduce/SKILL.md) distinguish package creation, reuse testing and sharing. Do not add those tasks to every investigation.
 
 Continue authorized iteration until the requested scope is assessed or a concrete blocker prevents it. If no code change is warranted, report the supported finding rather than manufacture a fix. State what was observed, what remains unknown and where useful retained evidence lives.
