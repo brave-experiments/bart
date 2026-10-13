@@ -6,6 +6,8 @@ BART helps an agent investigate issues, verify fixes and develop changes using b
 
 For QA, the benefit is more coverage with reviewable evidence: phone and tablet layouts, landscape behavior, system-theme changes and configuration-specific controls. For engineers, the same skills support local development and an optional QA pass before submission. Reviewers get the tested build, what actually happened, captures and clear coverage limits.
 
+** [`androperator`](https://androperator.com) is required for Android app execution and evidence capture.** Install its CLI and a compatible Operator on the device/emulator using [Androperator setup](https://androperator.com/skill.md). If it is missing, BART's agent guidance directs setup and readiness checks before app work. Source-only investigation does not require a connected device. See [BART installation guidance](docs/setup.md#missing-androperator-installation).
+
 ## Try a QA verification
 
 Once [set up](docs/setup.md), start your usual coding-agent session and ask:
@@ -94,7 +96,7 @@ A runtime-backed review combines source review with the actual PR build and mean
 ## Get started
 
 1. Make the BART skills discoverable to your existing agent, following [setup](docs/setup.md#skill-discovery).
-2. Use a Brave Core checkout for source work and [Androperator](https://docs.androperator.com/host-agents/) for Android actions and evidence. Local builds use Core's existing tools; Brave Scaffold is optional.
+2. Use a Brave Core checkout for source work and install the required [Androperator tooling](https://androperator.com/skill.md) for Android actions and evidence. Local builds use Core's existing tools; Brave Scaffold is optional.
 3. Optionally set checkout, work-folder, device and posting defaults in ignored `config.toml`, using [config.example.toml](config.example.toml). Missing config is supported when the task supplies the needed context.
 
 For an existing [Brave Scaffold](https://github.com/brave-experiments/brave-scaffold) installation, opt in with `brave-scaffold.enabled = true` and `brave-scaffold.root = "/path/to/brave-scaffold"`. The agent uses its maintained `bcore-full-build-context` skill for local builds/tests and BART/Androperator for runtime inspection. See [Scaffold builds](docs/builds.md#build-with-brave-scaffold); Core's standalone workflow remains available when disabled.

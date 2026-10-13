@@ -1,6 +1,16 @@
 # Setup and local configuration
 
-Make BART's skills and linked docs readable by the agent already working in Core. No BART package install, provider setup or launcher is needed. Android work uses an existing compatible Androperator installation; follow its [setup](https://docs.androperator.com/setup/) when that is missing. Build tooling is selected in [builds](builds.md).
+Make BART's skills and linked docs readable by the agent already working in Core. No BART package install, provider setup or launcher is needed. Android execution needs compatible Androperator tooling; use the installation route below when missing. Build tooling is selected in [builds](builds.md).
+
+## Missing Androperator installation
+
+When runtime work is needed, check whether the selected interface is available; for local CLI use, inspect `command -v androperator` and `androperator --version`. Installed agent guidance or an existing Operator app alone does not establish CLI availability. Text-only/source-only work does not require Android setup.
+
+If the CLI is missing, read and follow Androperator's maintained [public setup skill](https://androperator.com/skill.md), using its [setup guide](https://docs.androperator.com/setup/) for details. Do not reproduce its installer/prerequisite instructions in BART or replace Androperator with an all-ADB workflow merely because setup is missing. Use the existing package manager and setup scope, preserve user-owned configuration, and resolve real host-install/permission boundaries. If installation is outside the request or restricted by the host, ask for that specific setup action and continue independent source work.
+
+After setup, load installed orientation/control-loop guidance, recheck the selected device/Operator compatibility and capability readiness, and verify an actual supported observation before resuming the app task. Record setup failures/recovery in usage notes. Canonical installation may remediate multiple connected targets; ensure every affected target is authorized or use the maintained supported targeted setup route. A setup command's exit alone does not establish readiness.
+
+If setup cannot complete, return the precise blocker and honest runtime coverage limits, retaining useful local output. Do not silently drop required captures or claim ADB fallback provides Androperator coverage. Do not uninstall a working global installation just to simulate first use; clean-host/bootstrap validation is a separately scoped test, and documentation checks do not prove it passed.
 
 ## Skill discovery
 

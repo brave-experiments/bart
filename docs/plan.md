@@ -24,6 +24,7 @@ Task-specific reports and receipts remain in working directories. Use their obse
 - Exercise an optional unattended local pre-submit QA pass on the developer's actual changed build. Complete the selected phone/tablet, landscape and foreground-theme scope, or return precise blockers and useful partial results.
 - Complete full affected-screen/end-of-list coverage, per-device in-app identity and decisive transition inspection consistently in future QA runs. Finding a defect does not establish completion of the other selected checks.
 - Validate model/harness/reasoning metadata reporting, privacy-safe report assets and portable text context exports against the current guidance.
+- Validate first-use Android setup on a separately scoped clean host/environment where Androperator is absent, then resume a bounded app task. The maintained bootstrap route is documented but has not been demonstrated by BART's existing-install QA trials.
 
 ## Independent integrations
 
