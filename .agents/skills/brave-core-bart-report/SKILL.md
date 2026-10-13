@@ -11,6 +11,8 @@ Honor the requested format and location. For local HTML with captures, follow [H
 
 For QA verification, lead with the [verification summary](../../../docs/reporting.md#verification-summary-format): outcome emoji/headline, unofficial notice, compact device/build identity, STEPS, ACTUAL RESULTS and labeled SCREENSHOT / SCREENCAST media. Put detailed receipts and check matrices after that summary.
 
+For published QA reports or local reports intended for publication, prepare the [text-only context attachment](../../../docs/report-context.md) from useful retained commands, instructions, test inputs and sanitized receipts. Use its unique filename convention; exclude media/binaries and do not add a live replay merely to create the export.
+
 Use current conversation and saved evidence. Inspect decisive media using [evidence guidance](../../../docs/evidence.md); a referenced file or successful command is not a behavior assessment. Keep observations, attribution, coverage and delivery status distinct. Missing footage remains missing; do not invent a transition or rerun the app just to regenerate prose.
 
 If evidence raises a new question, return to source investigation or request-scoped observation as useful. Report an honest limit when more work is unavailable or outside scope. Include relevant failed/mixed attempts and omitted checks.

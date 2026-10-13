@@ -2,6 +2,8 @@
 
 Save reusable instructions when requested or worthwhile, especially when unusual setup or discovered navigation would help another attempt. Ordinary steps may fit directly in an assessment/PR. Packaging is optional, not a gate for development or verification.
 
+A published QA report's [text-only context attachment](report-context.md) is a separate export of useful existing material, not a requirement to author a new reproduction skill or prove live reuse. Include a task-specific skill here in that attachment when one was actually written, excluding media/binaries from the context ZIP.
+
 ## Small, portable contents
 
 ```text

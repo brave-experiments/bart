@@ -107,6 +107,12 @@ An illustrative coverage table, not claimed results:
 | Tablet portrait | <tablet layout/controls observed> | <capture> |
 | Tablet landscape | <observations or specific blocker> | <capture or not run reason> |
 
+## Context attachment
+
+Include a [text-only context ZIP](report-context.md) with requested published QA reports, and prepare it for local QA reports intended for publication. It contains useful reproduction/verification context, commands or adaptive instructions, any local test inputs/helper source and sanitized text receipts. Media and APKs remain separate. Link its long unique filename locally, and its confirmed attachment URL when posted; state missing context or delivery blockers.
+
+This attachment packages useful material from the work. It does not require a formal reproduction skill or another live session. Optional skill authoring/replay remains separately scoped under [reproduction](reproduction.md).
+
 ## Additional measurement evidence
 
 After the standard verification summary, include a measurement table when useful, with the measured property, actual values for each observed build/condition, units/method and evidence references. A single current-build column is valid; before/after columns are appropriate only when both were actually measured. State source-derived expectations separately from measured values.
