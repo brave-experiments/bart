@@ -6,7 +6,7 @@ Build toward [the project goal](docs/north-star.md) and track implemented and de
 - Follow the host's and selected checkout's authority rules. Skill discovery and local configuration grant no new permissions. Continue authorized work without repeated confirmation; resolve real target, scope or local-work conflicts.
 - Tie behavior claims to inspected observations. Evidence conventions belong in [evidence](docs/evidence.md); outcome and delivery semantics belong in [reporting](docs/reporting.md).
 - Keep machine paths in ignored `config.toml`. Put task notes, downloaded APKs and evidence in the working directory selected using [setup](docs/setup.md#configuration), outside tracked source; BART's ignored `.work/` is supported. Source changes and build tools use the selected Core workspace's own paths.
-- Put durable shared knowledge in `docs/`, canonical skills in `.agents/skills/`, and any concrete mechanical helper in `scripts/` using Node.js/TypeScript. Add executable tooling only for a demonstrated need.
+- Put durable shared knowledge in `docs/`, canonical skills in `.agents/skills/`, and any concrete mechanical helper in `scripts/`. Prefer standard-library Python 3.11+ for standalone artifact helpers; use Node.js/TypeScript where existing tooling makes it appropriate. Add executable tooling only for a demonstrated need.
 - Keep investigation notes, session reports and case-specific test plans outside this repository's durable docs. Use historical observations as context, not current device state.
 - Name branches and worktrees for their work, without agent/model attribution. Create BART worktrees under `.worktrees/` in the main checkout.
 

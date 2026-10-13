@@ -49,6 +49,8 @@ Before assessed recording, inspect an annotated baseline for readability, trunca
 
 QA on-screen logs should include the tested device's Android release version and API level, alongside the app/version and device model, for example `Android 17 | API 37`. Obtain both from the selected device, not the host SDK or an assumed version-to-API mapping. Keep this line readable and untruncated in the inspected capture; do not include the device serial.
 
+Keep configured blocked values out of annotations and capture filenames. Inspect screenshots and continuous video for visible blocked values before using the [export privacy helper](export-privacy.md) with media review acknowledged. Byte/metadata scanning cannot establish absence from pixels; retain private originals and label redacted delivery copies.
+
 The maintained [on-screen log API](https://docs.androperator.com/api/on-screen-logs/) supports live templates for foreground app package, version name/code, icon and device metadata. Use `--template`, not literal `--text`, for placeholders. Its currently documented template keys do not include Android release/API level; insert freshly observed values as literal text alongside the supported live placeholders, rather than invent keys. With `PANEL_TOP_DP` calculated for the current display, an illustrative small label is:
 
 ```sh

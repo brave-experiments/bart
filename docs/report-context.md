@@ -48,6 +48,8 @@ Follow [report privacy](reporting.md#assessment-and-investigation): remove devic
 
 Inspect the selected staging directory and ZIP file listing, ensure all files are text, review privacy and confirm relative instructions/dependencies resolve. Verify archive integrity and extract it into a temporary directory to read the entrypoint and relevant links. Keep it compact by selecting useful context; compression alone does not make excessive logs manageable. Respect the destination's current attachment-size limit and report a precise delivery gap rather than silently omit essential context.
 
+Run the [export privacy helper](export-privacy.md) on the final delivery directory, including the ZIP. It checks archive entry filenames and decompressed text; a compressed-byte search alone is insufficient.
+
 Link the archive from local HTML. For requested GitHub publication, attach it through the supported archive-upload route and link the confirmed attachment URL; a media-only CLI upload route may require a browser or human handoff for ZIPs. Do not invent an upload API. After upload, retain a local publication receipt mapping the archive/media to their URLs; provide the association in the posted report. Keep app assessment and attachment/publication completion separate.
 
 If context is limited because commands, receipts or test inputs were not retained, state that in README and the report. Do not rerun device actions just to manufacture missing history. Package inspection verifies portability of files, not successful live reproduction; report a fresh replay only when separately requested and actually performed.

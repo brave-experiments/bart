@@ -12,6 +12,7 @@ BART provides three current-agent skills: a natural-language entry point, report
 | Foreground system-theme checks | Demonstrated | Wallet runs captured ADB-triggered theme changes with the affected page foreground. Later Appearance runs retained final-state observations but lacked equivalent transition footage. |
 | Local HTML reports and text-only context ZIPs | Demonstrated | Reports linked captures and context exports. Browser-rendered layout/playback inspection was not established in the reviewed reports. |
 | Live capture labels and action toasts | Demonstrated in a Wallet refresh | Captures showed package/version labels and theme announcements; overlap/truncation required adjustment. Current placement/Android metadata guidance still needs consistent use. |
+| Configured export privacy checks | Unit-tested | Helper checks text, filenames/directory names, ZIP entry names/content and standalone media bytes. Physical-device evidence-pack integration and visual media redaction remain to demonstrate. |
 | Configuration-specific visual findings | Demonstrated | A later Appearance run identified a tablet-only missing icon/alignment difference and a phone navigation-area concern, with classification/coverage limits. |
 
 Task-specific reports and receipts remain in working directories. Use their observations as historical context, never as current device state. Documentation changes alone do not establish that later runs follow every evidence requirement.
