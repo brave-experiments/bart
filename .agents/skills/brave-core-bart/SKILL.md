@@ -31,6 +31,8 @@ Load only the guidance needed for the next decision:
 
 For Android actions, use installed `androperator-agent-orientation` when unfamiliar and `androperator-agent-control-loop` for adaptive execution. Their maintained [host guidance](https://docs.androperator.com/host-agents/) is the fallback. The current agent chooses actions and judges results; no child agent or saved runtime skill is needed.
 
+For local builds/tests, honor the configured Scaffold opt-in and load its selected installation's `bcore-full-build-context` skill as described in [build guidance](../../../docs/builds.md#build-with-brave-scaffold). Core standalone builds remain the default when the integration is disabled.
+
 Ordinary QA of a merged fix uses current Nightly, including a newer installed build than the PR's release comment. Follow [build selection](../../../docs/builds.md#select-and-identify-an-apk); exact/historical testing is a distinct requested scope.
 
 For UI QA, follow the [configuration baseline](../../../docs/verify.md#configuration-coverage) and include its captures/coverage gaps in the report. A [local pre-submit QA request](../../../docs/verify.md#local-pre-submit-qa) uses the developer's changed build rather than Nightly and can run autonomously within agreed device/build scope.

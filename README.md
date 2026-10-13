@@ -77,6 +77,8 @@ Development guidance is available; end-to-end feature development through BART s
 2. Use a Brave Core checkout for source work and [Androperator](https://docs.androperator.com/host-agents/) for Android actions and evidence. Local builds use Core's existing tools; Brave Scaffold is optional.
 3. Optionally set checkout, work-folder, device and posting defaults in ignored `config.toml`, using [config.example.toml](config.example.toml). Missing config is supported when the task supplies the needed context.
 
+For an existing [Brave Scaffold](https://github.com/brave-experiments/brave-scaffold) installation, opt in with `brave-scaffold.enabled = true` and `brave-scaffold.root = "/path/to/brave-scaffold"`. The agent uses its maintained `bcore-full-build-context` skill for local builds/tests and BART/Androperator for runtime inspection. See [Scaffold builds](docs/builds.md#build-with-brave-scaffold); Core's standalone workflow remains available when disabled.
+
 BART runs through the agent already in your session. It does not require a BART CLI, separate agent launcher or model-provider account. Skills and shared docs supply the guidance; the host agent and existing tools perform the work.
 
 Task artifacts can live in ignored `.work/` or an external directory. Publication occurs only when requested and permitted by the host. The example configuration sends development reports and PR previews to BART issues; a preview is not an actual Core draft PR. See [configuration](docs/setup.md#configuration) and [delivery scope](docs/reporting.md#delivery-scope).

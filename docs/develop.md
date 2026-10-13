@@ -22,6 +22,7 @@ Keep the change focused on one meaningful behavior, with tests appropriate to it
 
 - Run relevant source checks and tests; select assertions that catch the change's behavior and useful regressions. A tiny styling edit does not need a test that merely repeats the implementation.
 - Build/install with [build guidance](builds.md), then observe the selected app through Androperator. A passing test or build alone does not establish rendered behavior.
+- If configured to use Scaffold, load its selected installation's [build skill](builds.md#build-with-brave-scaffold) for the actual build/test work. Pass the selected Core checkout explicitly and preserve its normal preparation guards; continue using BART/Androperator for app investigation and assessment.
 - Inspect the changed scope and nearby affected interactions. For visual changes, consider theme, focus, layout and relevant device conditions; choose proportionate coverage rather than require a broad matrix.
 - Capture using [evidence](evidence.md) while the behavior happens. For causal before/after claims, compare supported builds and matched conditions. Preserve unexpected results and revise the hypothesis/change.
 - Keep build-tool preparations or local Android support overlays out of product commits. Do not reset or reverse unrelated staging/work to tidy the diff.

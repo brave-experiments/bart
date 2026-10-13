@@ -19,6 +19,7 @@ Task-specific reports and receipts remain in working directories. Use their obse
 ## Next validation priorities
 
 - Demonstrate local feature development from a plain request without prior conversation history: source edits, relevant tests, build/install, runtime inspection and a concise local summary. Honor requested discussion checkpoints without adding routine approval gates to autonomous execution.
+- Exercise the opt-in Brave Scaffold build/test route during that demonstration, loading its maintained local skill and using the selected Core checkout explicitly. Configuration and command-help checks establish integration setup only, not a successful feature build or runtime validation.
 - Exercise an optional unattended local pre-submit QA pass on the developer's actual changed build. Complete the selected phone/tablet, landscape and foreground-theme scope, or return precise blockers and useful partial results.
 - Complete full affected-screen/end-of-list coverage, per-device in-app identity and decisive transition inspection consistently in future QA runs. Finding a defect does not establish completion of the other selected checks.
 - Validate model/harness/reasoning metadata reporting, privacy-safe report assets and portable text context exports against the current guidance.
