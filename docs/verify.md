@@ -34,7 +34,7 @@ Include useful [configuration evidence](reporting.md#configuration-coverage-evid
 
 Developers may request a QA-only pass over local Android changes before submission. Inspect the branch/local diff to choose affected screens and relevant checks, build/install the actual changed APK when requested, and exercise the configuration baseline above. Use [build guidance](builds.md) to tie results to that source/diff, not installed Nightly. This supplements Core's tests/presubmit checks and does not imply code edits or publication.
 
-For an unattended pass, resolve checkout/change scope, device/emulator targets, build/install authority, relevant reversible state changes, exclusive use and output location before execution. Use available tools and continue authorized work without routine pauses. Emulator creation, image installation, resets or other setup beyond the agreed scope require a real scope decision. If blocked, finish a useful partial/blocked report rather than wait indefinitely. Preserve original settings and report restoration limits.
+For an unattended pass, resolve checkout/change scope, device/emulator targets, build/install authority, relevant reversible state changes, exclusive use and output location before execution. Routine emulator selection/start/creation follows [setup](setup.md#emulator-selection-and-setup), preferring existing devices; do not add approval pauses for operations already covered by the task. Resets or setup beyond the agreed scope require a real scope decision. If blocked, finish a useful partial/blocked report rather than wait indefinitely. Preserve original settings and report restoration limits.
 
 ## Complete the assessment
 

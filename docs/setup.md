@@ -48,7 +48,7 @@ Choose the task artifact directory from an explicit task directory, then configu
 
 Select the Android target from explicit task selection, then `android.device_id`, then the sole usable device. Multiple candidates without a selection require a choice. Use an explicitly selected Operator, then `android.operator_package`, otherwise the release default from maintained Androperator guidance. Recheck the selected target and compatibility/readiness when execution starts; config is not a historical readiness receipt. It selects device/package, not transport setup or permission to reset/install apps.
 
-For [configuration coverage](verify.md#configuration-coverage), use explicit per-device task selections, then `android.phone_device_id` and `android.tablet_device_id`. The generic `device_id` can fill one role only after inspecting its actual device configuration; it does not replace the other role. Verify each target's device class, readiness and artifact compatibility. Select an available suitable emulator when authorized; do not silently create one or reinterpret an ordinary phone as a tablet. Missing targets become explicit coverage gaps. Serialize control and do not operate a developer's device concurrently with another controller.
+For [configuration coverage](verify.md#configuration-coverage), use explicit per-device task selections, then `android.phone_device_id` and `android.tablet_device_id`. The generic `device_id` can fill one role only after inspecting its actual device configuration; it does not replace the other role. Verify each target's device class, readiness and artifact compatibility. Use [emulator selection](#emulator-selection-and-setup) to fill missing coverage; do not reinterpret an ordinary phone as a tablet. Missing targets become explicit coverage gaps. Serialize control and do not operate a developer's device concurrently with another controller.
 
 Missing config is supported. Use available checkout/device context and create/select artifacts only when needed. Resolve publication settings only for a publication request. A missing explicitly selected file or malformed relevant setting needs a clear correction; continue independent work with known inputs. Do not rewrite local config as incidental task work. BART configuration does not configure the host's credentials, provider or Androperator transport.
 
@@ -65,6 +65,16 @@ destination = "pull-request"
 ```
 
 Repository values use `owner/repo`; destination values are `issue` or `pull-request`. Item identity comes from the task/linked issue, not a global issue number. Explicit task destinations override the relevant default. Missing or invalid posting settings are resolved before publishing; never fill QA settings from PR settings or fall back to upstream. [Reporting](reporting.md#delivery-scope) owns the meaning of these destinations, comment versus creation scope and preview completion.
+
+## Emulator selection and setup
+
+A request to perform local Android QA or development includes routine selection, starting and creation of suitable host emulators needed for that work, unless the user or host rules restrict setup. Continue without asking separately for every emulator operation. Explain the selected target and material setup actions; configuration and skill loading alone do not authorize execution. Requests only to plan or explain do not authorize creating/starting devices.
+
+Prefer, in order: a suitable running emulator not controlled by someone else, a suitable existing stopped AVD, then a new AVD only when no existing one meets the required device class/API/ABI. Inspect inventory and configuration before choosing. Preserve existing profiles, snapshots and local state; do not wipe, delete or repurpose user-owned AVDs to force a match. Routine setup may install the selected compatible Brave and Operator APKs and required emulator image within the task's scope, subject to host approval/access rules. Resolve real conflicts, resource shortages or restricted installs rather than repeated generic confirmation.
+
+Use Androperator's maintained emulator help and supported SDK tools. Start with `androperator emulator list`, `inspect <name>` and `start <name>`; `provision` can implement reuse-first selection when its supported configuration fits. Inspect `create`/provision defaults before using them: a default phone emulator does not provide tablet coverage. For a tablet, use a genuine suitable tablet AVD/hardware profile through available supported tools, then verify its device configuration and app layout. Name newly created AVDs for their test purpose and record identity/setup in private task notes.
+
+Wait for boot and explicit device discovery, check matching Operator readiness, and observe the app before testing. Record unavailable coverage when setup cannot complete; continue independent checks and return a useful report. Shutdown/cleanup should affect only task-owned instances within scope; do not stop another user's emulator or delete retained evidence/AVDs as incidental cleanup.
 
 ## Task artifacts
 
