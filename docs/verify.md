@@ -30,6 +30,8 @@ For an icon-related change, check comparable rows for expected icons and consist
 
 Keep inspection claims tied to the actual inspected scope. Do not summarize a group as “icons verified” unless the relevant items were individually inspected; state exceptions and uninspected items. This does not require a per-row report, only a truthful summary of what was checked.
 
+Inspect the full affected screen/container, including offscreen and end-of-list content. Retain captures of relevant sections after scrolling and exercise scrolling/reachability when layout could hide controls. Upper/middle screenshots alone do not complete a whole-screen usability check. If the end cannot be reached or assessed, investigate the blocker within scope and report precisely which content/interaction remains unverified.
+
 ## Configuration coverage
 
 For ordinary Android UI QA, attempt the requested behavior on phone portrait, phone landscape, after a foreground-preserving system theme change, tablet portrait and tablet landscape. Inspect appearance and usability: clipping/overlap, scrollability, reachable actions, restored content and relevant device-specific controls. Use [recipes](recipes.md) for the actual trigger and state restoration. This is a baseline, not a requirement to run every combination; add combinations when source or observations suggest an interaction. Honor an explicitly narrower task scope.

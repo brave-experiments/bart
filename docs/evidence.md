@@ -6,6 +6,8 @@ Retain observations while doing the work so a reader can assess the claim. Andro
 
 Capture the starting condition, decisive action/transition and resulting state when they affect the claim. Label build/condition variants clearly. Long setup can stay outside a concise reviewer clip, with supporting observations linked. A small visual prototype may need readable stills; a timing/transition claim may need continuous video.
 
+For recreation, theme-change, rotation or other transition checks, record a concise continuous clip starting before the trigger and continuing through the observed result, with readable baseline and final holds. Do not substitute a settled still for evidence that a screen stayed open or restored without intervention. If recording is unavailable or unusable, retain stills for supported final-state observations and mark transition coverage limited; do not report the transition verified from the final state alone.
+
 Keep useful action receipts and fresh hierarchies/screenshots. Correlation and timing help relate the action to observations, but sequential screenshot/hierarchy captures are not atomic. Saved route coordinates are not current targets; use semantic selection and fresh screen evidence. Follow Androperator's actual image/native geometry guidance if coordinate input is necessary.
 
 ## Inspect what was captured
@@ -13,6 +15,7 @@ Keep useful action receipts and fresh hierarchies/screenshots. Correlation and t
 - Open the actual image, not just its path. Fine shape/color/text may need a higher-detail fresh screenshot. A hierarchy does not establish visual styling, occlusion or contrast.
 - Wait for the relevant state and confirm it remains active. Dismissing a keyboard can also remove focus and invalidate a visual check. Higher resolution cannot repair the wrong state.
 - Finalize video and inspect decisive intervals, rotation, cropping, readability and final hold. Check all video artifacts when display changes produce multiple clips. A recording start receipt or successful decode is not proof that the important behavior is visible.
+- Inspect frames through the decisive trigger/result interval at a resolution appropriate to the claim, or inspect continuous playback with available tools. Sparse contact-sheet samples are orientation aids, not sufficient evidence to exclude brief blank, overlap or disappearance events between samples. Preserve originals, state the inspection method and narrow conclusions to the intervals/properties actually inspected.
 - Inspect capture failures and partial artifacts. A usable screenshot may support a limited claim even if hierarchy/video capture failed. Capture status and app outcome are independent; state the gap rather than discard usable observations.
 - Preserve original recordings and relevant failed attempts. Trim only irrelevant lead-in/trailing footage for delivery and label derived media; do not cut out decisive waits, transitions or interventions. A later clean run does not erase an earlier valid failure.
 
