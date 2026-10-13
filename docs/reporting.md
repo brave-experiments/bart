@@ -134,6 +134,8 @@ Use the [illustrative HTML report](examples/qa-report.html) as the minimum prese
 
 For theme-dependent bugs, include the [required theme demo](evidence.md#theme-change-bugs) prominently under SCREENSHOT / SCREENCAST, including in a development evidence pack. If it could not be recorded or inspected, state the concrete reason near the headline/results and mark theme-transition evidence incomplete. Do not omit video silently or describe after-toggle screenshots as a completed demo.
 
+For orientation-dependent bugs, include the [required rotation demo](evidence.md#orientation-change-bugs) in the same prominent section, showing the transition and relevant resulting layout/interaction. Identify directions actually exercised and any missing reverse/other configuration scope. If footage is missing or uninspected, state the blocker and incomplete rotation verification near the results; separate supporting final-orientation screenshots from transition evidence.
+
 ```text
 <attempt>/
   report.html

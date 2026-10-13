@@ -9,7 +9,7 @@ Produce the requested result from intended behavior, build/source identity, actu
 
 Honor the requested format and location. For local HTML with captures, follow [HTML verification delivery](../../../docs/reporting.md#local-html-verification-report), including relative local media/receipts and a truthful report for blocked or partial outcomes.
 
-Use its [HTML structure example](../../../docs/examples/qa-report.html) for readable evidence packs with inline captures. Theme-dependent bugs require a [demo video](../../../docs/evidence.md#theme-change-bugs), or an explicit capture blocker/incomplete transition result; do not substitute screenshot links silently.
+Use its [HTML structure example](../../../docs/examples/qa-report.html) for readable evidence packs with inline captures. Theme- and orientation-dependent bugs require [theme](../../../docs/evidence.md#theme-change-bugs) or [rotation demo video](../../../docs/evidence.md#orientation-change-bugs), or an explicit capture blocker/incomplete transition result; do not substitute screenshot links silently.
 
 For QA verification, lead with the [verification summary](../../../docs/reporting.md#verification-summary-format): outcome emoji/headline, unofficial notice, compact device/build identity, STEPS, ACTUAL RESULTS and labeled SCREENSHOT / SCREENCAST media. Put detailed receipts and check matrices after that summary.
 

@@ -12,6 +12,8 @@ A source eligibility condition is not proof that a feature is active. Identify d
 
 ## Exercise and assess
 
+Theme and orientation bugs require an explicit runtime QA verification step, including when validating a local fix. After building/installing the changed app, exercise the reported configuration transition, inspect the resulting layout/state and relevant interactions, and retain the required [theme](evidence.md#theme-change-bugs) or [orientation demo](evidence.md#orientation-change-bugs). Source edits, tests and successful compilation alone do not complete these tasks. This verification can alternate with investigation/edits; it is not a mandatory linear phase for every request. Respect review-only or code-only scope and state runtime verification not performed when excluded.
+
 For each useful check, identify the action, intended observation and evidence needed. Use current UI observations for navigation. Bound retries when timing or external state makes reproduction uncertain; record changed conditions rather than pick a favorable timing rule after seeing the outcomes.
 
 Preserve the reported trigger and foreground state. Use [action recipes](recipes.md) for system-theme changes, rotation and settings navigation when applicable, with the issue's STR/TP taking precedence. Determine which event matters from source and reference media; re-entry-only coverage cannot establish foreground restoration.
