@@ -20,7 +20,7 @@ Generate a new UUID for each export; record the archive creation time in UTC. Us
 
 ## Useful contents
 
-At minimum, include `README.md` explaining the assessed target, scope, build/device make/model, prerequisites, how to repeat meaningful checks, original observations/limits and how to find the separate media. Organize additional files only when they exist and help continuation:
+At minimum, include `README.md` explaining the assessed target, scope, build/device make/model, available [agent execution context](reporting.md#assessment-and-investigation), prerequisites, how to repeat meaningful checks, original observations/limits and how to find the separate media. Organize additional files only when they exist and help continuation:
 
 | Contents | Purpose |
 | --- | --- |
