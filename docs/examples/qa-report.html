@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BART QA report structure example</title>
+  <style>
+    body { margin: 0; background: #f5f6f8; color: #202530; font: 16px/1.55 system-ui, sans-serif; }
+    main { max-width: 1080px; margin: auto; padding: 24px; }
+    h1 { font-size: 26px; } h2 { font-size: 21px; margin-top: 28px; }
+    section { margin: 20px 0; } a { color: #244eb5; }
+    .notice { padding: 14px; background: #fff3cd; border-left: 4px solid #946800; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { padding: 10px; text-align: left; vertical-align: top; border-bottom: 1px solid #ddd; }
+    .media { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    figure { margin: 0; padding: 14px; background: white; }
+    .placeholder { padding: 24px; border: 1px dashed #777; background: #eef0f4; }
+    figcaption { margin-top: 10px; } code { overflow-wrap: anywhere; }
+    @media (max-width: 600px) { main { padding: 14px; } th, td { padding: 8px; } }
+  </style>
+</head>
+<body><main>
+  <p class="notice"><strong>Illustrative structure only.</strong> No device was tested for this example. Replace placeholders with inspected evidence; do not deliver this file unchanged.</p>
+  <h1>🟡 Verification PARTIAL using the following:</h1>
+  <p><strong>Automated BART assessment - not an official QA sign-off.</strong></p>
+  <p>Target: &lt;issue/PR link and title&gt;</p>
+  <p class="notice">&lt;Key observed results, additional defects and important missing coverage. Select the headline from actual outcomes, not this example.&gt;</p>
+  <table aria-label="Device, build and conditions">
+    <tr><th>Device/OS</th><td>&lt;Make/model, Android release/API and observed OS build; identify each target without serials&gt;</td></tr>
+    <tr><th>Brave Build</th><td>&lt;Actual in-app version and local build/commit relationship when developing&gt;</td></tr>
+    <tr><th>Chromium</th><td>&lt;Actual in-app version, or explicitly labeled alternate source&gt;</td></tr>
+    <tr><th>Channel/architecture</th><td>&lt;Observed package/channel and ABI&gt;</td></tr>
+    <tr><th>Revision/build relationship</th><td>&lt;Current Nightly containing the fix, or actual locally changed build; distinguish baseline builds&gt;</td></tr>
+    <tr><th>Androperator</th><td>&lt;CLI version used, or actual non-use and reason&gt;</td></tr>
+    <tr><th>Agent execution context</th><td>&lt;Available model, harness/version and reasoning mode; mark not exposed where applicable&gt;</td></tr>
+    <tr><th>Scope/conditions</th><td>&lt;Relevant settings, theme, navigation, prerequisites and original state&gt;</td></tr>
+  </table>
+  <section><h2>STEPS:</h2><ol>
+    <li>&lt;Specific STR/TP and setup used, including relevant foreground state&gt;</li>
+    <li>&lt;Actual trigger, such as system theme change without leaving the target screen&gt;</li>
+    <li>&lt;Observed interaction and restoration steps&gt;</li>
+  </ol></section>
+  <section><h2>ACTUAL RESULTS:</h2><ul>
+    <li>&lt;Concrete expected/observed behavior and individual outcome&gt;</li>
+    <li>&lt;Relevant failures or incomplete checks, without overstating causal proof&gt;</li>
+    <li>&lt;Video inspection method and any limit affecting the claim&gt;</li>
+  </ul></section>
+  <section><h2>SCREENSHOT / SCREENCAST:</h2>
+    <figure><div class="placeholder">&lt;Playable decisive video: use video controls with a relative local MP4 source and optional poster&gt;</div><figcaption>&lt;Build/condition, visible baseline → trigger → result, inspection method, and open/download link&gt;</figcaption></figure>
+    <div class="media">
+      <figure><div class="placeholder">&lt;Inline inspected baseline image&gt;</div><figcaption>&lt;Actual baseline identity/condition and link to full image&gt;</figcaption></figure>
+      <figure><div class="placeholder">&lt;Inline inspected result image&gt;</div><figcaption>&lt;Actual changed-build/result condition and link to full image&gt;</figcaption></figure>
+    </div>
+  </section>
+  <section><h2>Configuration coverage</h2>
+    <table><tr><th>Configuration</th><th>Observed result/outcome</th><th>Evidence</th></tr>
+      <tr><td>Phone portrait</td><td>&lt;Observation&gt;</td><td>&lt;Relative media link&gt;</td></tr>
+      <tr><td>Phone landscape</td><td>&lt;Full affected content and reachability, or precise gap&gt;</td><td>&lt;Media link or blocker&gt;</td></tr>
+      <tr><td>Foreground system-theme change</td><td>&lt;Observation and transition coverage&gt;</td><td>&lt;Demo clip or explicit capture failure&gt;</td></tr>
+      <tr><td>Tablet portrait/landscape</td><td>&lt;Per-orientation observations and device-specific controls&gt;</td><td>&lt;Relevant captures or gap&gt;</td></tr>
+    </table>
+  </section>
+  <section><h2>Implementation and validation details</h2><p>&lt;For development: requirement, focused change, actual commits/builds and test results. Label source hypotheses and unexecuted assertions. Omit when irrelevant.&gt;</p></section>
+  <section><h2>Limits and remaining work</h2><p>&lt;Missing evidence, affected paths, environment problems and next actions; do not hide important failures only here&gt;</p></section>
+  <section><h2>Context attachment and local delivery</h2><p>&lt;Long unique text-only ZIP link, sanitized receipts and useful notes. Keep original private diagnostics separate; no media/binaries inside the ZIP.&gt;</p><p>&lt;Actual link/archive checks and rendered-report check status. Opening the browser is not visual inspection.&gt;</p></section>
+</main></body>
+</html>

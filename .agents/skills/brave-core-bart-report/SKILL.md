@@ -9,6 +9,8 @@ Produce the requested result from intended behavior, build/source identity, actu
 
 Honor the requested format and location. For local HTML with captures, follow [HTML verification delivery](../../../docs/reporting.md#local-html-verification-report), including relative local media/receipts and a truthful report for blocked or partial outcomes.
 
+Use its [HTML structure example](../../../docs/examples/qa-report.html) for readable evidence packs with inline captures. Theme-dependent bugs require a [demo video](../../../docs/evidence.md#theme-change-bugs), or an explicit capture blocker/incomplete transition result; do not substitute screenshot links silently.
+
 For QA verification, lead with the [verification summary](../../../docs/reporting.md#verification-summary-format): outcome emoji/headline, unofficial notice, compact device/build identity, STEPS, ACTUAL RESULTS and labeled SCREENSHOT / SCREENCAST media. Put detailed receipts and check matrices after that summary.
 
 For published QA reports or local reports intended for publication, prepare the [text-only context attachment](../../../docs/report-context.md) from useful retained commands, instructions, test inputs and sanitized receipts. Use its unique filename convention; exclude media/binaries and do not add a live replay merely to create the export.

@@ -130,6 +130,10 @@ Keep this section factual: describe what was measured and observed, including un
 
 When the user requests HTML with local captures, create a dedicated attempt directory containing `report.html` and the assets/receipts that support it. Use embedded CSS and minimal optional JavaScript; no CDN, remote font or hosted app media should be required to read the assessment. The report plus its relative local assets is the portable deliverable; embedding large media into one file is unnecessary.
 
+Use the [illustrative HTML report](examples/qa-report.html) as the minimum presentation structure, adapting it to actual scope and evidence. It demonstrates readable styling, identity, steps/results, inline media, coverage and context sections; it contains no test results or real media. Replace placeholders and omit irrelevant sections, but do not replace a requested evidence pack with a few unstyled paragraphs and opaque numbered capture links. Display the relevant inspected screenshots inline with descriptive captions and full-image links, and embed required demo clips using `<video controls>` plus open/download links. A source explanation and screenshot table alone do not constitute transition evidence.
+
+For theme-dependent bugs, include the [required theme demo](evidence.md#theme-change-bugs) prominently under SCREENSHOT / SCREENCAST, including in a development evidence pack. If it could not be recorded or inspected, state the concrete reason near the headline/results and mark theme-transition evidence incomplete. Do not omit video silently or describe after-toggle screenshots as a completed demo.
+
 ```text
 <attempt>/
   report.html
