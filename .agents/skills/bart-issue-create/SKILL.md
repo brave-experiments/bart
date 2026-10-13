@@ -34,7 +34,7 @@ Include short, relevant fenced code snippets when useful. Anchor existing code t
 - Read snippets from that exact revision and verify their line numbers. Link to `https://github.com/OWNER/REPO/blob/FULL_SHA/path/to/file#Lstart-Lend` in the source repository, which may differ from the issue repository.
 - Label proposed code and local changes as proposals. Anchor their existing context to a verified pushed revision; do not imply the proposed code exists there. If no published source supports a link, state that limit. Do not push commits to obtain links.
 
-Store the draft in a unique directory under the configured `BART_WORK_DIR`, outside the checkout, with its case when applicable. If the variable is unset, ask for its location rather than inventing a machine-specific default. Retain drafts after cancellation or failure.
+Store the draft in a unique task directory selected through [setup](../../../docs/setup.md#configuration), using an explicit task directory or optional `workspace.work_dir` in local `config.toml`. Missing config is supported; resolve the directory only when saving files. Retain drafts after cancellation or failure. This contributor skill targets `brave-experiments/bart` itself, independently of runtime QA/PR publication defaults.
 
 Save a concise, single-line title in `title.txt` and the Markdown body in `body.md`, both as UTF-8. Require both to be nonempty. When resuming an existing draft, preserve the user's saved edits rather than regenerating it from session context. For an older combined draft, split its title and body without changing their text.
 

@@ -1,0 +1,27 @@
+# Copyright (c) 2026 The Brave Authors. All rights reserved.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Optional defaults. Copy to config.toml only if no local file already exists.
+# Replace or omit workspace paths; relative paths resolve from the config file.
+
+[workspace]
+brave_core_dir = "/absolute/path/to/src/brave"
+work_dir = "/absolute/path/to/bart-work"
+
+# Optional target defaults; omit device_id to resolve it for each task.
+[android]
+# device_id = "<device-serial>"
+# phone_device_id = "<phone-serial>"
+# tablet_device_id = "<tablet-or-tablet-emulator-serial>"
+operator_package = "com.androperator.operator"
+
+# Development: both outputs go to BART issues; PR output is a preview.
+[publication.qa]
+repository = "brave-experiments/bart"
+destination = "issue"
+
+[publication.pr]
+repository = "brave-experiments/bart"
+destination = "issue"
