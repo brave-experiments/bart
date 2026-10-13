@@ -1,71 +1,98 @@
 # BART
 
-BART is a collection of skills that help an existing coding agent understand, develop, investigate and verify Brave Android through source code and the running app.
+**Ask your coding agent to check Brave Android, and get findings you can inspect.**
 
-The current agent reasons, edits code and assesses results. [Androperator](https://docs.androperator.com/host-agents/) supplies Android actions, observations and evidence. Brave Core and existing development tools supply builds, installs and repository operations.
+BART helps an agent investigate issues, verify fixes and develop changes using both Brave Core source and the running Android app. It gives the agent Brave-specific guidance for testing, evidence and reporting. You describe the work in ordinary language; the agent chooses the relevant checks and tools.
 
-## Use an ordinary request
+For QA, the benefit is more coverage with reviewable evidence: phone and tablet layouts, landscape behavior, system-theme changes and configuration-specific controls. For engineers, the same skills support local development and an optional QA pass before submission. Reviewers get the tested build, what actually happened, captures and clear coverage limits.
 
-Use the same entry point for autonomous execution and developer collaboration. A feature description, design reference or app observation can start the work; a GitHub issue or PR is optional.
+## Try a QA verification
 
-### Develop a feature locally
-
-```text
-/brave-core-bart Implement <feature description> in this Brave Android checkout.
-Use emulator-5554. Build, install and inspect the result locally.
-Keep everything local; do not push or create a PR.
-```
-
-### Discuss an approach before implementation
+Once [set up](docs/setup.md), start your usual coding-agent session and ask:
 
 ```text
-/brave-core-bart Help me develop <feature description>.
-Inspect the relevant source and discuss the approach with me before editing.
+/brave-core-bart QA verify https://github.com/brave/brave-core/pull/40563.
+Save a local HTML report, captures and text-only context ZIP under .work/pr-40563/.
+Do not publish findings.
 ```
 
-### Investigate an issue or verify a PR
+Ordinary verification of a merged fix uses **current Nightly**, rather than requiring the original PR build. The agent inspects the issue, PR and relevant source, exercises the app, and records observations. It prefers suitable existing emulators and can prepare one when needed within the authorized task and host rules. Missing devices, prerequisites or evidence are reported, not counted as passing checks.
 
-For an optional local pre-submit check:
+Use `/brave-core-bart` as the main entry point. You do not need to invoke a series of preparation commands or supply a formal test package.
+
+## What you get
+
+A QA report leads with a familiar summary:
+
+```text
+🟢 Verification PASSED using the following:
+Automated BART assessment - not an official QA sign-off.
+
+Device, build and conditions
+STEPS
+ACTUAL RESULTS
+SCREENSHOT / SCREENCAST
+```
+
+The headline reflects the findings: passed, failed, blocked, inconclusive or partial. This is an example format, not a recorded pass.
+
+The report includes:
+
+- **Tested identity:** device make/model, Android version/API, Brave and Chromium versions, Androperator version and available model/execution context.
+- **Actual results:** observed behavior, relevant failures and any additional issues spotted during testing.
+- **Configuration coverage:** phone/tablet, portrait/landscape and system-theme checks, with useful captures and explicit omissions.
+- **Visible evidence:** labeled screenshots and transition recordings, with inspection and timing limits stated.
+- **Reproduction context:** a compact text-only ZIP for published reports or when requested locally, containing useful commands, test inputs, instructions and sanitized receipts. Media and APKs stay separate.
+
+Requested local HTML opens with its capture assets using relative links. Reports exclude device serials and other personally identifying information. Measurements can add precise observations, but are not presented as universal proof that a bug is fixed.
+
+**BART assists QA; it does not provide official QA sign-off.** A successful command is not automatically successful app behavior, and untested configurations remain untested. See [reporting](docs/reporting.md) for the output conventions.
+
+## For engineers
+
+Develop a feature locally:
+
+```text
+/brave-core-bart Implement <feature description> in this Android checkout.
+Build, install and inspect it on my configured device. Keep everything local.
+```
+
+Run an optional pre-submit QA pass:
 
 ```text
 /brave-core-bart QA my local Android changes before submission.
-Build and inspect them on the configured phone and tablet emulator.
-Save a local HTML report and captures. Do not edit code or publish findings.
+Build and inspect them on phone and tablet. Save a local HTML report and captures.
+Do not edit product code or publish findings.
 ```
 
-Normal UI QA attempts phone/tablet, landscape and system-theme coverage and includes useful captures. Unavailable configurations and additional observed defects remain explicit. See [verification](docs/verify.md#configuration-coverage); a narrower request can select a smaller scope.
+A local pre-submit pass tests **your changed build**, not an unrelated installed Nightly. It supplements Core's normal tests and presubmit checks.
 
-```text
-/brave-core-bart look at https://github.com/brave/brave-browser/issues/59445.
-Prototype a fix in a draft PR
-```
+You can ask to discuss the approach before editing, contribute feedback during the work, or let the agent continue authorized implementation and testing autonomously. A GitHub URL is optional; a feature description, design reference or app observation can start the task. The agent can move between source research, app inspection and changes as needed. Local development normally ends with a concise summary rather than a formal QA report.
 
-```text
-/brave-core-bart verify the fix in https://github.com/brave/brave-core/pull/40517.
-```
+Development guidance is available; end-to-end feature development through BART still needs a dedicated live demonstration. See [developing](docs/develop.md) and the [validation plan](docs/plan.md).
 
-Understanding, acting and reporting are capabilities, not ordered phases. Start with the code or app, return to research when an observation raises questions, and revise the approach as needed.
+## Get started
 
-The agent continues authorized implementation and validation without routine approval pauses. A developer can request a discussion checkpoint or contribute code/app observations during the work. Local development finishes with the implementation, requested checks/runtime inspection and a concise summary; publication and reproduction packages remain separately scoped. See the [developer quick start](docs/setup.md#developer-quick-start).
+1. Make the BART skills discoverable to your existing agent, following [setup](docs/setup.md#skill-discovery).
+2. Use a Brave Core checkout for source work and [Androperator](https://docs.androperator.com/host-agents/) for Android actions and evidence. Local builds use Core's existing tools; Brave Scaffold is optional.
+3. Optionally set checkout, work-folder, device and posting defaults in ignored `config.toml`, using [config.example.toml](config.example.toml). Missing config is supported when the task supplies the needed context.
 
-## Skills
+BART runs through the agent already in your session. It does not require a BART CLI, separate agent launcher or model-provider account. Skills and shared docs supply the guidance; the host agent and existing tools perform the work.
 
-| Skill | Purpose |
+Task artifacts can live in ignored `.work/` or an external directory. Publication occurs only when requested and permitted by the host. The example configuration sends development reports and PR previews to BART issues; a preview is not an actual Core draft PR. See [configuration](docs/setup.md#configuration) and [delivery scope](docs/reporting.md#delivery-scope).
+
+## Current maturity
+
+Initial local QA runs have exercised Wallet settings across system-theme changes and Appearance settings on phone/tablet configurations. They produced HTML reports, captures and text context, and identified a tablet-only icon/alignment omission. Coverage and evidence quality are still being refined; these runs are not a reliability benchmark or complete regression suite.
+
+Fresh-session development, actual draft-PR delivery, external publication and independent reuse of exported reproduction instructions need further validation. BART is ready for more scoped QA trials, with findings and limitations reviewed by people. The [maintained plan](docs/plan.md) tracks capabilities and gaps.
+
+## Supporting skills and guidance
+
+| Skill | Use |
 | --- | --- |
-| [brave-core-bart](.agents/skills/brave-core-bart/SKILL.md) | Main entry point for Brave Android work. Loads relevant guidance as needed. |
-| [brave-core-bart-report](.agents/skills/brave-core-bart-report/SKILL.md) | Assessments, investigations, prototype demonstrations and draft PRs. |
-| [brave-core-bart-reproduce](.agents/skills/brave-core-bart-reproduce/SKILL.md) | Optional adaptive reproduction instructions for another attempt. |
+| [brave-core-bart](.agents/skills/brave-core-bart/SKILL.md) | Main entry point for development, investigation and verification. |
+| [brave-core-bart-report](.agents/skills/brave-core-bart-report/SKILL.md) | Create or update a report from observations and evidence. |
+| [brave-core-bart-reproduce](.agents/skills/brave-core-bart-reproduce/SKILL.md) | Save optional adaptive instructions for another attempt. |
 
-Follow [setup](docs/setup.md) to make the skills available to the agent working in Core. There is no BART CLI, agent launcher or required Node installation. Shared guidance lives in `docs/`; skills link to it rather than duplicate it.
-
-## Local configuration
-
-Optional `config.toml` selects the Core checkout, artifact directory and independent QA/PR posting defaults. [config.example.toml](config.example.toml) directs development publication to BART issues. A source issue or PR URL does not select the write destination.
-
-Verification returns an assessment; posting requires a posting request. A BART issue containing a PR description is a preview, not completion of a request to create a real draft PR. See [reporting and delivery](docs/reporting.md).
-
-## Status
-
-The skills, configuration guidance and supporting documents are available. Fresh-session source/app workflows, exact PR APK retrieval, publication and reproduction reuse still need live validation. The examples above are requests to try, not recorded results. See the [maintained plan](docs/plan.md) and [project goal](docs/north-star.md).
-
-Contributors: read [AGENTS.md](AGENTS.md) and [contributing](docs/contributing.md). [bart-issue-create](.agents/skills/bart-issue-create/SKILL.md) is a repository-local contributor skill, separate from the runtime collection.
+Shared guidance covers [verification](docs/verify.md), [builds](docs/builds.md), [evidence](docs/evidence.md), [action recipes](docs/recipes.md) and [Brave QA resources](docs/qa-resources.md). Contributors should read [AGENTS.md](AGENTS.md) and [contributing](docs/contributing.md); [bart-issue-create](.agents/skills/bart-issue-create/SKILL.md) helps draft issues about BART itself.
