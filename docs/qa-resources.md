@@ -14,7 +14,7 @@ The [qa-resources repository](https://github.com/brave/qa-resources) contains An
 | [Android Sync V2 wiki plan](https://github.com/brave/qa-resources/wiki/Android-Sync-V2) | Sync identity, offline state, invalid inputs and multi-device prerequisite examples. | Historical navigation, defaults and clean-install requirements need current/task-specific interpretation. |
 | [Test links](https://github.com/brave/qa-resources/blob/master/testlinks.json) | Candidate sites/input fixtures for a relevant check. | URLs may be stale or external content may have changed; a link alone is not an expectation or known-good fixture. |
 
-The wiki page called “Brave Native Wallet Test Plan” describes Desktop, while “[TBA] Mobile Wallet Test Plan” is a placeholder in the inspected checkout. Do not select a plan by its title alone or claim mobile coverage from either. Inspect actual contents/platform and use the Android Wallet template when appropriate.
+Check a plan's actual platform and contents, not its title alone. “Brave Native Wallet Test Plan” may describe Desktop, and a TBA mobile page may contain no checks. Use the Android Wallet template when applicable and confirm the current upstream content before claiming coverage.
 
 ## Apply the useful knowledge
 

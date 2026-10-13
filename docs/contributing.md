@@ -15,4 +15,4 @@ Run `git diff --check` and existing applicable checks. Read changed skills/docs 
 
 A focused setup change may need native discovery checks; a runtime recipe needs scoped app observation. Record actual coverage and failures externally. Documentation edits do not automatically require a device/model request. Source tests/builds are run in their own selected Core workspace, not BART.
 
-Keep no compatibility shims for obsolete BART commands or schemas. Do not overwrite unknown local work or erase ignored files as incidental cleanup. Update [the plan](plan.md) with demonstrated capabilities and real gaps, not a claimed pass based only on process exit.
+Do not overwrite unknown local work or erase ignored files as incidental cleanup. Update [capability status](plan.md) with demonstrated work and real gaps, not a claimed pass based only on process exit. Keep reusable knowledge in its owning document and link to it rather than accumulating repeated rules across skills.

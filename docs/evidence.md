@@ -65,7 +65,7 @@ androperator on-screen-log clear --device "$SERIAL" --operator-package "$OPERATO
 
 Use the [toast action contract](https://docs.androperator.com/api/actions/#show_toast) for brief action announcements, with `short` or `long` native duration. Toast submission does not wait for display/dismissal; Android can truncate or rate-limit it. If a toast is absent from a capture, do not claim it was visible. Its Operator icon is not the identity of the app being tested. See [the recipe](recipes.md#announce-an-external-action) for an ADB theme-change announcement.
 
-Clear/cancel only the current annotations created for the task. Both APIs replace their previous annotation for the selected Operator; resolve other controller use first. API/CLI syntax was checked against maintained docs and installed CLI help; capture inclusion and live template/toast behavior still require observation on the selected device. Missing labeling support is a usage-notes finding, not a reason to block otherwise useful QA.
+Clear/cancel only the current annotations created for the task. Both APIs replace their previous annotation for the selected Operator; resolve other controller use first. Check current API/CLI support and observe inclusion/readability on the selected device. Initial captures demonstrate live labels/toasts on one device, not universal capture-path support. Missing labeling support is a usage-notes finding, not a reason to block otherwise useful QA.
 
 ## Measured observations
 

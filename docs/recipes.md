@@ -59,7 +59,7 @@ adb -s "$SERIAL" shell wm user-rotation lock 0
 
 Values are display rotations relative to its natural orientation: 0, 1, 2, 3 correspond to 0°, 90°, 180°, 270°. On a naturally portrait phone, 1 usually requests landscape and 0 portrait; do not assume that mapping on every device. Read back `wm user-rotation` and inspect actual display/app geometry through fresh hierarchy/screenshots. App orientation constraints can prevent the requested visible rotation. Do not silently override those constraints, resize the display or change density to manufacture the expected state.
 
-Restore the original mode: `wm user-rotation free` when originally free, or `wm user-rotation lock <original-value>` when originally locked. Preserve other settings. If this route is unavailable, inspect the supported alternative rather than blindly write settings; retain its effects/restoration and coverage limits. Window-manager help/readbacks were checked on an Android 17 Pixel; forced rotation through this recipe still needs live validation. Captures crossing rotation require [video inspection](evidence.md#inspect-what-was-captured).
+Restore the original mode: `wm user-rotation free` when originally free, or `wm user-rotation lock <original-value>` when originally locked. Preserve other settings. If this route is unavailable, inspect the supported alternative rather than blindly write settings; retain its effects/restoration and coverage limits. Initial QA runs exercised forced rotation on selected phone/tablet targets; verify support and actual orientation on each new target. Captures crossing rotation require [video inspection](evidence.md#inspect-what-was-captured).
 
 ## Open Brave settings and find a setting
 

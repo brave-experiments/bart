@@ -13,7 +13,7 @@ That result may be an explanation, bug investigation, code change, prototype, sc
 | BART | Supply Brave-specific knowledge, workflow judgment and reporting/reproduction guidance. |
 | Core and existing development tools | Build, install, retrieve artifacts and perform authorized repository operations. |
 
-Use the smallest useful skill set. One-off work needs no formal preparation package or saved reproduction skill. There is no API compatibility requirement and no need for a BART runtime framework.
+Use the smallest useful skill set. One-off work needs no formal preparation package or saved reproduction skill. BART supplies instructions to the current agent rather than a separate execution framework.
 
 ## Working model
 
