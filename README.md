@@ -57,6 +57,15 @@ Develop a feature locally:
 Build, install and inspect it on my configured device. Keep everything local.
 ```
 
+Implement an issue and retain evidence for review:
+
+```text
+/brave-core-bart Implement <issue URL> in this Android checkout on its current branch.
+Build and commit locally, do not push. Create a QA evidence pack.
+```
+
+The evidence pack includes a local HTML assessment, inspected screenshots and required transition demos, useful build/test/install receipts and a sanitized text-only context ZIP. It assesses the actual changed build; a successful commit or build alone does not establish the fix. “This checkout” selects the session's Core checkout rather than a different configured default. See [development evidence packs](docs/develop.md#requested-qa-evidence-pack).
+
 Run an optional pre-submit QA pass:
 
 ```text
@@ -74,9 +83,9 @@ Development guidance is available; end-to-end feature development through BART s
 ## Technical PR review
 
 ```text
-/brave-core-bart Perform a runtime-backed technical review of <PR URL>
-in this review checkout. Check out, sync, build and test the PR; create focused
-test fixtures where useful. Save a local HTML review and evidence pack.
+/brave-core-bart Perform a technical review of <PR URL>.
+Check out and sync the PR in this review checkout, build and run it,
+and construct local fixtures where useful. Save a local HTML review and evidence pack.
 Do not modify product code, push or publish findings.
 ```
 
