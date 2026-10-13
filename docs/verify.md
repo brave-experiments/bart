@@ -22,6 +22,14 @@ Select nearby regression checks proportionate to the change, using applicable [Q
 
 Add [measured observations](evidence.md#measured-observations) when an exposed property supplies useful additional facts, such as geometry for a placement issue or exact preference values after recreation. Retain the measurements and conditions without inferring a fix verdict or causation from them. Do not require measurements or historical comparisons when they add no useful evidence.
 
+## Inspect the whole affected UI group
+
+When a change establishes or updates a repeated UI pattern, inspect the affected group for completeness, not only the components changed in the diff. Include items supplied by upstream code and items visible only on particular device or feature configurations. Compare relevant properties such as icons, alignment, labels, summaries, grouping, enabled state and interaction. Inspect actual screenshots as well as hierarchy data; decorative icons may not appear as separately identifiable accessibility nodes.
+
+For an icon-related change, check comparable rows for expected icons and consistent alignment, including configuration-only rows. An omission may be intentional; record the observed difference and consult requirements, design references or established conventions before classifying it as a defect. If intent is unclear, flag the inconsistency for review rather than invent a universal rule that every item needs an icon. A source/runtime discrepancy likewise needs interpretation against intended behavior, not an automatic failure based only on source values.
+
+Keep inspection claims tied to the actual inspected scope. Do not summarize a group as “icons verified” unless the relevant items were individually inspected; state exceptions and uninspected items. This does not require a per-row report, only a truthful summary of what was checked.
+
 ## Configuration coverage
 
 For ordinary Android UI QA, attempt the requested behavior on phone portrait, phone landscape, after a foreground-preserving system theme change, tablet portrait and tablet landscape. Inspect appearance and usability: clipping/overlap, scrollability, reachable actions, restored content and relevant device-specific controls. Use [recipes](recipes.md) for the actual trigger and state restoration. This is a baseline, not a requirement to run every combination; add combinations when source or observations suggest an interaction. Honor an explicitly narrower task scope.
