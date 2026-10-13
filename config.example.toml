@@ -13,6 +13,8 @@ work_dir = "/absolute/path/to/bart-work"
 # Optional target defaults; omit device_id to resolve it for each task.
 [android]
 # device_id = "<device-serial>"
+# phone_device_id = "<phone-serial>"
+# tablet_device_id = "<tablet-or-tablet-emulator-serial>"
 operator_package = "com.androperator.operator"
 
 # Development: both outputs go to BART issues; PR output is a preview.

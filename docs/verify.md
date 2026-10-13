@@ -22,6 +22,20 @@ Select nearby regression checks proportionate to the change, using applicable [Q
 
 Add [measured observations](evidence.md#measured-observations) when an exposed property supplies useful additional facts, such as geometry for a placement issue or exact preference values after recreation. Retain the measurements and conditions without inferring a fix verdict or causation from them. Do not require measurements or historical comparisons when they add no useful evidence.
 
+## Configuration coverage
+
+For ordinary Android UI QA, attempt the requested behavior on phone portrait, phone landscape, after a foreground-preserving system theme change, tablet portrait and tablet landscape. Inspect appearance and usability: clipping/overlap, scrollability, reachable actions, restored content and relevant device-specific controls. Use [recipes](recipes.md) for the actual trigger and state restoration. This is a baseline, not a requirement to run every combination; add combinations when source or observations suggest an interaction. Honor an explicitly narrower task scope.
+
+Use suitable authorized devices/emulators and the actual build selected for the task. A resized phone window alone does not establish tablet coverage. Resolve missing tablet access or setup within the authorized scope and continue independent phone checks. Report unavailable configurations as blocked/not run, or explain source/observed inapplicability. Default UI QA missing selected baseline coverage is partial; explicitly scoped checks can pass without implying the full baseline ran. Any observed defect remains a failure even when other configurations pass.
+
+Include useful [configuration evidence](reporting.md#configuration-coverage-evidence) for every exercised configuration. Do not claim scrolling or restored interaction from a static screenshot alone. Flag additional configuration-specific defects separately from the original fix's result and prominently in actual results; creating a new issue is separately scoped publication.
+
+## Local pre-submit QA
+
+Developers may request a QA-only pass over local Android changes before submission. Inspect the branch/local diff to choose affected screens and relevant checks, build/install the actual changed APK when requested, and exercise the configuration baseline above. Use [build guidance](builds.md) to tie results to that source/diff, not installed Nightly. This supplements Core's tests/presubmit checks and does not imply code edits or publication.
+
+For an unattended pass, resolve checkout/change scope, device/emulator targets, build/install authority, relevant reversible state changes, exclusive use and output location before execution. Use available tools and continue authorized work without routine pauses. Emulator creation, image installation, resets or other setup beyond the agreed scope require a real scope decision. If blocked, finish a useful partial/blocked report rather than wait indefinitely. Preserve original settings and report restoration limits.
+
 ## Complete the assessment
 
 Return the checks, observations and limits using [reporting](reporting.md). A product failure or supported non-reproduction can complete an assessment; unavailable setup produces blocked/partial coverage. Preserve mixed outcomes. Posting and optional reproduction packaging are separately scoped work.

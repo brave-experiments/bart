@@ -25,6 +25,16 @@ Inspect the relevant source and discuss the approach with me before editing.
 
 ### Investigate an issue or verify a PR
 
+For an optional local pre-submit check:
+
+```text
+/brave-core-bart QA my local Android changes before submission.
+Build and inspect them on the configured phone and tablet emulator.
+Save a local HTML report and captures. Do not edit code or publish findings.
+```
+
+Normal UI QA attempts phone/tablet, landscape and system-theme coverage and includes useful captures. Unavailable configurations and additional observed defects remain explicit. See [verification](docs/verify.md#configuration-coverage); a narrower request can select a smaller scope.
+
 ```text
 /brave-core-bart look at https://github.com/brave/brave-browser/issues/59445.
 Prototype a fix in a draft PR

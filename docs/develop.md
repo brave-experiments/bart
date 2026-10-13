@@ -30,4 +30,6 @@ Builds, installs, syncs and repairs follow the current task's checkout/device au
 
 ## Deliver
 
+An optional [local pre-submit QA pass](verify.md#local-pre-submit-qa) can inspect the changed build across phone/tablet, landscape and theme configurations before submission. The same entry point handles this QA-only request; it does not automatically edit code or publish findings. Resolve targets and authorized operations before an unattended run, then return the report and observed defects for the developer's next iteration.
+
 Follow the request and Core/host commit rules; any commit contains only the intended source change and relevant tests. [Reporting](reporting.md) defines the lightweight local summary and requested reports/PRs. Local-only work does not imply a QA document, posting, push or reproduction package. A prototype can reveal remaining defects; report them. A truthful failed prototype does not prove a fix, but can demonstrate useful development work.

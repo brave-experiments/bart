@@ -89,6 +89,24 @@ Androperator:
 
 The explicit headline/section layout comes from QA comments on [57449](https://github.com/brave/brave-browser/issues/57449#issuecomment-6005588417) and [57747](https://github.com/brave/brave-browser/issues/57747#issuecomment-5345309104). Other concise examples are [57872](https://github.com/brave/brave-browser/issues/57872#issuecomment-5607870886), [58827](https://github.com/brave/brave-browser/issues/58827#issuecomment-5637985692) and [58370](https://github.com/brave/brave-browser/issues/58370#issuecomment-5728374687). These are format/coverage references, not BART evidence. [QA resources](qa-resources.md) supplies optional regression context; do not apply official QA labels or sign-off merely because the assessment passes.
 
+## Configuration coverage evidence
+
+Include evidence for configuration checks in the report, not only a claim that they were tested. After the standard QA summary and primary media, show a compact table with configuration, actual observed result/outcome and evidence links. Use entries such as phone portrait, phone landscape, after system theme change, tablet portrait and tablet landscape, following [verification scope](verify.md#configuration-coverage). Name actual tested devices by make/model and record relevant conditions; never include physical serials. Mark blocked, omitted or inapplicable checks with reasons rather than empty evidence cells implying success.
+
+Show useful labeled captures for each exercised configuration in a comparison grid or expandable supporting section. Use screenshots for visible layout and clips for scrolling, recreation or interaction claims. One clip can support several checks; link the same capture instead of duplicating media. Include relevant successful coverage even when it adds report length: reviewers should be able to inspect what landscape/tablet testing actually looked like.
+
+Keep the main finding and decisive capture near the headline. Additional observed defects belong prominently in ACTUAL RESULTS with their captures, separately identifying the original fix's result and affected configuration. Do not hide them in a collapsed successful-coverage appendix. Repeated captures adding no information and raw diagnostic logs remain local supporting material, linked selectively. Preserve original/failed attempts under [evidence guidance](evidence.md).
+
+An illustrative coverage table, not claimed results:
+
+| Configuration | Actual result/outcome | Evidence |
+| --- | --- | --- |
+| Phone portrait | <observed behavior> | <capture> |
+| Phone landscape | <layout and usability observations> | <capture/clip> |
+| After system theme change | <restoration and control observations> | <clip> |
+| Tablet portrait | <tablet layout/controls observed> | <capture> |
+| Tablet landscape | <observations or specific blocker> | <capture or not run reason> |
+
 ## Additional measurement evidence
 
 After the standard verification summary, include a measurement table when useful, with the measured property, actual values for each observed build/condition, units/method and evidence references. A single current-build column is valid; before/after columns are appropriate only when both were actually measured. State source-derived expectations separately from measured values.

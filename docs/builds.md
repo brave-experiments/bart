@@ -33,6 +33,8 @@ Record the revision actually built, artifact identity and any head/merge distinc
 
 ## Build with existing tools
 
+For local pre-submit QA, test an APK built from the selected branch and actual local changes, recording their revision/diff and effective build output. Do not substitute current Nightly and claim the developer's changes were assessed. Select compatible artifacts for each phone/tablet target; reuse one build only where its ABI/API requirements fit both. [Pre-submit guidance](verify.md#local-pre-submit-qa) defines the scope and unattended prerequisites.
+
 Read the selected Core checkout's README, Android development/build configuration guidance and relevant test docs. Inspect its package scripts/help, current environment and `args.gn` when they affect the task. Build through Core's supported commands, with target OS/architecture, configuration and APK output chosen for the device. [Core's Android environment guide](https://github.com/brave/brave-browser/wiki/Android-Development-Environment) is a starting reference, not proof of local readiness.
 
 For a prepared Core workspace, this is a starting command for a Debug arm64 APK, run from Core's root:

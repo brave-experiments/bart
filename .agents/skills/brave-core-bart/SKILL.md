@@ -33,6 +33,8 @@ For Android actions, use installed `androperator-agent-orientation` when unfamil
 
 Ordinary QA of a merged fix uses current Nightly, including a newer installed build than the PR's release comment. Follow [build selection](../../../docs/builds.md#select-and-identify-an-apk); exact/historical testing is a distinct requested scope.
 
+For UI QA, follow the [configuration baseline](../../../docs/verify.md#configuration-coverage) and include its captures/coverage gaps in the report. A [local pre-submit QA request](../../../docs/verify.md#local-pre-submit-qa) uses the developer's changed build rather than Nightly and can run autonomously within agreed device/build scope.
+
 During Androperator work, maintain per-session [usage notes](../../../docs/evidence.md#androperator-usage-notes) for API/docs gaps, feature requests and concrete fallbacks such as `adb`, referencing existing logs rather than duplicating them.
 
 ## Finish the requested work
