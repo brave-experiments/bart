@@ -6,14 +6,14 @@ Make BART's skills and linked docs readable by the agent already working in Core
 
 Keep a stable local BART checkout. Its canonical skills live in `.agents/skills/`; `.claude/skills` links to that directory and `CLAUDE.md` links to `AGENTS.md`.
 
-For sessions working in Core, link the three `brave-core-bart*` skill directories into the host's personal discovery directory:
+For sessions working in Core, link the three runtime skill directories into the host's personal discovery directory: `brave-core-bart`, `brave-core-bart-report` and `brave-core-bart-reproduce`.
 
 | Host | Personal discovery location |
 | --- | --- |
 | Claude Code | `~/.claude/skills/` |
 | Agent-compatible hosts, including OpenCode | `~/.agents/skills/` |
 
-Create each link only after inspecting the target directory and any same-named entry. Preserve existing user-owned entries and shared-directory links. Use an absolute source target such as `<bart-checkout>/.agents/skills/brave-core-bart`; repeat for report/reproduce. Do not install the contributor `bart-issue-create` into Core sessions. This setup writes outside Core and requires the user's setup scope.
+Create each link only after inspecting the target directory and any same-named entry. Preserve existing user-owned entries and shared-directory links. Use an absolute source target such as `<bart-checkout>/.agents/skills/brave-core-bart`; repeat for the other runtime skills. Do not install the contributor `bart-issue-create` into Core sessions. This setup writes outside Core and requires the user's setup scope.
 
 Claude Code also supports session-local `--add-dir <bart-checkout>` discovery. See [Claude skills](https://code.claude.com/docs/en/skills) and [OpenCode skills](https://opencode.ai/docs/skills/) for current host behavior. OpenCode slash metadata on the main skill is optional host metadata; confirm the installed client's support. A sibling clone or parent directory is not proof of discovery from a Git worktree. To update a linked installation, update the stable BART checkout and reload skills or start a fresh session as the host requires; do not overwrite personal skill entries or local config. To remove it, remove only links that you verified point to this collection.
 
@@ -37,6 +37,7 @@ The default config location is relative to the real BART skill source, independe
 | --- | --- |
 | `workspace.brave_core_dir` | Default Core checkout root, normally `<workspace>/src/brave`. |
 | `workspace.work_dir` | Optional root for task notes, downloads and evidence, including BART's ignored `.work/`. |
+| `brave-scaffold.enabled`, `.root` | Opt in to an existing Brave Scaffold checkout for local build/test work; omitted `enabled` means false. |
 | `android.device_id`, `.operator_package` | Optional device and matching Operator defaults; pass the resolved selections explicitly to Android tools. |
 | `android.phone_device_id`, `.tablet_device_id` | Optional independent phone/tablet targets for configuration coverage. |
 | `publication.qa.repository`, `.destination` | Default QA/investigation posting repository and item type. |
@@ -51,6 +52,10 @@ Select the Android target from explicit task selection, then `android.device_id`
 For [configuration coverage](verify.md#configuration-coverage), use explicit per-device task selections, then `android.phone_device_id` and `android.tablet_device_id`. The generic `device_id` can fill one role only after inspecting its actual device configuration; it does not replace the other role. Verify each target's device class, readiness and artifact compatibility. Use [emulator selection](#emulator-selection-and-setup) to fill missing coverage; do not reinterpret an ordinary phone as a tablet. Missing targets become explicit coverage gaps. Serialize control and do not operate a developer's device concurrently with another controller.
 
 Missing config is supported. Use available checkout/device context and create/select artifacts only when needed. Resolve publication settings only for a publication request. A missing explicitly selected file or malformed relevant setting needs a clear correction; continue independent work with known inputs. Do not rewrite local config as incidental task work. BART configuration does not configure the host's credentials, provider or Androperator transport.
+
+Set `brave-scaffold.enabled = true` and `brave-scaffold.root` to your existing [Brave Scaffold](https://github.com/brave-experiments/brave-scaffold) checkout when you want its maintained build/test workflow. Resolve `root` using the same relative/absolute/`~/` path rules as workspace paths; it is the Scaffold root, not Core. When enabled, use [Scaffold build guidance](builds.md#build-with-brave-scaffold) for local builds/tests. When disabled or omitted, use Core's supported standalone commands. An explicit task tool choice overrides this default without editing config.
+
+An enabled installation needs a readable root, `.agents/skills/bcore-full-build-context/SKILL.md` and its `scripts/bcore` launcher. If missing, inspect available setup and report the specific integration gap; do not silently change build tools or install Scaffold. Resolve a supported fallback when the request allows it or ask only for the real tool/setup choice, continuing independent source work. A config flag selects tools, not build/install/sync authority or environment approval.
 
 Development defaults in the example use issues in `brave-experiments/bart` for both report categories. Production defaults can be:
 

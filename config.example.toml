@@ -10,6 +10,11 @@
 brave_core_dir = "/absolute/path/to/src/brave"
 work_dir = "/absolute/path/to/bart-work"
 
+# Opt in to an existing checkout of https://github.com/brave-experiments/brave-scaffold.
+[brave-scaffold]
+enabled = false
+# root = "/absolute/path/to/brave-scaffold"
+
 # Optional target defaults; omit device_id to resolve it for each task.
 [android]
 # device_id = "<device-serial>"

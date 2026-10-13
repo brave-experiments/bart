@@ -130,6 +130,12 @@ Keep this section factual: describe what was measured and observed, including un
 
 When the user requests HTML with local captures, create a dedicated attempt directory containing `report.html` and the assets/receipts that support it. Use embedded CSS and minimal optional JavaScript; no CDN, remote font or hosted app media should be required to read the assessment. The report plus its relative local assets is the portable deliverable; embedding large media into one file is unnecessary.
 
+Use the [illustrative HTML report](examples/qa-report.html) as the minimum presentation structure, adapting it to actual scope and evidence. It demonstrates readable styling, identity, steps/results, inline media, coverage and context sections; it contains no test results or real media. Replace placeholders and omit irrelevant sections, but do not replace a requested evidence pack with a few unstyled paragraphs and opaque numbered capture links. Display the relevant inspected screenshots inline with descriptive captions and full-image links, and embed required demo clips using `<video controls>` plus open/download links. A source explanation and screenshot table alone do not constitute transition evidence.
+
+For theme-dependent bugs, include the [required theme demo](evidence.md#theme-change-bugs) prominently under SCREENSHOT / SCREENCAST, including in a development evidence pack. If it could not be recorded or inspected, state the concrete reason near the headline/results and mark theme-transition evidence incomplete. Do not omit video silently or describe after-toggle screenshots as a completed demo.
+
+For orientation-dependent bugs, include the [required rotation demo](evidence.md#orientation-change-bugs) in the same prominent section, showing the transition and relevant resulting layout/interaction. Identify directions actually exercised and any missing reverse/other configuration scope. If footage is missing or uninspected, state the blocker and incomplete rotation verification near the results; separate supporting final-orientation screenshots from transition evidence.
+
 ```text
 <attempt>/
   report.html
@@ -166,11 +172,21 @@ Use labeled before/after media when supported, identifying actual builds and mat
 
 For a real PR, select the base repository/branch and actual head repository/branch explicitly, inspect all included commits and the diff, and follow host/Core signing and publication rules. A local branch/description or opened form is not a delivered draft PR. If no change is warranted, report the supported finding instead of making an empty PR.
 
+## Technical review report
+
+Lead with the reviewed PR/revision, requested code-only/runtime-backed scope, material findings and critical coverage limits, not a QA pass headline. State that this is an automated BART technical review, not official approval or QA sign-off. Include available agent execution context and follow the same report privacy rules.
+
+For each finding, give priority, impact, pinned source location, observed or source-backed evidence, useful reproduction/fixture instructions and uncertainty. Distinguish runtime-reproduced defects, source-only findings and unresolved hypotheses. If no material findings remain, say so for the assessed scope; do not equate a successful build or incomplete runtime testing with a clean comprehensive review.
+
+Follow with actual checkout/Core/Chromium/build/device identity, flags/prerequisites, commands/tests and experiments performed, configuration coverage, readable captures/demos, restoration and blocked/unrun checks. Use the local HTML example's styling/identity/media structure with findings-first review sections; QA summary formatting applies only to a separately labeled behavioral assessment. Link a sanitized text-only context ZIP when an evidence pack/export or publication is requested, including authored fixtures/source and commands. Raw media/binaries remain separate. Apply existing link, archive and permitted rendering checks; keep delivery status distinct from review findings.
+
 ## Delivery scope
 
 | Request | Completion |
 | --- | --- |
 | Develop locally | Focused implementation, requested checks/build/install/runtime inspection and a concise local summary, or specific blockers/limits. No automatic push or publication. |
+| Implement and create a QA evidence pack | Changed-build runtime assessment plus local HTML, captures, receipts and text-only context ZIP under [development delivery guidance](develop.md#requested-qa-evidence-pack). Commit only when requested or required by Core/host rules; no automatic publication. |
+| Technical review | Findings for the requested code/runtime scope and explicit coverage limits; runtime preparation/experiments follow [review guidance](review.md). No implicit product fixes or GitHub approval/publication. |
 | Verify | Return an evidence-backed assessment in the session or useful saved document. No automatic posting, edits or package. |
 | Verify and post findings | Assessment plus publication at the resolved destination with accessible evidence and confirmed URL, or a precise delivery blocker. |
 | Prototype in a draft PR | Warranted change/validation and a real draft PR; if no change is warranted, report that supported conclusion. |

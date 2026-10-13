@@ -2,6 +2,10 @@
 
 For a requested published QA report, prepare a text-only context ZIP alongside separately attached screenshots/videos. It lets another agent inspect how checks were performed, repeat the workflow and assess the retained results independently. Prepare the same ZIP for a local QA report intended for later publication; a short session answer or local development summary does not automatically need one. Creating the attachment does not require a new live replay or new executable helpers.
 
+A requested [development QA evidence pack](develop.md#requested-qa-evidence-pack) includes this export even when all output stays local. Identify the selected Core starting/final revisions, relevant task diff, actual changed-build identity, commands/test inputs and observed validation; do not imply a published commit permalink exists for local-only work.
+
+A requested [technical-review evidence pack](review.md) uses the same text-only export. Include pinned reviewed/tested revisions, experiment expectations/results, authored fixture manifests/source, exact load/invocation steps and relevant sanitized diagnostics. Use `bart-review-context--` instead of `bart-qa-context--` for its filename; the remaining source-target, build, UTC timestamp and UUID convention is unchanged. Do not include binary fixtures/media or imply an unexecuted fixture reproduced a finding.
+
 ## Name and layout
 
 Use this filename, with the source target being assessed rather than the repository receiving a development report:

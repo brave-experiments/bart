@@ -57,6 +57,15 @@ Develop a feature locally:
 Build, install and inspect it on my configured device. Keep everything local.
 ```
 
+Implement an issue and retain evidence for review:
+
+```text
+/brave-core-bart Implement <issue URL> in this Android checkout on its current branch.
+Build and commit locally, do not push. Create a QA evidence pack.
+```
+
+The evidence pack includes a local HTML assessment, inspected screenshots and required transition demos, useful build/test/install receipts and a sanitized text-only context ZIP. It assesses the actual changed build; a successful commit or build alone does not establish the fix. “This checkout” selects the session's Core checkout rather than a different configured default. See [development evidence packs](docs/develop.md#requested-qa-evidence-pack).
+
 Run an optional pre-submit QA pass:
 
 ```text
@@ -71,11 +80,24 @@ You can ask to discuss the approach before editing, contribute feedback during t
 
 Development guidance is available; end-to-end feature development through BART still needs a dedicated live demonstration. See [developing](docs/develop.md) and the [validation plan](docs/plan.md).
 
+## Technical PR review
+
+```text
+/brave-core-bart Perform a technical review of <PR URL>.
+Check out and sync the PR in this review checkout, build and run it,
+and construct local fixtures where useful. Save a local HTML review and evidence pack.
+Do not modify product code, push or publish findings.
+```
+
+A runtime-backed review combines source review with the actual PR build and meaningful app experiments, including small extensions/pages or other test inputs when helpful. Findings lead the report, with tested revision, evidence and unassessed scope explicit. A code-only request does not imply checkout/sync/device operations, and review does not implicitly fix the PR. This workflow is documented but not yet demonstrated end to end; see [review guidance](docs/review.md).
+
 ## Get started
 
 1. Make the BART skills discoverable to your existing agent, following [setup](docs/setup.md#skill-discovery).
 2. Use a Brave Core checkout for source work and [Androperator](https://docs.androperator.com/host-agents/) for Android actions and evidence. Local builds use Core's existing tools; Brave Scaffold is optional.
 3. Optionally set checkout, work-folder, device and posting defaults in ignored `config.toml`, using [config.example.toml](config.example.toml). Missing config is supported when the task supplies the needed context.
+
+For an existing [Brave Scaffold](https://github.com/brave-experiments/brave-scaffold) installation, opt in with `brave-scaffold.enabled = true` and `brave-scaffold.root = "/path/to/brave-scaffold"`. The agent uses its maintained `bcore-full-build-context` skill for local builds/tests and BART/Androperator for runtime inspection. See [Scaffold builds](docs/builds.md#build-with-brave-scaffold); Core's standalone workflow remains available when disabled.
 
 BART runs through the agent already in your session. It does not require a BART CLI, separate agent launcher or model-provider account. Skills and shared docs supply the guidance; the host agent and existing tools perform the work.
 

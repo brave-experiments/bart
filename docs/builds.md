@@ -31,9 +31,42 @@ Read the PR's check/status links, then the selected existing job's metadata, log
 
 Record the revision actually built, artifact identity and any head/merge distinction. Authentication failures, expired jobs and missing assets are explicit gaps. Do not invent an API for a service called StoryBoard or confuse it with Storybook UI previews. A verified service route can be documented when observed; until then use a supplied suitable APK or supported alternative and state missing exact-build coverage.
 
+### PR review workspace and build
+
+For explicitly requested runtime-backed review, select a build-capable review workspace, inspect starting branch/revisions/local work and pin the current PR head/base. Fetch the required PR objects through the supported repository route and verify the checked-out revision matches the reviewed head; label a merge build or later updated head separately. Do not redirect or overwrite a developer's active work to prepare the review. A Core-only Git worktree may lack the corresponding Chromium/dependency workspace.
+
+When checkout and sync are requested, use the selected Core/Scaffold maintained source workflow to align Chromium and dependencies with that revision before building. Sync can change/reset source; inspect and preserve wanted work first, and resolve actual conflicts without stashing/discarding implicitly. Reading a build skill or passing doctor does not expand authority to sync. Record effective Core/Chromium revisions, configuration and output; a blocked sync/build limits runtime review but leaves source review useful.
+
+Build/install the selected PR revision using the configured build route below or a supported identified PR artifact. Keep product fixes and optional diagnostic modifications separate from the reviewed build. Current Nightly is not a substitute for an open PR artifact. Recheck whether the head changed before final reporting and state the exact reviewed/tested revision and any later unreviewed changes.
+
 ## Build with existing tools
 
 For local pre-submit QA, test an APK built from the selected branch and actual local changes, recording their revision/diff and effective build output. Do not substitute current Nightly and claim the developer's changes were assessed. Select compatible artifacts for each phone/tablet target; reuse one build only where its ABI/API requirements fit both. [Pre-submit guidance](verify.md#local-pre-submit-qa) defines the scope and unattended prerequisites.
+
+Select the build workflow from the task's explicit tool choice, otherwise [configuration](setup.md#configuration). With `brave-scaffold.enabled = true`, follow the section below. Otherwise use Core's standalone route. This choice affects local builds/tests, not ordinary existing-Nightly QA or Androperator's device-control role.
+
+### Build with Brave Scaffold
+
+Resolve `SCAFFOLD_ROOT` from `brave-scaffold.root` and `CORE_DIR` from BART's selected Core checkout. Load the **local** `$SCAFFOLD_ROOT/.agents/skills/bcore-full-build-context/SKILL.md` in the current agent, through native skill loading only if it resolves to that selected installation; otherwise read the file directly. Its [upstream skill](https://github.com/brave-experiments/brave-scaffold/tree/main/.agents/skills/bcore-full-build-context) is a reference, not a substitute for the installed revision. Consult its linked agent-workflow and Android docs as needed. Do not copy its test mapping, support scripts or API contracts into BART.
+
+Call the selected installation's absolute launcher, passing the resolved Core path so Scaffold does not infer another checkout from cwd or conflicting defaults. Typical commands, subject to that installation's current help and capability support:
+
+```sh
+"$SCAFFOLD_ROOT/scripts/bcore" --checkout "$CORE_DIR" doctor android --json
+"$SCAFFOLD_ROOT/scripts/bcore" --checkout "$CORE_DIR" build android --json
+"$SCAFFOLD_ROOT/scripts/bcore" --checkout "$CORE_DIR" test android --plan --json
+"$SCAFFOLD_ROOT/scripts/bcore" --checkout "$CORE_DIR" run android --device "$SERIAL" --json
+```
+
+Use build/run only within the requested operations. When building and launching are both requested, the maintained skill's `build-run android --device "$SERIAL" --json` route can tie deployment to that completed build. A plan previews commands and does not run tests; execute selected tests when authorized. Test discovery finds changed test files, not every test affected by production code; inspect its unmapped/unselected results and select a relevant existing suite/file/filter when necessary. No selected tests is not a passing regression suite.
+
+Keep the skill's configured Debug/architecture/remote-execution behavior unless the task requires other effective options. “Locally on my machine” does not by itself disable the configured remote compiler service; use an offline option only for an explicitly selected offline build. Match the actual APK to each device and inspect the returned artifact before Androperator observations.
+
+Honor the selected checkout's approved environment and Scaffold's normal guarded patch/support preparation. Requested builds/tests may write their declared source/output paths; inspect existing work and ensure exclusive use. Doctor/repair suggestions and config do not authorize sync, cleanup, support checkout/branch changes, tool installation or `direnv allow`; only the user approves environments. If preparation conflicts with local work, retain the failure and resolve it rather than bypass guards or switch to a direct build that evades them. Android support/test overlays remain tooling state and stay out of feature commits.
+
+Read JSON outcomes, per-suite results/counts, warnings, returned artifact identity and diagnostic paths using the maintained skill's contracts. Retain commands/effective options and useful build/test/deploy receipts in task notes, with privacy-safe exports when reported. A successful build or process launch is followed by independent app/version/behavior observation through Androperator. Report setup/build failure, missing test coverage or unresolved output precisely; do not run an older output and claim it represents the feature change.
+
+### Build directly with Core
 
 Read the selected Core checkout's README, Android development/build configuration guidance and relevant test docs. Inspect its package scripts/help, current environment and `args.gn` when they affect the task. Build through Core's supported commands, with target OS/architecture, configuration and APK output chosen for the device. [Core's Android environment guide](https://github.com/brave/brave-browser/wiki/Android-Development-Environment) is a starting reference, not proof of local readiness.
 
@@ -46,8 +79,6 @@ pnpm run build --target_os=android --target_arch=arm64 \
 ```
 
 Confirm options against the selected checkout and its approved environment before execution. Remote execution, macOS Android support and other host-specific setup follow that environment's maintained instructions. Read the build's effective output rather than assume this directory or filename applies after forwarded options.
-
-If optional Brave Scaffold is already available, use its `bcore-full-build-context` guidance and Android docs. For an explicitly selected checkout/device, a typical supported route is `bcore --checkout <checkout> build android --json`, followed by `bcore --checkout <checkout> run android --device <serial> --json` when install/launch is in scope. Check actual local help, effective arguments and returned artifact. Core remains usable without Scaffold; do not copy its support implementation into BART.
 
 Use the actual effective output from the completed build. A failed or interrupted rebuild can invalidate an older success receipt and leave old bytes at the same path. Inspect the outcome before retry/install; do not claim an older default APK is the new prototype. Keep relevant build failures and test results. A runner's zero exit with missing counts or no selected tests is not proof of passing regressions.
 

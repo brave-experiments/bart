@@ -28,4 +28,6 @@ Use [action recipes](recipes.md) for system theme, rotation and adaptive Brave s
 
 Use [develop](develop.md) for source changes, [verify](verify.md) for existing-build assessment and [builds](builds.md) for artifacts/build/install. Optional Scaffold tools can help if present; Core's supported standalone workflow remains usable.
 
+Use [technical review](review.md) for requested PR source review and build/runtime experiments, including focused task-local fixtures. An explicit review request determines preparation/experiment scope; product fixes and publication are separate work.
+
 Use [reporting](reporting.md) for output/delivery and [reproduction](reproduction.md) only when future-attempt instructions help. [Setup](setup.md) selects local defaults. A configured posting repository is independent of the repo being investigated.

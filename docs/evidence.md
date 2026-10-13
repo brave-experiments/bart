@@ -10,6 +10,18 @@ For recreation, theme-change, rotation or other transition checks, record a conc
 
 Keep useful action receipts and fresh hierarchies/screenshots. Correlation and timing help relate the action to observations, but sequential screenshot/hierarchy captures are not atomic. Saved route coordinates are not current targets; use semantic selection and fresh screen evidence. Follow Androperator's actual image/native geometry guidance if coordinate input is necessary.
 
+### Theme-change bugs
+
+If the reported failure occurs after a theme change, a demo video is required evidence for the assessed theme transition, whether verifying Nightly or validating a local implementation. Start recording before the change with the affected state visibly established; show the actual theme trigger and the resulting app state without navigation/relaunch rescue. Retain a final readable hold and relevant interactions. Use the [system-theme recipe](recipes.md#change-system-lightdark-theme-without-leaving-the-app) when that is the trigger; an app-theme/re-entry route is not a substitute.
+
+Record the changed-build transition; capture an actual failing baseline too when available and useful, labeling its exact identity, including intermediate implementations that still failed. Do not manufacture historical evidence or require a downgrade to obtain it. Include the demo in the report, inspect its decisive interval, and preserve failures/originals. If video tooling or capture fails, attempt scoped recovery and retain diagnostics; deliver useful stills with an explicit incomplete transition check rather than claim the theme bug verified from stills alone.
+
+### Orientation-change bugs
+
+If a reported failure depends on rotation or orientation, a demo video is required for the assessed rotation and resulting behavior. Establish the affected screen/state before recording; show portrait → landscape (or the reported direction), hold the result, and test relevant scrolling, clipping, control reachability and state preservation. Include the reverse transition when part of the expected behavior or selected regression scope. Use the [rotation recipe](recipes.md#force-display-rotation), checking the actual orientation rather than assuming the request rotated the app.
+
+Keep the tested screen foreground across rotation unless the STR/TP specifies another route. Do not reopen/relaunch it to mask recreation or layout failures. Retain readable final-state screenshots as supporting evidence, not substitutes for the rotation demo. Apply the same baseline identity, decisive-interval inspection and capture-failure handling as theme demos. Missing or uninspected rotation footage leaves transition coverage incomplete; report the actual final-state observations separately.
+
 ## Inspect what was captured
 
 - Open the actual image, not just its path. Fine shape/color/text may need a higher-detail fresh screenshot. A hierarchy does not establish visual styling, occlusion or contrast.
