@@ -32,17 +32,25 @@ The current API exposes `--top-offset-dp`, not a vertical-center anchor. Compute
 
 Before assessed recording, inspect an annotated baseline for readability, truncation, overlap with the app and possible toast region. Reposition before the trigger, not between a timing-critical action and its result. Clear the panel for an unobstructed final observation when needed. If reliable placement needs an unavailable API, record that gap in usage notes rather than invent a center flag.
 
-The maintained [on-screen log API](https://docs.androperator.com/api/on-screen-logs/) supports live templates for foreground app package, version name/code, icon and device metadata. Use `--template`, not literal `--text`, for placeholders. With `PANEL_TOP_DP` calculated for the current display, an illustrative small label is:
+QA on-screen logs should include the tested device's Android release version and API level, alongside the app/version and device model, for example `Android 17 | API 37`. Obtain both from the selected device, not the host SDK or an assumed version-to-API mapping. Keep this line readable and untruncated in the inspected capture; do not include the device serial.
+
+The maintained [on-screen log API](https://docs.androperator.com/api/on-screen-logs/) supports live templates for foreground app package, version name/code, icon and device metadata. Use `--template`, not literal `--text`, for placeholders. Its currently documented template keys do not include Android release/API level; insert freshly observed values as literal text alongside the supported live placeholders, rather than invent keys. With `PANEL_TOP_DP` calculated for the current display, an illustrative small label is:
 
 ```sh
-androperator on-screen-log set --template 'BART capture
+ANDROID_VERSION="$(adb -s "$SERIAL" shell getprop ro.build.version.release | tr -d '\r\n')"
+ANDROID_API="$(adb -s "$SERIAL" shell getprop ro.build.version.sdk | tr -d '\r\n')"
+# Check both reads succeeded and values are valid before constructing the label.
+androperator on-screen-log set --template "BART capture
 {{foreground_app.package_name}}
-{{foreground_app.version_name}} | {{device.model}}' \
+{{foreground_app.version_name}} | {{device.model}}
+Android $ANDROID_VERSION | API $ANDROID_API" \
   --anchor right --text-align right --top-offset-dp "$PANEL_TOP_DP" \
   --edge-offset-dp 8 --width-dp 200 --font-size-sp 10 \
   --background-color '#B3000000' \
   --ttl-ms 120000 --device "$SERIAL" --operator-package "$OPERATOR_PACKAGE"
 ```
+
+If either Android value is unavailable, label it unavailable and record the observation gap; do not supply a guessed value. Refresh these literals when switching devices and recheck panel height/placement for the extra line. They are caller-supplied observations, not live Android-version template fields.
 
 The supported key is `{{foreground_app.package_name}}`, not a generic topmost-window ID. The template follows sampled foreground app context, excluding keyboard/its own overlay; system panels may retain the last verified app, and metadata may initially be unavailable. Inspect the captured label and separately retain [build identity](builds.md); the label is not proof of source revision, instant focus history or installed-byte identity.
 
