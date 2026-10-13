@@ -35,6 +35,8 @@ Builds, installs, syncs and repairs follow the current task's checkout/device au
 
 ### Requested QA evidence pack
 
+When moving from implementation to runtime verification, retain the actual changed APK, source revision/diff, targets, prerequisites and already completed checks in conversation/task notes. Follow [verification guidance](verify.md) with that artifact; its ordinary merged-fix Nightly default must not replace the implementation build.
+
 A request to implement locally and create a QA evidence pack includes building the changed app, installing/launching it on suitable task-selected devices/emulators, and inspecting the result through Androperator within host rules. Do not stop after compiling or substitute installed Nightly for the changed build. Use the [configuration baseline](verify.md#configuration-coverage) for UI assessment, including the device-specific surface implicated by the issue.
 
 Save the pack in a dedicated directory under the selected work root, named for the issue/feature with an attempt label when needed. It contains the [local HTML report](reporting.md#local-html-verification-report), readable captures/decisive clips, useful build/test/install receipts, session Androperator usage notes and a [text-only context ZIP](report-context.md). Keep private originals separate from sanitized report-linked/exported content. No publication or live replay is implied by pack creation.

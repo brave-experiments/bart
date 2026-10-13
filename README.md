@@ -71,6 +71,17 @@ You can ask to discuss the approach before editing, contribute feedback during t
 
 Development guidance is available; end-to-end feature development through BART still needs a dedicated live demonstration. See [developing](docs/develop.md) and the [validation plan](docs/plan.md).
 
+## Technical PR review
+
+```text
+/brave-core-bart Perform a runtime-backed technical review of <PR URL>
+in this review checkout. Check out, sync, build and test the PR; create focused
+test fixtures where useful. Save a local HTML review and evidence pack.
+Do not modify product code, push or publish findings.
+```
+
+A runtime-backed review combines source review with the actual PR build and meaningful app experiments, including small extensions/pages or other test inputs when helpful. Findings lead the report, with tested revision, evidence and unassessed scope explicit. A code-only request does not imply checkout/sync/device operations, and review does not implicitly fix the PR. This workflow is documented but not yet demonstrated end to end; see [review guidance](docs/review.md).
+
 ## Get started
 
 1. Make the BART skills discoverable to your existing agent, following [setup](docs/setup.md#skill-discovery).

@@ -31,6 +31,14 @@ Read the PR's check/status links, then the selected existing job's metadata, log
 
 Record the revision actually built, artifact identity and any head/merge distinction. Authentication failures, expired jobs and missing assets are explicit gaps. Do not invent an API for a service called StoryBoard or confuse it with Storybook UI previews. A verified service route can be documented when observed; until then use a supplied suitable APK or supported alternative and state missing exact-build coverage.
 
+### PR review workspace and build
+
+For explicitly requested runtime-backed review, select a build-capable review workspace, inspect starting branch/revisions/local work and pin the current PR head/base. Fetch the required PR objects through the supported repository route and verify the checked-out revision matches the reviewed head; label a merge build or later updated head separately. Do not redirect or overwrite a developer's active work to prepare the review. A Core-only Git worktree may lack the corresponding Chromium/dependency workspace.
+
+When checkout and sync are requested, use the selected Core/Scaffold maintained source workflow to align Chromium and dependencies with that revision before building. Sync can change/reset source; inspect and preserve wanted work first, and resolve actual conflicts without stashing/discarding implicitly. Reading a build skill or passing doctor does not expand authority to sync. Record effective Core/Chromium revisions, configuration and output; a blocked sync/build limits runtime review but leaves source review useful.
+
+Build/install the selected PR revision using the configured build route below or a supported identified PR artifact. Keep product fixes and optional diagnostic modifications separate from the reviewed build. Current Nightly is not a substitute for an open PR artifact. Recheck whether the head changed before final reporting and state the exact reviewed/tested revision and any later unreviewed changes.
+
 ## Build with existing tools
 
 For local pre-submit QA, test an APK built from the selected branch and actual local changes, recording their revision/diff and effective build output. Do not substitute current Nightly and claim the developer's changes were assessed. Select compatible artifacts for each phone/tablet target; reuse one build only where its ABI/API requirements fit both. [Pre-submit guidance](verify.md#local-pre-submit-qa) defines the scope and unattended prerequisites.

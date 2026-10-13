@@ -1,6 +1,6 @@
 # BART capabilities and validation
 
-BART provides three current-agent skills, shared Brave Android guidance and optional local configuration. Initial QA workflows are demonstrated; coverage and evidence quality continue to improve. These statuses describe observed capabilities, not stages every request must follow or guarantees across devices and hosts.
+BART provides three current-agent skills: a natural-language entry point, reporting and optional reproduction guidance. Shared docs cover development, QA and technical review, with optional local configuration. Initial QA workflows are demonstrated; runtime-backed technical review needs live validation. These statuses describe observed capabilities, not stages every request must follow or guarantees across devices and hosts.
 
 ## Available capabilities
 
@@ -19,6 +19,7 @@ Task-specific reports and receipts remain in working directories. Use their obse
 ## Next validation priorities
 
 - Demonstrate local feature development from a plain request without prior conversation history: source edits, relevant tests, build/install, runtime inspection and a concise local summary. Honor requested discussion checkpoints without adding routine approval gates to autonomous execution.
+- Demonstrate development-to-QA iteration using the changed APK, not Nightly, through the main entry point. Then demonstrate a runtime-backed PR review with pinned checkout/sync/build, focused task-local fixtures and findings-first evidence delivery, without implicitly fixing product code.
 - Exercise the opt-in Brave Scaffold build/test route during that demonstration, loading its maintained local skill and using the selected Core checkout explicitly. Configuration and command-help checks establish integration setup only, not a successful feature build or runtime validation.
 - Exercise an optional unattended local pre-submit QA pass on the developer's actual changed build. Complete the selected phone/tablet, landscape and foreground-theme scope, or return precise blockers and useful partial results.
 - Complete full affected-screen/end-of-list coverage, per-device in-app identity and decisive transition inspection consistently in future QA runs. Finding a defect does not establish completion of the other selected checks.

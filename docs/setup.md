@@ -6,14 +6,14 @@ Make BART's skills and linked docs readable by the agent already working in Core
 
 Keep a stable local BART checkout. Its canonical skills live in `.agents/skills/`; `.claude/skills` links to that directory and `CLAUDE.md` links to `AGENTS.md`.
 
-For sessions working in Core, link the three `brave-core-bart*` skill directories into the host's personal discovery directory:
+For sessions working in Core, link the three runtime skill directories into the host's personal discovery directory: `brave-core-bart`, `brave-core-bart-report` and `brave-core-bart-reproduce`.
 
 | Host | Personal discovery location |
 | --- | --- |
 | Claude Code | `~/.claude/skills/` |
 | Agent-compatible hosts, including OpenCode | `~/.agents/skills/` |
 
-Create each link only after inspecting the target directory and any same-named entry. Preserve existing user-owned entries and shared-directory links. Use an absolute source target such as `<bart-checkout>/.agents/skills/brave-core-bart`; repeat for report/reproduce. Do not install the contributor `bart-issue-create` into Core sessions. This setup writes outside Core and requires the user's setup scope.
+Create each link only after inspecting the target directory and any same-named entry. Preserve existing user-owned entries and shared-directory links. Use an absolute source target such as `<bart-checkout>/.agents/skills/brave-core-bart`; repeat for the other runtime skills. Do not install the contributor `bart-issue-create` into Core sessions. This setup writes outside Core and requires the user's setup scope.
 
 Claude Code also supports session-local `--add-dir <bart-checkout>` discovery. See [Claude skills](https://code.claude.com/docs/en/skills) and [OpenCode skills](https://opencode.ai/docs/skills/) for current host behavior. OpenCode slash metadata on the main skill is optional host metadata; confirm the installed client's support. A sibling clone or parent directory is not proof of discovery from a Git worktree. To update a linked installation, update the stable BART checkout and reload skills or start a fresh session as the host requires; do not overwrite personal skill entries or local config. To remove it, remove only links that you verified point to this collection.
 
