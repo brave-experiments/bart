@@ -1,12 +1,12 @@
 """Synthetic privacy fixtures; never include real device identifiers."""
 import json
+import io
+from contextlib import redirect_stdout, redirect_stderr
 from pathlib import Path
 import tempfile
-import subprocess
-import sys
 import unittest
 import zipfile
-from export_privacy import inspect_export, load_blocked_words, Matcher
+from export_privacy import inspect_export, load_blocked_words, Matcher, main
 
 
 class ExportPrivacyTests(unittest.TestCase):
@@ -90,18 +90,26 @@ class ExportPrivacyTests(unittest.TestCase):
         self.assertTrue(inspect_export(self.input, ['input'])['findings'])
 
     def test_cli_exit_codes_and_private_diagnostics(self):
-        script = Path(__file__).with_name('export_privacy.py')
+        def invoke(arguments):
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                try:
+                    code = main(arguments)
+                except SystemExit as error:
+                    code = error.code
+            return code, stdout.getvalue() + stderr.getvalue()
+
         config = self.root / 'config.toml'
         config.write_text('[privacy]\nblocked_words=["SERIAL-A"]')
-        command = [sys.executable, str(script), 'check', '--input', str(self.input), '--config', str(config)]
-        self.assertEqual(subprocess.run(command, capture_output=True).returncode, 0)
+        command = ['check', '--input', str(self.input), '--config', str(config)]
+        self.assertEqual(invoke(command)[0], 0)
         (self.input / 'SERIAL-A.txt').write_text('SERIAL-A')
-        result = subprocess.run(command, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 1)
-        self.assertNotIn('SERIAL-A', result.stdout + result.stderr)
-        result = subprocess.run([sys.executable, str(script), 'SERIAL-A'], capture_output=True, text=True)
-        self.assertEqual(result.returncode, 2)
-        self.assertNotIn('SERIAL-A', result.stdout + result.stderr)
+        code, diagnostics = invoke(command)
+        self.assertEqual(code, 1)
+        self.assertNotIn('SERIAL-A', diagnostics)
+        code, diagnostics = invoke(['SERIAL-A'])
+        self.assertEqual(code, 2)
+        self.assertNotIn('SERIAL-A', diagnostics)
 
 
 if __name__ == '__main__':
