@@ -22,6 +22,11 @@ enabled = false
 # tablet_device_id = "<tablet-or-tablet-emulator-serial>"
 operator_package = "com.androperator.operator"
 
+# Literal sensitive strings excluded from delivery contents and filenames.
+# Configured Android targets and task-selected targets are included automatically.
+[privacy]
+blocked_words = []
+
 # Development: both outputs go to BART issues; PR output is a preview.
 [publication.qa]
 repository = "brave-experiments/bart"

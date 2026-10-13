@@ -50,6 +50,7 @@ The default config location is relative to the real BART skill source, independe
 | `brave-scaffold.enabled`, `.root` | Opt in to an existing Brave Scaffold checkout for local build/test work; omitted `enabled` means false. |
 | `android.device_id`, `.operator_package` | Optional device and matching Operator defaults; pass the resolved selections explicitly to Android tools. |
 | `android.phone_device_id`, `.tablet_device_id` | Optional independent phone/tablet targets for configuration coverage. |
+| `privacy.blocked_words` | Array of nonempty literal sensitive strings excluded from export contents, filenames and directory names. Configured Android device IDs are included automatically; pass task-selected IDs to the export helper. |
 | `publication.qa.repository`, `.destination` | Default QA/investigation posting repository and item type. |
 | `publication.pr.repository`, `.destination` | Independent prototype/PR posting repository and item type. |
 

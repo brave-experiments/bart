@@ -18,6 +18,8 @@ Include available execution context for the agent producing the report: model na
 
 Never include personally identifying information in bug reports, QA assessments, PR descriptions or their shared attachments. Identify a physical device by make/model and Android version/build, not its serial number. Redact serials from command examples, receipts, screenshots, videos and other report-linked assets; use `<device-serial>` in commands. Exact serials may remain in ignored local configuration or private execution receipts needed to target the device, but must not appear in the report or its shareable assets, including local HTML reports. Inspect selected content before delivery and retain original diagnostic evidence privately.
 
+Run the [export privacy helper](export-privacy.md) on the complete delivery directory before delivering a local QA report/evidence pack or publishing report-linked assets. Include task-selected device IDs, visually review media and resolve all findings in contents, filenames and directory names. Recheck after any delivery change or final ZIP creation.
+
 For normal QA, describe current-Nightly behavior on the actual tested version. Keep a PR's first-containing release as source context, not a claimed tested build. Absence of a historical control limits causal attribution; it does not itself make present-day behavioral verification incomplete.
 
 Use per-check `pass`, `fail`, `blocked`, `inconclusive` and `not run`, with reasons. An overall `partial` assessment means coverage is incomplete. Preserve mixed outcomes and relevant failures. Keep these distinctions explicit:
