@@ -25,6 +25,19 @@ Sanitize selected text before packaging ZIPs. The sanitizer does not rewrite ZIP
 
 All filenames and directory names, including the selected root path, are checked. Diagnostics use artifact numbers without exposing filenames or matched values. A nonzero exit means the operation did not pass; repair the selected copies and rerun. Keep private task receipts of the selected configuration and reviewed files, without exporting the blocklist itself.
 
+## GitHub comment and PR text
+
+```sh
+python3 /path/to/bart/scripts/export_privacy.py comment \
+  --body /private/comment-draft.md --output /private/comment-export
+
+python3 /path/to/bart/scripts/export_privacy.py pr \
+  --title "fix: handle shields toggle" --body /private/pr-draft.md \
+  --output /private/pr-export
+```
+
+`comment` writes `comment.md`. `pr` writes `pr-title.txt` (one line, at most 256 characters) and `pr-body.md`. Both apply the same checks as `check`, including the output path, and create the new output directory only when no findings remain; they never redact. Fix the draft and rerun on findings. Use the exported text for the issue comment, `gh pr create --title "$(cat pr-title.txt)" --body-file pr-body.md` or a draft PR preview, subject to the publication rules in [reporting](reporting.md). Exporting grants no authority to post.
+
 ## Media and delivery
 
 Standalone PNG/JPEG/WebP and MP4/WebM/MOV files receive filename and byte/metadata substring checks. Compressed metadata is not fully decoded. Inspect actual images and continuous video for visible sensitive values; `--media-reviewed` acknowledges this caller review and does not perform OCR or establish a visual privacy guarantee. Without that flag, media produces an unresolved finding. Redact delivery copies when necessary without hiding the assessed behavior, and inspect the resulting copies again.

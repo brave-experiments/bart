@@ -10,8 +10,10 @@ import io
 import json
 from pathlib import Path
 import re
+import shutil
 import stat
 import sys
+import tempfile
 import tomllib
 from urllib.parse import quote
 import zipfile
@@ -172,21 +174,56 @@ def inspect_export(root, words, *, sanitize_to=None, media_reviewed=False):
     return {'findings': findings, 'mediaCount': media_count, 'filesChecked': count}
 
 
+def export_markdown(operation, words, body, output, title=None):
+    """Write GitHub-ready Markdown to a new directory only if it passes the privacy check."""
+    if operation == 'pr':
+        title = (title or '').strip()
+        if not title or len(title) > 256 or '\n' in title or '\r' in title:
+            raise ValueError('PR title must be one nonempty line of at most 256 characters.')
+    elif title is not None:
+        raise ValueError('Title applies only to PR exports.')
+    text = Path(body).read_text(encoding='utf-8')
+    if not text.strip():
+        raise ValueError('Body is empty.')
+    files = {'pr-title.txt': title + '\n', 'pr-body.md': text} if operation == 'pr' else {'comment.md': text}
+    destination = Path(output).absolute()
+    if destination.exists():
+        raise ValueError('Output must not exist.')
+    with tempfile.TemporaryDirectory(prefix='bart-export-') as staging:
+        for name, content in files.items():
+            (Path(staging) / name).write_text(content, encoding='utf-8')
+        result = inspect_export(staging, words)
+        if Matcher(words).contains(str(destination)) or Matcher(words).contains(str(destination.resolve())):
+            result['findings'].append({'artifact': 'root', 'reason': 'Blocked value in delivery path.'})
+        if not result['findings']:
+            shutil.copytree(staging, destination)
+    return result
+
+
 def main(argv=None):
     parser = PrivateArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=('check', 'sanitize'))
-    parser.add_argument('--input', required=True)
+    parser.add_argument('operation', choices=('check', 'sanitize', 'comment', 'pr'))
+    parser.add_argument('--input')
+    parser.add_argument('--body')
+    parser.add_argument('--title')
     parser.add_argument('--output')
     parser.add_argument('--config')
     parser.add_argument('--device', action='append', default=[])
     parser.add_argument('--media-reviewed', action='store_true')
     args = parser.parse_args(argv)
     try:
-        if bool(args.output) != (args.operation == 'sanitize'):
+        markdown = args.operation in ('comment', 'pr')
+        if markdown:
+            if not args.output or not args.body or args.input:
+                raise ValueError('Markdown exports require --body and --output, not --input.')
+        elif not args.input or args.body or args.title or bool(args.output) != (args.operation == 'sanitize'):
             raise ValueError('Output is required only for sanitize.')
         config = args.config or Path(__file__).resolve().parent.parent / 'config.toml'
         words = load_blocked_words(config, args.device, optional=args.config is None)
-        result = inspect_export(args.input, words, sanitize_to=args.output, media_reviewed=args.media_reviewed)
+        if markdown:
+            result = export_markdown(args.operation, words, args.body, args.output, args.title)
+        else:
+            result = inspect_export(args.input, words, sanitize_to=args.output, media_reviewed=args.media_reviewed)
         result['scope'] = 'Text, filenames, ZIP entries and media bytes; pixels require caller visual review.'
         print(json.dumps(result, indent=2))
         return 1 if result['findings'] else 0

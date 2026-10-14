@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import zipfile
-from export_privacy import inspect_export, load_blocked_words, Matcher, main
+from export_privacy import export_markdown, inspect_export, load_blocked_words, Matcher, main
 
 
 class ExportPrivacyTests(unittest.TestCase):
@@ -110,6 +110,35 @@ class ExportPrivacyTests(unittest.TestCase):
         code, diagnostics = invoke(['SERIAL-A'])
         self.assertEqual(code, 2)
         self.assertNotIn('SERIAL-A', diagnostics)
+
+    def test_markdown_exports(self):
+        body = self.root / 'body.md'
+        body.write_text('## Result\nPassed on the tested build.')
+        comment = self.root / 'comment-out'
+        self.assertEqual(export_markdown('comment', ['SERIAL-A'], body, comment)['findings'], [])
+        self.assertEqual(sorted(path.name for path in comment.iterdir()), ['comment.md'])
+        pr = self.root / 'pr-out'
+        export_markdown('pr', ['SERIAL-A'], body, pr, 'fix: handle shields toggle')
+        self.assertEqual((pr / 'pr-title.txt').read_text(), 'fix: handle shields toggle\n')
+        self.assertEqual((pr / 'pr-body.md').read_text(), body.read_text())
+        with self.assertRaises(ValueError):
+            export_markdown('comment', [], body, comment)
+        for title in ('', 'two\nlines', 'x' * 257):
+            with self.assertRaises(ValueError):
+                export_markdown('pr', [], body, self.root / 'bad', title)
+        with self.assertRaises(ValueError):
+            export_markdown('comment', [], body, self.root / 'bad', 'title')
+
+    def test_markdown_export_blocks_sensitive_values_without_output(self):
+        body = self.root / 'body.md'
+        body.write_text('Device SERIAL-A passed.')
+        output = self.root / 'blocked-out'
+        self.assertTrue(export_markdown('comment', ['SERIAL-A'], body, output)['findings'])
+        self.assertFalse(output.exists())
+        body.write_text('Clean body.')
+        result = export_markdown('pr', ['SERIAL-A'], body, self.root / 'x', 'Fix SERIAL-A crash')
+        self.assertTrue(result['findings'])
+        self.assertFalse((self.root / 'x').exists())
 
 
 if __name__ == '__main__':
