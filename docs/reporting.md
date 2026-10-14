@@ -6,7 +6,13 @@ Deliver the result the user requested, with conclusions supported by inspectable
 
 A local feature/prototype/fix request normally finishes with a concise session summary: what changed and where, checks/tests run, actual build/device and observed app behavior when exercised, evidence locations and remaining limits. State requested work that remains blocked or unrun. Save a separate document only when useful or requested.
 
-Local delivery does not require a QA-style assessment, published media, PR or reproduction package. Keep the same evidence standards and build-identity distinctions for behavior claims. Follow request/Core/host conventions for local commits; keep a local-only task local even if publication defaults exist. If a formal QA assessment is requested, use the form below.
+Without a requested QA deliverable, local delivery does not require a QA-style assessment, published media, PR or reproduction package. Keep the same evidence standards and build-identity distinctions for behavior claims. Follow request/Core/host conventions for local commits; keep a local-only task local even if publication defaults exist. If a QA deliverable is requested, follow [requested QA delivery](#requested-qa-delivery).
+
+## Requested QA delivery
+
+Treat “produce a QA verification,” “create a QA report” and “create a QA evidence pack” as requests for a saved local QA deliverable, not merely a conversational list of checks. Unless the user specifies another format, deliver a [local HTML report](#local-html-verification-report) with available inspected captures, sanitized supporting receipts, usage notes and a [text-only context ZIP](report-context.md). For implementation followed by QA, follow [development delivery](develop.md#requested-qa-evidence-pack) using the actual changed build. A plain request to “verify” may finish with an evidence-backed session assessment; an explicitly requested report must be delivered without asking the user to request it again. “Local only” restricts publication, not requested report creation.
+
+A blocked prerequisite, failed capture or inconclusive behavioral check changes the assessment outcome, not the obligation to produce the report. Retain available evidence and state missing checks/media and specific next actions; do not manufacture a pass or an untested reproduction procedure. If report creation itself is blocked, identify that concrete delivery blocker and retain the available draft. Finish with the report's absolute path, assessed outcome and important remaining scope, distinguishing implementation/commit status from behavioral verification and report delivery.
 
 ## Assessment and investigation
 
@@ -199,6 +205,7 @@ Follow with actual checkout/Core/Chromium/build/device identity, flags/prerequis
 | Request | Completion |
 | --- | --- |
 | Develop locally | Focused implementation, requested checks/build/install/runtime inspection and a concise local summary, or specific blockers/limits. No automatic push or publication. |
+| Produce a QA verification or create a QA report | Saved local QA deliverable under [requested QA delivery](#requested-qa-delivery), including a truthful blocked/partial/inconclusive report when behavior remains unconfirmed. Honor an explicitly selected format; no automatic publication. |
 | Implement and create a QA evidence pack | Changed-build runtime assessment plus local HTML, captures, receipts and text-only context ZIP under [development delivery guidance](develop.md#requested-qa-evidence-pack). Commit only when requested or required by Core/host rules; no automatic publication. |
 | Technical review | Findings for the requested code/runtime scope and explicit coverage limits; runtime preparation/experiments follow [review guidance](review.md). No implicit product fixes or GitHub approval/publication. |
 | Verify | Return an evidence-backed assessment in the session or useful saved document. No automatic posting, edits or package. |
