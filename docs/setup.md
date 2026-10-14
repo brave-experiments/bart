@@ -94,10 +94,12 @@ Wait for boot and explicit device discovery, check matching Operator readiness, 
 
 ## Task artifacts
 
+When selecting a new task folder for an issue or PR, use `<issue|pr>-<number>-<concise-description>`, for example `issue-59892-android-menu-branding` or `pr-40242-android-extensions-review`. Use lowercase hyphen-separated words describing the work, not only a bare number. Add an attempt/session subdirectory when needed to preserve separate runs. Honor an explicit user-selected destination; do not rename or overwrite an existing run as incidental cleanup. For tasks without an issue/PR, use a similarly descriptive task name.
+
 Create only files that help the work. A suggested layout under the selected root is:
 
 ```text
-<task-name>/
+<issue|pr>-<number>-<concise-description>/
   notes.md
   androperator-usage-notes.md
   builds/

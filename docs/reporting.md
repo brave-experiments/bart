@@ -6,7 +6,13 @@ Deliver the result the user requested, with conclusions supported by inspectable
 
 A local feature/prototype/fix request normally finishes with a concise session summary: what changed and where, checks/tests run, actual build/device and observed app behavior when exercised, evidence locations and remaining limits. State requested work that remains blocked or unrun. Save a separate document only when useful or requested.
 
-Local delivery does not require a QA-style assessment, published media, PR or reproduction package. Keep the same evidence standards and build-identity distinctions for behavior claims. Follow request/Core/host conventions for local commits; keep a local-only task local even if publication defaults exist. If a formal QA assessment is requested, use the form below.
+Without a requested QA deliverable, local delivery does not require a QA-style assessment, published media, PR or reproduction package. Keep the same evidence standards and build-identity distinctions for behavior claims. Follow request/Core/host conventions for local commits; keep a local-only task local even if publication defaults exist. If a QA deliverable is requested, follow [requested QA delivery](#requested-qa-delivery).
+
+## Requested QA delivery
+
+Treat “produce a QA verification,” “create a QA report” and “create a QA evidence pack” as requests for a saved local QA deliverable, not merely a conversational list of checks. Unless the user specifies another format, deliver a [local HTML report](#local-html-verification-report) with available inspected captures, sanitized supporting receipts, usage notes and a [text-only context ZIP](report-context.md). For implementation followed by QA, follow [development delivery](develop.md#requested-qa-evidence-pack) using the actual changed build. A plain request to “verify” may finish with an evidence-backed session assessment; an explicitly requested report must be delivered without asking the user to request it again. “Local only” restricts publication, not requested report creation.
+
+A blocked prerequisite, failed capture or inconclusive behavioral check changes the assessment outcome, not the obligation to produce the report. Retain available evidence and state missing checks/media and specific next actions; do not manufacture a pass or an untested reproduction procedure. If report creation itself is blocked, identify that concrete delivery blocker and retain the available draft. Finish with the report's absolute path, assessed outcome and important remaining scope, distinguishing implementation/commit status from behavioral verification and report delivery.
 
 ## Assessment and investigation
 
@@ -31,6 +37,16 @@ Use per-check `pass`, `fail`, `blocked`, `inconclusive` and `not run`, with reas
 - Observed improvement versus evidence that the change caused it.
 - Completed checks versus omitted/blocked checks.
 - App assessment versus publication status.
+
+## Human-readable overview and reproduction
+
+Near the top of a saved assessment, development evidence pack or technical review, include a **User facing changes** section. In one short paragraph or a few bullets, state the problem a person encounters and the intended visible difference, following the user-impact principle in PR descriptions. Distinguish implemented intent from observed validation: an accessibility-label check is not a rendered-tooltip check, and a passing build does not establish either. For a review without an implementation, describe the proposed change and observed user impact. If there is no visible change, say so with the reason. Keep source/build mechanics in the details.
+
+Follow with a **Reproduction and verification guide** that a reader can use without the conversation or execution log. State reproduction difficulty factually: which attempts reproduced it, which did not, conditions that mattered and unresolved triggers. Use counts or timing only when retained; do not claim “easy” or “reliable” from a single attempt. If the symptom was not reproduced, say that clearly instead of treating a source diagnosis as observed reproduction.
+
+Give concrete setup, the actual app entry point, relevant state/input and numbered human actions, with expected/observed behavior at the important steps. Keep these separate from implementation actions such as editing strings, generating translations, building or recovering an emulator. Explain whether custom scripts, extensions, pages, mouse input, injected events or other special tooling are necessary or merely aids. Link their text/source in the context pack, with exact invocation, dependencies and scripted behavior; distinguish a scripted trigger from the ordinary user route and state when the latter remains unverified. Describe unsuccessful substitute triggers where they affect interpretation, not every exploratory command.
+
+The standard STEPS section can serve as this guide when concise, or summarize/link to it when setup is longer. Do not leave reviewers to infer reproduction from a chronological list of source edits and tool attempts. Keep the key difficulty and unmet behavioral check visible near the headline; put detailed attempt history, diagnostic commands and technical reasoning afterward.
 
 ## Verification summary format
 
@@ -170,6 +186,8 @@ Do not search, enumerate or read application bundles under `/Applications` or `~
 
 Read the target Core repository's current template and relevant review practices. Explain the problem, focused change, rationale, issue relationship, actual validation and known prototype limits. Keep tests with the behavior they establish and report missing runtime coverage.
 
+Include the [user-facing overview and reproduction guide](#human-readable-overview-and-reproduction) in the supporting report/evidence pack. A PR description follows its repository's template and includes an explicit `User impact:` line or equivalent required field; do not substitute build-script details for the visible change reviewers need to understand.
+
 Use labeled before/after media when supported, identifying actual builds and matched conditions. Include ordinary reproduction steps and unusual setup that affects reviewers. [PR 39221](https://github.com/brave/brave-core/pull/39221) illustrates a media table and a fixed-tablet-taskbar prerequisite; it does not make that prerequisite universal.
 
 For a real PR, select the base repository/branch and actual head repository/branch explicitly, inspect all included commits and the diff, and follow host/Core signing and publication rules. A local branch/description or opened form is not a delivered draft PR. If no change is warranted, report the supported finding instead of making an empty PR.
@@ -187,6 +205,7 @@ Follow with actual checkout/Core/Chromium/build/device identity, flags/prerequis
 | Request | Completion |
 | --- | --- |
 | Develop locally | Focused implementation, requested checks/build/install/runtime inspection and a concise local summary, or specific blockers/limits. No automatic push or publication. |
+| Produce a QA verification or create a QA report | Saved local QA deliverable under [requested QA delivery](#requested-qa-delivery), including a truthful blocked/partial/inconclusive report when behavior remains unconfirmed. Honor an explicitly selected format; no automatic publication. |
 | Implement and create a QA evidence pack | Changed-build runtime assessment plus local HTML, captures, receipts and text-only context ZIP under [development delivery guidance](develop.md#requested-qa-evidence-pack). Commit only when requested or required by Core/host rules; no automatic publication. |
 | Technical review | Findings for the requested code/runtime scope and explicit coverage limits; runtime preparation/experiments follow [review guidance](review.md). No implicit product fixes or GitHub approval/publication. |
 | Verify | Return an evidence-backed assessment in the session or useful saved document. No automatic posting, edits or package. |

@@ -35,6 +35,8 @@ Builds, installs, syncs and repairs follow the current task's checkout/device au
 
 ### Requested QA evidence pack
 
+Requests to produce a QA verification or create a QA report after implementation use this delivery scope under [requested QA delivery](reporting.md#requested-qa-delivery). Honor an explicitly selected format; otherwise create the local HTML evidence pack below. The concise local-development summary applies only when no QA deliverable was requested.
+
 When moving from implementation to runtime verification, retain the actual changed APK, source revision/diff, targets, prerequisites and already completed checks in conversation/task notes. Follow [verification guidance](verify.md) with that artifact; its ordinary merged-fix Nightly default must not replace the implementation build.
 
 A request to implement locally and create a QA evidence pack includes building the changed app, installing/launching it on suitable task-selected devices/emulators, and inspecting the result through Androperator within host rules. Do not stop after compiling or substitute installed Nightly for the changed build. Use the [configuration baseline](verify.md#configuration-coverage) for UI assessment, including the device-specific surface implicated by the issue.
@@ -51,4 +53,4 @@ Follow the selected Core checkout's commit instructions and requested commit sco
 
 An optional [local pre-submit QA pass](verify.md#local-pre-submit-qa) can inspect the changed build across phone/tablet, landscape and theme configurations before submission. The same entry point handles this QA-only request; it does not automatically edit code or publish findings. Resolve targets and authorized operations before an unattended run, then return the report and observed defects for the developer's next iteration.
 
-Follow the request and Core/host commit rules; any commit contains only the intended source change and relevant tests. [Reporting](reporting.md) defines the lightweight local summary and requested reports/PRs. Local-only work does not imply a QA document, posting, push or reproduction package. A prototype can reveal remaining defects; report them. A truthful failed prototype does not prove a fix, but can demonstrate useful development work.
+Follow the request and Core/host commit rules; any commit contains only the intended source change and relevant tests. [Reporting](reporting.md) defines the lightweight local summary and requested reports/PRs. Without a requested QA deliverable, local-only work does not imply a QA document or evidence pack; it never implies posting, push or reproduction-skill authoring. A prototype can reveal remaining defects; report them. A truthful failed prototype does not prove a fix, but can demonstrate useful development work.
