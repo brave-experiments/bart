@@ -178,7 +178,7 @@ class ExportPrivacyTests(unittest.TestCase):
         result, out = self.package(['bart-context'])
         self.assertTrue(result['findings'])
         self.assertEqual(list(out.iterdir()), [])
-        for bad in (dict(target='40563')):
+        for bad in (dict(target='40563'), dict(target='pr-0')):
             with self.assertRaises(ValueError):
                 self.package(**bad)
         (self.input / 'shot.png').write_bytes(b'x')
