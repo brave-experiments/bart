@@ -112,9 +112,9 @@ class ExportPrivacyTests(unittest.TestCase):
         (self.input / 'README.md').write_text('ok')
         delivery = self.root / 'delivery'
         delivery.mkdir()
-        code, _ = invoke(['package', '--input', str(self.input), '--output', str(delivery), '--config', str(config), '--repo', 'brave/brave-core', '--target', 'pr-1'])
+        code, _ = invoke(['package', '--input', str(self.input), '--output', str(delivery), '--config', str(config), '--target', 'pr-1'])
         self.assertEqual(code, 0)
-        self.assertRegex(next(delivery.iterdir()).name, r'^bart-qa-context-brave-core-pr-1-\d{8}T\d{6}Z\.zip$')
+        self.assertRegex(next(delivery.iterdir()).name, r'^bart-context-pr-1-\d{8}T\d{4}\.zip$')
         code, diagnostics = invoke(['SERIAL-A'])
         self.assertEqual(code, 2)
         self.assertNotIn('SERIAL-A', diagnostics)
@@ -149,8 +149,8 @@ class ExportPrivacyTests(unittest.TestCase):
         self.assertFalse((self.root / 'x').exists())
 
     def package(self, words=(), **overrides):
-        options = dict(kind='qa', repo='Brave/brave-core', target='pr-40563',
-                       now=datetime.datetime(2026, 10, 13, 9, 15, tzinfo=datetime.timezone.utc))
+        options = dict(kind='qa', target='pr-40563',
+                       now=datetime.datetime(2026, 10, 13, 9, 15, 59, tzinfo=datetime.timezone.utc))
         options.update(overrides)
         out = self.root / 'out'
         out.mkdir(exist_ok=True)
@@ -161,11 +161,11 @@ class ExportPrivacyTests(unittest.TestCase):
         (self.input / 'receipts').mkdir()
         (self.input / 'receipts' / 'a.json').write_text('{}')
         result, out = self.package()
-        name = 'bart-qa-context-brave-core-pr-40563-20261013T091500Z'
+        name = 'bart-context-pr-40563-20261013T0915'
         self.assertEqual(result['archive'], name + '.zip')
         with zipfile.ZipFile(out / (name + '.zip')) as archive:
             self.assertEqual(archive.namelist(), [f'{name}/README.md', f'{name}/receipts/a.json'])
-        self.assertTrue(package_context([], self.input, out, kind='review', repo='brave/brave-core', target='issue-1')['archive'].startswith('bart-review-context-brave-core-issue-1-'))
+        self.assertTrue(package_context([], self.input, out, kind='review', target='issue-1')['archive'].startswith('bart-review-context-issue-1-'))
         with self.assertRaises(ValueError):
             self.package()
 
@@ -175,10 +175,10 @@ class ExportPrivacyTests(unittest.TestCase):
         self.assertTrue(result['findings'])
         self.assertEqual(list(out.iterdir()), [])
         (self.input / 'README.md').write_text('ok')
-        result, out = self.package(['serial-a'], repo='brave/serial-a')
+        result, out = self.package(['bart-context'])
         self.assertTrue(result['findings'])
         self.assertEqual(list(out.iterdir()), [])
-        for bad in (dict(repo='brave'), dict(target='40563')):
+        for bad in (dict(target='40563')):
             with self.assertRaises(ValueError):
                 self.package(**bad)
         (self.input / 'shot.png').write_bytes(b'x')

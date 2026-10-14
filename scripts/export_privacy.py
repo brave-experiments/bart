@@ -201,16 +201,13 @@ def export_markdown(operation, words, body, output, title=None):
     return result
 
 
-def package_context(words, source, output_dir, *, kind, repo, target, now=None):
+def package_context(words, source, output_dir, *, kind, target, now=None):
     """Zip a staged text-only context directory under the documented filename, checking the finished archive."""
-    prefix = {'qa': 'bart-qa-context', 'review': 'bart-review-context'}[kind]
-    owner, _, repo_name = repo.lower().partition('/')
-    if not re.fullmatch(r'[a-z0-9][a-z0-9._-]*', owner) or not re.fullmatch(r'[a-z0-9][a-z0-9._-]*', repo_name):
-        raise ValueError('Repository must be owner/repo.')
+    prefix = {'qa': 'bart-context', 'review': 'bart-review-context'}[kind]
     if not re.fullmatch(r'(pr|issue)-[1-9][0-9]*', target):
         raise ValueError('Target must be pr-N or issue-N.')
-    stamp = (now or datetime.datetime.now(datetime.timezone.utc)).strftime('%Y%m%dT%H%M%SZ')
-    name = f'{prefix}-{repo_name}-{target}-{stamp}'
+    stamp = (now or datetime.datetime.now(datetime.timezone.utc)).strftime('%Y%m%dT%H%M')
+    name = f'{prefix}-{target}-{stamp}'
     source, output_dir = Path(source).absolute(), Path(output_dir).absolute()
     if not output_dir.is_dir():
         raise ValueError('Output directory must exist.')
@@ -247,7 +244,6 @@ def main(argv=None):
     parser.add_argument('--body')
     parser.add_argument('--title')
     parser.add_argument('--kind', choices=('qa', 'review'), default='qa')
-    parser.add_argument('--repo')
     parser.add_argument('--target')
     parser.add_argument('--output')
     parser.add_argument('--config')
@@ -257,8 +253,8 @@ def main(argv=None):
     try:
         markdown = args.operation in ('comment', 'pr')
         if args.operation == 'package':
-            if not (args.input and args.output and args.repo and args.target) or args.body or args.title:
-                raise ValueError('Package requires --input, --output, --repo and --target.')
+            if not (args.input and args.output and args.target) or args.body or args.title:
+                raise ValueError('Package requires --input, --output and --target.')
         elif markdown:
             if not args.output or not args.body or args.input:
                 raise ValueError('Markdown exports require --body and --output, not --input.')
@@ -267,7 +263,7 @@ def main(argv=None):
         config = args.config or Path(__file__).resolve().parent.parent / 'config.toml'
         words = load_blocked_words(config, args.device, optional=args.config is None)
         if args.operation == 'package':
-            result = package_context(words, args.input, args.output, kind=args.kind, repo=args.repo, target=args.target)
+            result = package_context(words, args.input, args.output, kind=args.kind, target=args.target)
         elif markdown:
             result = export_markdown(args.operation, words, args.body, args.output, args.title)
         else:
