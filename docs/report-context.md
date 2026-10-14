@@ -20,7 +20,7 @@ For example, using illustrative values:
 bart-qa-context--brave-brave-core--pr-40563--nightly-1.99.35--20261013T091500Z--6f68d4af-0916-4a6e-bcd3-2d573d576916.zip
 ```
 
-Generate a new UUID for each export; record the archive creation time in UTC. Use lowercase filesystem-safe labels without paths, spaces, personal names or device serials. Use `build-unknown` or `multi-build` when appropriate, with actual identities explained inside. The archive contains one top-level directory matching its basename without `.zip`. Save it alongside the report and link the exact filename in the report's Context attachment section.
+Generate a new UUID for each export; record the archive creation time in UTC. Use lowercase filesystem-safe labels without paths, spaces, personal names or device serials. Use `build-unknown` or `multi-build` when appropriate, with actual identities explained inside. The archive contains one top-level directory matching its basename without `.zip`. Create it with the [export privacy helper](export-privacy.md#context-zip) `package` operation rather than by hand. Save it alongside the report and link the exact filename in the report's Context attachment section.
 
 ## Useful contents
 

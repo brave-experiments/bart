@@ -5,6 +5,7 @@ This Source Code Form is subject to the Mozilla Public License, v. 2.0.
 https://mozilla.org/MPL/2.0/
 """
 import argparse
+import datetime
 import html
 import io
 import json
@@ -15,10 +16,11 @@ import stat
 import sys
 import tempfile
 import tomllib
+import uuid
 from urllib.parse import quote
 import zipfile
 
-TEXT = {'.md', '.txt', '.html', '.htm', '.json', '.xml', '.log', '.csv', '.py', '.ts', '.js', '.mjs', '.css', '.sh', '.toml', '.yaml', '.yml', '.svg'}
+TEXT = {'.md', '.txt', '.html', '.htm', '.json', '.xml', '.log', '.csv', '.py', '.ts', '.js', '.mjs', '.css', '.sh', '.toml', '.yaml', '.yml', '.svg', '.diff', '.patch'}
 MEDIA = {'.png', '.jpg', '.jpeg', '.webp', '.mp4', '.webm', '.mov'}
 MAX_BYTES = 64 * 1024 * 1024
 
@@ -200,12 +202,55 @@ def export_markdown(operation, words, body, output, title=None):
     return result
 
 
+def package_context(words, source, output_dir, *, kind, repo, target, build, now=None, token=None):
+    """Zip a staged text-only context directory under the documented filename, checking the finished archive."""
+    prefix = {'qa': 'bart-qa-context', 'review': 'bart-review-context'}[kind]
+    owner_repo = repo.lower().replace('/', '-')
+    if not re.fullmatch(r'[a-z0-9][a-z0-9._]*-[a-z0-9][a-z0-9._-]*', owner_repo) or repo.count('/') != 1:
+        raise ValueError('Repository must be owner/repo.')
+    if not re.fullmatch(r'(pr|issue)-[1-9][0-9]*', target):
+        raise ValueError('Target must be pr-N or issue-N.')
+    if not re.fullmatch(r'[a-z0-9][a-z0-9._-]*', build):
+        raise ValueError('Build label must be lowercase letters, digits, dots, underscores or hyphens.')
+    stamp = (now or datetime.datetime.now(datetime.timezone.utc)).strftime('%Y%m%dT%H%M%SZ')
+    name = f'{prefix}--{owner_repo}--{target}--{build}--{stamp}--{token or uuid.uuid4()}'
+    source, output_dir = Path(source).absolute(), Path(output_dir).absolute()
+    if not output_dir.is_dir():
+        raise ValueError('Output directory must exist.')
+    if not (source / 'README.md').is_file():
+        raise ValueError('Context needs a top-level README.md.')
+    files = sorted(path for path in source.rglob('*') if path.is_file() and not path.is_symlink())
+    if any(path.suffix.lower() not in TEXT for path in files):
+        raise ValueError('Context ZIPs hold only supported text files; keep media, APKs and archives separate.')
+    result = inspect_export(source, words)
+    destination = output_dir / f'{name}.zip'
+    matcher = Matcher(words)
+    if not result['findings'] and (matcher.contains(str(destination)) or matcher.contains(str(destination.resolve()))):
+        result['findings'].append({'artifact': 'root', 'reason': 'Blocked value in delivery path.'})
+    if result['findings']:
+        return result
+    with tempfile.TemporaryDirectory(prefix='bart-package-') as staging:
+        archive = Path(staging) / destination.name
+        with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as handle:
+            for path in files:
+                handle.writestr(f'{name}/{path.relative_to(source).as_posix()}', path.read_bytes())
+        result = inspect_export(staging, words)
+        if not result['findings']:
+            shutil.copyfile(archive, destination)
+            result['archive'] = destination.name
+    return result
+
+
 def main(argv=None):
     parser = PrivateArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=('check', 'sanitize', 'comment', 'pr'))
+    parser.add_argument('operation', choices=('check', 'sanitize', 'comment', 'pr', 'package'))
     parser.add_argument('--input')
     parser.add_argument('--body')
     parser.add_argument('--title')
+    parser.add_argument('--kind', choices=('qa', 'review'), default='qa')
+    parser.add_argument('--repo')
+    parser.add_argument('--target')
+    parser.add_argument('--build')
     parser.add_argument('--output')
     parser.add_argument('--config')
     parser.add_argument('--device', action='append', default=[])
@@ -213,14 +258,19 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         markdown = args.operation in ('comment', 'pr')
-        if markdown:
+        if args.operation == 'package':
+            if not (args.input and args.output and args.repo and args.target and args.build) or args.body or args.title:
+                raise ValueError('Package requires --input, --output, --repo, --target and --build.')
+        elif markdown:
             if not args.output or not args.body or args.input:
                 raise ValueError('Markdown exports require --body and --output, not --input.')
         elif not args.input or args.body or args.title or bool(args.output) != (args.operation == 'sanitize'):
             raise ValueError('Output is required only for sanitize.')
         config = args.config or Path(__file__).resolve().parent.parent / 'config.toml'
         words = load_blocked_words(config, args.device, optional=args.config is None)
-        if markdown:
+        if args.operation == 'package':
+            result = package_context(words, args.input, args.output, kind=args.kind, repo=args.repo, target=args.target, build=args.build)
+        elif markdown:
             result = export_markdown(args.operation, words, args.body, args.output, args.title)
         else:
             result = inspect_export(args.input, words, sanitize_to=args.output, media_reviewed=args.media_reviewed)

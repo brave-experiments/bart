@@ -21,9 +21,21 @@ python3 /path/to/bart/scripts/export_privacy.py check \
 
 Sanitization creates a new separate directory only after input validation and replaces text matches with `[REDACTED]`. It preserves originals and filenames. Blocked filenames or directory names stop the operation: choose safe names and update relative links before retrying. The placeholder itself must not match the blocklist. Label derived receipts/media and distinguish original capture hashes from checksums of delivery copies.
 
-Sanitize selected text before packaging ZIPs. The sanitizer does not rewrite ZIPs. The final checker validates ZIP integrity and inspects entry names and decompressed UTF-8 text. Media, nested ZIPs and unsupported formats inside context ZIPs fail. Links, special files, unreadable artifacts, invalid UTF-8, binary text and embedded base64 data fail rather than being skipped. Each artifact and the combined expanded contents of each ZIP are limited to 64 MiB; ZIPs are limited to 10,000 entries. Supported standalone text formats include Markdown, HTML, JSON, XML, logs, CSV, script/source text, TOML, YAML and SVG; unknown extensions fail.
+Sanitize selected text before packaging ZIPs. The sanitizer does not rewrite ZIPs. The final checker validates ZIP integrity and inspects entry names and decompressed UTF-8 text. Media, nested ZIPs and unsupported formats inside context ZIPs fail. Links, special files, unreadable artifacts, invalid UTF-8, binary text and embedded base64 data fail rather than being skipped. Each artifact and the combined expanded contents of each ZIP are limited to 64 MiB; ZIPs are limited to 10,000 entries. Supported standalone text formats include Markdown, HTML, JSON, XML, logs, CSV, script/source text, diffs and patches, TOML, YAML and SVG; unknown extensions fail.
 
 All filenames and directory names, including the selected root path, are checked. Diagnostics use artifact numbers without exposing filenames or matched values. A nonzero exit means the operation did not pass; repair the selected copies and rerun. Keep private task receipts of the selected configuration and reviewed files, without exporting the blocklist itself.
+
+## Context ZIP
+
+```sh
+python3 /path/to/bart/scripts/export_privacy.py package \
+  --input /private/context-staging --output /private/delivery \
+  --repo brave/brave-core --target pr-40563 --build nightly-1.99.35
+```
+
+`package` builds the [text-only context ZIP](report-context.md) with the documented filename (`bart-qa-context--<owner>-<repo>--<pr|issue>-<number>--<build>--<UTC time>--<uuid>`), or `bart-review-context--` with `--kind review`. It zips the staging directory under a single top-level directory with the same basename. The staging directory needs a top-level `README.md`. Media, APKs, archives and other non-text files stop the operation. `--output` must be an existing directory.
+
+It checks the staging directory, builds the ZIP in a temporary location, then runs the final archive check on the ZIP (entry names and decompressed text). The ZIP is copied into `--output` only when there are no findings, so a failure leaves nothing to deliver. The new name uses a fresh UUID and timestamp each time; link that exact filename in the report.
 
 ## GitHub comment and PR text
 
