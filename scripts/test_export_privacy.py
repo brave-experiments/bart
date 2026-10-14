@@ -108,6 +108,13 @@ class ExportPrivacyTests(unittest.TestCase):
         code, diagnostics = invoke(command)
         self.assertEqual(code, 1)
         self.assertNotIn('SERIAL-A', diagnostics)
+        (self.input / 'SERIAL-A.txt').unlink()
+        (self.input / 'README.md').write_text('ok')
+        delivery = self.root / 'delivery'
+        delivery.mkdir()
+        code, _ = invoke(['package', '--input', str(self.input), '--output', str(delivery), '--config', str(config), '--repo', 'brave/brave-core', '--target', 'pr-1'])
+        self.assertEqual(code, 0)
+        self.assertRegex(next(delivery.iterdir()).name, r'^bart-qa-context-brave-core-pr-1-\d{8}T\d{6}Z\.zip$')
         code, diagnostics = invoke(['SERIAL-A'])
         self.assertEqual(code, 2)
         self.assertNotIn('SERIAL-A', diagnostics)

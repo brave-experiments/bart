@@ -267,7 +267,7 @@ def main(argv=None):
         config = args.config or Path(__file__).resolve().parent.parent / 'config.toml'
         words = load_blocked_words(config, args.device, optional=args.config is None)
         if args.operation == 'package':
-            result = package_context(words, args.input, args.output, kind=args.kind, repo=args.repo, target=args.target, build=args.build)
+            result = package_context(words, args.input, args.output, kind=args.kind, repo=args.repo, target=args.target)
         elif markdown:
             result = export_markdown(args.operation, words, args.body, args.output, args.title)
         else:
