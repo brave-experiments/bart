@@ -16,7 +16,6 @@ import stat
 import sys
 import tempfile
 import tomllib
-import uuid
 from urllib.parse import quote
 import zipfile
 
@@ -202,18 +201,16 @@ def export_markdown(operation, words, body, output, title=None):
     return result
 
 
-def package_context(words, source, output_dir, *, kind, repo, target, build, now=None, token=None):
+def package_context(words, source, output_dir, *, kind, repo, target, now=None):
     """Zip a staged text-only context directory under the documented filename, checking the finished archive."""
     prefix = {'qa': 'bart-qa-context', 'review': 'bart-review-context'}[kind]
-    owner_repo = repo.lower().replace('/', '-')
-    if not re.fullmatch(r'[a-z0-9][a-z0-9._]*-[a-z0-9][a-z0-9._-]*', owner_repo) or repo.count('/') != 1:
+    owner, _, repo_name = repo.lower().partition('/')
+    if not re.fullmatch(r'[a-z0-9][a-z0-9._-]*', owner) or not re.fullmatch(r'[a-z0-9][a-z0-9._-]*', repo_name):
         raise ValueError('Repository must be owner/repo.')
     if not re.fullmatch(r'(pr|issue)-[1-9][0-9]*', target):
         raise ValueError('Target must be pr-N or issue-N.')
-    if not re.fullmatch(r'[a-z0-9][a-z0-9._-]*', build):
-        raise ValueError('Build label must be lowercase letters, digits, dots, underscores or hyphens.')
     stamp = (now or datetime.datetime.now(datetime.timezone.utc)).strftime('%Y%m%dT%H%M%SZ')
-    name = f'{prefix}--{owner_repo}--{target}--{build}--{stamp}--{token or uuid.uuid4()}'
+    name = f'{prefix}-{repo_name}-{target}-{stamp}'
     source, output_dir = Path(source).absolute(), Path(output_dir).absolute()
     if not output_dir.is_dir():
         raise ValueError('Output directory must exist.')
@@ -225,6 +222,8 @@ def package_context(words, source, output_dir, *, kind, repo, target, build, now
     result = inspect_export(source, words)
     destination = output_dir / f'{name}.zip'
     matcher = Matcher(words)
+    if destination.exists():
+        raise ValueError('Archive already exists.')
     if not result['findings'] and (matcher.contains(str(destination)) or matcher.contains(str(destination.resolve()))):
         result['findings'].append({'artifact': 'root', 'reason': 'Blocked value in delivery path.'})
     if result['findings']:
@@ -250,7 +249,6 @@ def main(argv=None):
     parser.add_argument('--kind', choices=('qa', 'review'), default='qa')
     parser.add_argument('--repo')
     parser.add_argument('--target')
-    parser.add_argument('--build')
     parser.add_argument('--output')
     parser.add_argument('--config')
     parser.add_argument('--device', action='append', default=[])
@@ -259,8 +257,8 @@ def main(argv=None):
     try:
         markdown = args.operation in ('comment', 'pr')
         if args.operation == 'package':
-            if not (args.input and args.output and args.repo and args.target and args.build) or args.body or args.title:
-                raise ValueError('Package requires --input, --output, --repo, --target and --build.')
+            if not (args.input and args.output and args.repo and args.target) or args.body or args.title:
+                raise ValueError('Package requires --input, --output, --repo and --target.')
         elif markdown:
             if not args.output or not args.body or args.input:
                 raise ValueError('Markdown exports require --body and --output, not --input.')

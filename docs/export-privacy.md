@@ -30,12 +30,12 @@ All filenames and directory names, including the selected root path, are checked
 ```sh
 python3 /path/to/bart/scripts/export_privacy.py package \
   --input /private/context-staging --output /private/delivery \
-  --repo brave/brave-core --target pr-40563 --build nightly-1.99.35
+  --repo brave/brave-core --target pr-40563
 ```
 
-`package` builds the [text-only context ZIP](report-context.md) with the documented filename (`bart-qa-context--<owner>-<repo>--<pr|issue>-<number>--<build>--<UTC time>--<uuid>`), or `bart-review-context--` with `--kind review`. It zips the staging directory under a single top-level directory with the same basename. The staging directory needs a top-level `README.md`. Media, APKs, archives and other non-text files stop the operation. `--output` must be an existing directory.
+`package` builds the [text-only context ZIP](report-context.md) with the documented filename (`bart-qa-context-<repo>-<pr|issue>-<number>-<UTC time>`), or `bart-review-context-` with `--kind review`. It zips the staging directory under a single top-level directory with the same basename. The staging directory needs a top-level `README.md`. Media, APKs, archives and other non-text files stop the operation. `--output` must be an existing directory.
 
-It checks the staging directory, builds the ZIP in a temporary location, then runs the final archive check on the ZIP (entry names and decompressed text). The ZIP is copied into `--output` only when there are no findings, so a failure leaves nothing to deliver. The new name uses a fresh UUID and timestamp each time; link that exact filename in the report.
+It checks the staging directory, builds the ZIP in a temporary location, then runs the final archive check on the ZIP (entry names and decompressed text). The ZIP is copied into `--output` only when there are no findings, so a failure leaves nothing to deliver. Each run takes a fresh UTC timestamp, and the operation fails rather than overwrite an existing archive. Link the exact filename in the report.
 
 ## GitHub comment and PR text
 

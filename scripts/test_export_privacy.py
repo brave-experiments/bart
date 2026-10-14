@@ -142,8 +142,8 @@ class ExportPrivacyTests(unittest.TestCase):
         self.assertFalse((self.root / 'x').exists())
 
     def package(self, words=(), **overrides):
-        options = dict(kind='qa', repo='Brave/brave-core', target='pr-40563', build='nightly-1.99.35',
-                       now=datetime.datetime(2026, 10, 13, 9, 15, tzinfo=datetime.timezone.utc), token='6f68d4af-0916-4a6e-bcd3-2d573d576916')
+        options = dict(kind='qa', repo='Brave/brave-core', target='pr-40563',
+                       now=datetime.datetime(2026, 10, 13, 9, 15, tzinfo=datetime.timezone.utc))
         options.update(overrides)
         out = self.root / 'out'
         out.mkdir(exist_ok=True)
@@ -154,11 +154,13 @@ class ExportPrivacyTests(unittest.TestCase):
         (self.input / 'receipts').mkdir()
         (self.input / 'receipts' / 'a.json').write_text('{}')
         result, out = self.package()
-        name = 'bart-qa-context--brave-brave-core--pr-40563--nightly-1.99.35--20261013T091500Z--6f68d4af-0916-4a6e-bcd3-2d573d576916'
+        name = 'bart-qa-context-brave-core-pr-40563-20261013T091500Z'
         self.assertEqual(result['archive'], name + '.zip')
         with zipfile.ZipFile(out / (name + '.zip')) as archive:
             self.assertEqual(archive.namelist(), [f'{name}/README.md', f'{name}/receipts/a.json'])
-        self.assertTrue(package_context([], self.input, out, kind='review', repo='brave/brave-core', target='issue-1', build='multi-build')['archive'].startswith('bart-review-context--brave-brave-core--issue-1--multi-build--'))
+        self.assertTrue(package_context([], self.input, out, kind='review', repo='brave/brave-core', target='issue-1')['archive'].startswith('bart-review-context-brave-core-issue-1-'))
+        with self.assertRaises(ValueError):
+            self.package()
 
     def test_package_refuses_unsafe_input_and_leaves_no_zip(self):
         (self.input / 'README.md').write_text('Device SERIAL-A')
@@ -166,10 +168,10 @@ class ExportPrivacyTests(unittest.TestCase):
         self.assertTrue(result['findings'])
         self.assertEqual(list(out.iterdir()), [])
         (self.input / 'README.md').write_text('ok')
-        result, out = self.package(['serial-a'], build='serial-a')
+        result, out = self.package(['serial-a'], repo='brave/serial-a')
         self.assertTrue(result['findings'])
         self.assertEqual(list(out.iterdir()), [])
-        for bad in (dict(repo='brave'), dict(target='40563'), dict(build='Has Space')):
+        for bad in (dict(repo='brave'), dict(target='40563')):
             with self.assertRaises(ValueError):
                 self.package(**bad)
         (self.input / 'shot.png').write_bytes(b'x')
