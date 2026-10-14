@@ -26,6 +26,8 @@ Generate a new UUID for each export; record the archive creation time in UTC. Us
 
 At minimum, include `README.md` explaining the assessed target, scope, build/device make/model, available [agent execution context](reporting.md#assessment-and-investigation), prerequisites, how to repeat meaningful checks, original observations/limits and how to find the separate media. Organize additional files only when they exist and help continuation:
 
+Include the [human-readable reproduction guide](reporting.md#human-readable-overview-and-reproduction), observed reproduction difficulty and any necessary custom fixture/script source, invocation and dependencies. A command log alone is not an adequate guide. Mark failed or unestablished user triggers separately from successful source/resource checks.
+
 | Contents | Purpose |
 | --- | --- |
 | `original-attempt.md` or concise report text | Actual conditions, results, failures/omissions and relevant timestamps, distinct from future instructions. |

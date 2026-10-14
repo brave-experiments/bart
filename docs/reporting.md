@@ -32,6 +32,16 @@ Use per-check `pass`, `fail`, `blocked`, `inconclusive` and `not run`, with reas
 - Completed checks versus omitted/blocked checks.
 - App assessment versus publication status.
 
+## Human-readable overview and reproduction
+
+Near the top of a saved assessment, development evidence pack or technical review, include a **User facing changes** section. In one short paragraph or a few bullets, state the problem a person encounters and the intended visible difference, following the user-impact principle in PR descriptions. Distinguish implemented intent from observed validation: an accessibility-label check is not a rendered-tooltip check, and a passing build does not establish either. For a review without an implementation, describe the proposed change and observed user impact. If there is no visible change, say so with the reason. Keep source/build mechanics in the details.
+
+Follow with a **Reproduction and verification guide** that a reader can use without the conversation or execution log. State reproduction difficulty factually: which attempts reproduced it, which did not, conditions that mattered and unresolved triggers. Use counts or timing only when retained; do not claim “easy” or “reliable” from a single attempt. If the symptom was not reproduced, say that clearly instead of treating a source diagnosis as observed reproduction.
+
+Give concrete setup, the actual app entry point, relevant state/input and numbered human actions, with expected/observed behavior at the important steps. Keep these separate from implementation actions such as editing strings, generating translations, building or recovering an emulator. Explain whether custom scripts, extensions, pages, mouse input, injected events or other special tooling are necessary or merely aids. Link their text/source in the context pack, with exact invocation, dependencies and scripted behavior; distinguish a scripted trigger from the ordinary user route and state when the latter remains unverified. Describe unsuccessful substitute triggers where they affect interpretation, not every exploratory command.
+
+The standard STEPS section can serve as this guide when concise, or summarize/link to it when setup is longer. Do not leave reviewers to infer reproduction from a chronological list of source edits and tool attempts. Keep the key difficulty and unmet behavioral check visible near the headline; put detailed attempt history, diagnostic commands and technical reasoning afterward.
+
 ## Verification summary format
 
 Start a QA verification report with the compact summary below, before detailed source analysis, attempt logs or the full check matrix. Use the same order in Markdown comments and local HTML. Keep the unofficial BART notice immediately beside the headline so the familiar QA format does not imply official sign-off.
@@ -169,6 +179,8 @@ Do not search, enumerate or read application bundles under `/Applications` or `~
 ## Prototype and draft PR
 
 Read the target Core repository's current template and relevant review practices. Explain the problem, focused change, rationale, issue relationship, actual validation and known prototype limits. Keep tests with the behavior they establish and report missing runtime coverage.
+
+Include the [user-facing overview and reproduction guide](#human-readable-overview-and-reproduction) in the supporting report/evidence pack. A PR description follows its repository's template and includes an explicit `User impact:` line or equivalent required field; do not substitute build-script details for the visible change reviewers need to understand.
 
 Use labeled before/after media when supported, identifying actual builds and matched conditions. Include ordinary reproduction steps and unusual setup that affects reviewers. [PR 39221](https://github.com/brave/brave-core/pull/39221) illustrates a media table and a fixed-tablet-taskbar prerequisite; it does not make that prerequisite universal.
 
