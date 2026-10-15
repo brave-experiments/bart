@@ -78,19 +78,19 @@ An illustrative Markdown summary follows. Replace the outcome and placeholders f
 #### 🟢 Verification PASSED using the following:
 
 Automated BART assessment - not an official QA sign-off.
-Scope: <behavior/variants assessed; important limits>
+Scope: <behavior/variants assessed; important limits> on current Nightly ([`<version>`](<release URL>)); resolves [<issue>](<issue URL>)
 
 Device/OS:
 - <model / Android version / OS build when observed>
 
 Brave:
-- Build: <observed Brave version>
-- Chromium: <observed Chromium version / build type / architecture>
+- Build: [`<observed Brave version>`](<release URL>)
+- Chromium: `<observed Chromium version>` <build type / architecture>
 - Channel: <observed channel>
-- Revision/build relationship: <observed revision; current Nightly containing fix>
+- Revision/build relationship: <[`short revision`](<brave-core commit permalink>); current Nightly containing fix>
 
 Androperator:
-- CLI: <observed version>
+- CLI: `<observed version>`
 
 Agent execution context:
 - Model: <session-exposed name/ID, or not exposed>
@@ -113,6 +113,15 @@ Agent execution context:
 ```
 
 The explicit headline/section layout comes from QA comments on [57449](https://github.com/brave/brave-browser/issues/57449#issuecomment-6005588417) and [57747](https://github.com/brave/brave-browser/issues/57747#issuecomment-5345309104). Other concise examples are [57872](https://github.com/brave/brave-browser/issues/57872#issuecomment-5607870886), [58827](https://github.com/brave/brave-browser/issues/58827#issuecomment-5637985692) and [58370](https://github.com/brave/brave-browser/issues/58370#issuecomment-5728374687). These are format/coverage references, not BART evidence. [QA resources](qa-resources.md) supplies optional regression context; do not apply official QA labels or sign-off merely because the assessment passes.
+
+## Links and identifiers in published text
+
+Make identifiers in a comment or report readable and checkable by linking them. Use Markdown links in GitHub text and HTML anchors in local HTML.
+
+- Link a version to the release it names, such as the `brave/brave-browser` release for a Nightly. Put the version number in code ticks, including inside link text, and write the build as “current Nightly ([`1.100.4`](release URL))”, not just “current Nightly”. Use code ticks for other version-like values too, such as Chromium `156.0.8078.39`, Android build IDs and CLI versions. Link a version only to a page you have confirmed exists.
+- Link a commit hash to its permalink in the repository that owns it, normally `https://github.com/brave/brave-core/commit/<full-hash>` for a Core merge or head commit. Show the short hash as the link text.
+- Link every issue and PR with its full URL. Write “resolves [brave-browser #59904](https://github.com/brave/brave-browser/issues/59904)”, not a bare `#59904`, which resolves against the repository receiving the comment.
+- Mention a hash, version or number only when the reader gains from it. Keep the device serial rules in [report privacy](#assessment-and-investigation); linking never justifies including private identifiers.
 
 ## Configuration coverage evidence
 
@@ -229,3 +238,7 @@ Prefer supported GitHub-native attachments for requested GitHub delivery. Inspec
 For attachments unsupported by the client, a supported [browser attachment](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) route or necessary human handoff can deliver selected media/ZIP. Uploading itself is publication, even before submitting the comment. Public-repository attachments are accessible publicly; select task-appropriate evidence and omit unrelated local paths, account data and working logs.
 
 Inspect selected media using [evidence](evidence.md). Save the uploaded URLs, rewrite the delivery copy's local references and confirm accessibility/rendering for the audience. Confirm the final issue/comment/PR URL and real draft state where applicable. Preserve local drafts and user's edits after failure. Retrying publication reuses saved evidence and does not rerun device work or change the assessment.
+
+### GitHub media limitations
+
+Current `gh` clients post comment text but cannot attach images, videos or ZIPs; attachment URLs come from the GitHub web editor. Follow [publishing a report with media to GitHub](github-publishing.md), which covers the export, upload and finalize steps, video placement and image sizing.
