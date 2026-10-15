@@ -78,19 +78,19 @@ An illustrative Markdown summary follows. Replace the outcome and placeholders f
 #### 🟢 Verification PASSED using the following:
 
 Automated BART assessment - not an official QA sign-off.
-Scope: <behavior/variants assessed; important limits> on current Nightly ([<version>](<release URL>)); resolves [<issue>](<issue URL>)
+Scope: <behavior/variants assessed; important limits> on current Nightly ([`<version>`](<release URL>)); resolves [<issue>](<issue URL>)
 
 Device/OS:
 - <model / Android version / OS build when observed>
 
 Brave:
-- Build: [<observed Brave version>](<release URL>)
-- Chromium: <observed Chromium version / build type / architecture>
+- Build: [`<observed Brave version>`](<release URL>)
+- Chromium: `<observed Chromium version>` <build type / architecture>
 - Channel: <observed channel>
-- Revision/build relationship: <[short revision](<brave-core commit permalink>); current Nightly containing fix>
+- Revision/build relationship: <[`short revision`](<brave-core commit permalink>); current Nightly containing fix>
 
 Androperator:
-- CLI: <observed version>
+- CLI: `<observed version>`
 
 Agent execution context:
 - Model: <session-exposed name/ID, or not exposed>
@@ -118,7 +118,7 @@ The explicit headline/section layout comes from QA comments on [57449](https://g
 
 Make identifiers in a comment or report readable and checkable by linking them. Use Markdown links in GitHub text and HTML anchors in local HTML.
 
-- Link a version to the release it names, such as the `brave/brave-browser` release for a Nightly. Write the build as “current Nightly ([1.100.4](release URL))”, not just “current Nightly”. Link a version only to a page you have confirmed exists.
+- Link a version to the release it names, such as the `brave/brave-browser` release for a Nightly. Put the version number in code ticks, including inside link text, and write the build as “current Nightly ([`1.100.4`](release URL))”, not just “current Nightly”. Use code ticks for other version-like values too, such as Chromium `156.0.8078.39`, Android build IDs and CLI versions. Link a version only to a page you have confirmed exists.
 - Link a commit hash to its permalink in the repository that owns it, normally `https://github.com/brave/brave-core/commit/<full-hash>` for a Core merge or head commit. Show the short hash as the link text.
 - Link every issue and PR with its full URL. Write “resolves [brave-browser #59904](https://github.com/brave/brave-browser/issues/59904)”, not a bare `#59904`, which resolves against the repository receiving the comment.
 - Mention a hash, version or number only when the reader gains from it. Keep the device serial rules in [report privacy](#assessment-and-investigation); linking never justifies including private identifiers.
