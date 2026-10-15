@@ -78,16 +78,16 @@ An illustrative Markdown summary follows. Replace the outcome and placeholders f
 #### 🟢 Verification PASSED using the following:
 
 Automated BART assessment - not an official QA sign-off.
-Scope: <behavior/variants assessed; important limits>
+Scope: <behavior/variants assessed; important limits> on current Nightly ([<version>](<release URL>)); resolves [<issue>](<issue URL>)
 
 Device/OS:
 - <model / Android version / OS build when observed>
 
 Brave:
-- Build: <observed Brave version>
+- Build: [<observed Brave version>](<release URL>)
 - Chromium: <observed Chromium version / build type / architecture>
 - Channel: <observed channel>
-- Revision/build relationship: <observed revision; current Nightly containing fix>
+- Revision/build relationship: <[short revision](<brave-core commit permalink>); current Nightly containing fix>
 
 Androperator:
 - CLI: <observed version>
@@ -113,6 +113,15 @@ Agent execution context:
 ```
 
 The explicit headline/section layout comes from QA comments on [57449](https://github.com/brave/brave-browser/issues/57449#issuecomment-6005588417) and [57747](https://github.com/brave/brave-browser/issues/57747#issuecomment-5345309104). Other concise examples are [57872](https://github.com/brave/brave-browser/issues/57872#issuecomment-5607870886), [58827](https://github.com/brave/brave-browser/issues/58827#issuecomment-5637985692) and [58370](https://github.com/brave/brave-browser/issues/58370#issuecomment-5728374687). These are format/coverage references, not BART evidence. [QA resources](qa-resources.md) supplies optional regression context; do not apply official QA labels or sign-off merely because the assessment passes.
+
+## Links and identifiers in published text
+
+Make identifiers in a comment or report readable and checkable by linking them. Use Markdown links in GitHub text and HTML anchors in local HTML.
+
+- Link a version to the release it names, such as the `brave/brave-browser` release for a Nightly. Write the build as “current Nightly ([1.100.4](release URL))”, not just “current Nightly”. Link a version only to a page you have confirmed exists.
+- Link a commit hash to its permalink in the repository that owns it, normally `https://github.com/brave/brave-core/commit/<full-hash>` for a Core merge or head commit. Show the short hash as the link text.
+- Link every issue and PR with its full URL. Write “resolves [brave-browser #59904](https://github.com/brave/brave-browser/issues/59904)”, not a bare `#59904`, which resolves against the repository receiving the comment.
+- Mention a hash, version or number only when the reader gains from it. Keep the device serial rules in [report privacy](#assessment-and-investigation); linking never justifies including private identifiers.
 
 ## Configuration coverage evidence
 
@@ -229,3 +238,13 @@ Prefer supported GitHub-native attachments for requested GitHub delivery. Inspec
 For attachments unsupported by the client, a supported [browser attachment](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) route or necessary human handoff can deliver selected media/ZIP. Uploading itself is publication, even before submitting the comment. Public-repository attachments are accessible publicly; select task-appropriate evidence and omit unrelated local paths, account data and working logs.
 
 Inspect selected media using [evidence](evidence.md). Save the uploaded URLs, rewrite the delivery copy's local references and confirm accessibility/rendering for the audience. Confirm the final issue/comment/PR URL and real draft state where applicable. Preserve local drafts and user's edits after failure. Retrying publication reuses saved evidence and does not rerun device work or change the assessment.
+
+### GitHub media limitations
+
+Current `gh` clients post comment text but cannot attach images, videos or ZIPs; attachment URLs come from the GitHub web editor, so a person normally adds them after the text is posted. State this at handoff and prepare the text so that step is quick:
+
+- Post the checked text first with the media section as a clearly labeled placeholder, or give the user the exact upload order and filenames. The caller attaches the files, edits the comment to reference them and may then ask the agent to reformat it.
+- Name each media file so its use in the report is obvious, and keep one capture per table cell or paragraph so replacing a placeholder is a one-to-one edit.
+- Place videos outside tables. GitHub renders an attachment URL as a player only when it is alone on its own line with blank lines around it; inside a table cell, or beside other text or images, it stays a plain link. Put clips in their own section with a label line above each URL.
+- Pasted images carry full pixel dimensions in `width`/`height` attributes and render very large. Expect to rescale them after upload.
+- The context ZIP attaches as a file link, not inline.
