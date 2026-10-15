@@ -241,10 +241,4 @@ Inspect selected media using [evidence](evidence.md). Save the uploaded URLs, re
 
 ### GitHub media limitations
 
-Current `gh` clients post comment text but cannot attach images, videos or ZIPs; attachment URLs come from the GitHub web editor, so a person normally adds them after the text is posted. State this at handoff and prepare the text so that step is quick:
-
-- Post the checked text first with the media section as a clearly labeled placeholder, or give the user the exact upload order and filenames. The caller attaches the files, edits the comment to reference them and may then ask the agent to reformat it.
-- Name each media file so its use in the report is obvious, and keep one capture per table cell or paragraph so replacing a placeholder is a one-to-one edit.
-- Place videos outside tables. GitHub renders an attachment URL as a player only when it is alone on its own line with blank lines around it; inside a table cell, or beside other text or images, it stays a plain link. Put clips in their own section with a label line above each URL.
-- Pasted images carry full pixel dimensions in `width`/`height` attributes and render very large. Expect to rescale them after upload.
-- The context ZIP attaches as a file link, not inline.
+Current `gh` clients post comment text but cannot attach images, videos or ZIPs; attachment URLs come from the GitHub web editor. Follow [publishing a report with media to GitHub](github-publishing.md), which covers the export, upload and finalize steps, video placement and image sizing.
