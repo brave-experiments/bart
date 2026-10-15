@@ -4,23 +4,23 @@ For a requested published QA report, prepare a text-only context ZIP alongside s
 
 A requested [development QA evidence pack](develop.md#requested-qa-evidence-pack) includes this export even when all output stays local. Identify the selected Core starting/final revisions, relevant task diff, actual changed-build identity, commands/test inputs and observed validation; do not imply a published commit permalink exists for local-only work.
 
-A requested [technical-review evidence pack](review.md) uses the same text-only export. Include pinned reviewed/tested revisions, experiment expectations/results, authored fixture manifests/source, exact load/invocation steps and relevant sanitized diagnostics. Use `bart-review-context--` instead of `bart-qa-context--` for its filename; the remaining source-target, build, UTC timestamp and UUID convention is unchanged. Do not include binary fixtures/media or imply an unexecuted fixture reproduced a finding.
+A requested [technical-review evidence pack](review.md) uses the same text-only export. Include pinned reviewed/tested revisions, experiment expectations/results, authored fixture manifests/source, exact load/invocation steps and relevant sanitized diagnostics. Use `bart-review-context-` instead of `bart-context-` for its filename; the remaining target and UTC timestamp convention is unchanged. Do not include binary fixtures/media or imply an unexecuted fixture reproduced a finding.
 
 ## Name and layout
 
-Use this filename, with the source target being assessed rather than the repository receiving a development report:
+Use this filename, naming the PR or issue being assessed rather than the repository receiving a development report:
 
 ```text
-bart-qa-context--<owner>-<repo>--<pr|issue>-<number>--<build-label>--<UTC-YYYYMMDDTHHMMSSZ>--<uuid>.zip
+bart-context-<pr|issue>-<number>-<UTC-YYYYMMDDTHHMM>.zip
 ```
 
 For example, using illustrative values:
 
 ```text
-bart-qa-context--brave-brave-core--pr-40563--nightly-1.99.35--20261013T091500Z--6f68d4af-0916-4a6e-bcd3-2d573d576916.zip
+bart-context-pr-40563-20261013T0915.zip
 ```
 
-Generate a new UUID for each export; record the archive creation time in UTC. Use lowercase filesystem-safe labels without paths, spaces, personal names or device serials. Use `build-unknown` or `multi-build` when appropriate, with actual identities explained inside. The archive contains one top-level directory matching its basename without `.zip`. Save it alongside the report and link the exact filename in the report's Context attachment section.
+The timestamp is the archive creation time in UTC to the minute; the repository and build identity belong in the README inside the archive. The archive contains one top-level directory matching its basename without `.zip`. Create it with the [export privacy helper](export-privacy.md#context-zip) `package` operation rather than by hand. Save it alongside the report and link the exact filename in the report's Context attachment section.
 
 ## Useful contents
 

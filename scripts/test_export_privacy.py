@@ -6,7 +6,8 @@ from pathlib import Path
 import tempfile
 import unittest
 import zipfile
-from export_privacy import inspect_export, load_blocked_words, Matcher, main
+import datetime
+from export_privacy import package_context, export_markdown, inspect_export, load_blocked_words, Matcher, main
 
 
 class ExportPrivacyTests(unittest.TestCase):
@@ -107,9 +108,86 @@ class ExportPrivacyTests(unittest.TestCase):
         code, diagnostics = invoke(command)
         self.assertEqual(code, 1)
         self.assertNotIn('SERIAL-A', diagnostics)
+        (self.input / 'SERIAL-A.txt').unlink()
+        (self.input / 'README.md').write_text('ok')
+        delivery = self.root / 'delivery'
+        delivery.mkdir()
+        code, _ = invoke(['package', '--input', str(self.input), '--output', str(delivery), '--config', str(config), '--target', 'pr-1'])
+        self.assertEqual(code, 0)
+        self.assertRegex(next(delivery.iterdir()).name, r'^bart-context-pr-1-\d{8}T\d{4}\.zip$')
         code, diagnostics = invoke(['SERIAL-A'])
         self.assertEqual(code, 2)
         self.assertNotIn('SERIAL-A', diagnostics)
+
+    def test_markdown_exports(self):
+        body = self.root / 'body.md'
+        body.write_text('## Result\nPassed on the tested build.')
+        comment = self.root / 'comment-out'
+        self.assertEqual(export_markdown('comment', ['SERIAL-A'], body, comment)['findings'], [])
+        self.assertEqual(sorted(path.name for path in comment.iterdir()), ['comment.md'])
+        pr = self.root / 'pr-out'
+        export_markdown('pr', ['SERIAL-A'], body, pr, 'fix: handle shields toggle')
+        self.assertEqual((pr / 'pr-title.txt').read_text(), 'fix: handle shields toggle\n')
+        self.assertEqual((pr / 'pr-body.md').read_text(), body.read_text())
+        with self.assertRaises(ValueError):
+            export_markdown('comment', [], body, comment)
+        for title in ('', 'two\nlines', 'x' * 257):
+            with self.assertRaises(ValueError):
+                export_markdown('pr', [], body, self.root / 'bad', title)
+        with self.assertRaises(ValueError):
+            export_markdown('comment', [], body, self.root / 'bad', 'title')
+
+    def test_markdown_export_blocks_sensitive_values_without_output(self):
+        body = self.root / 'body.md'
+        body.write_text('Device SERIAL-A passed.')
+        output = self.root / 'blocked-out'
+        self.assertTrue(export_markdown('comment', ['SERIAL-A'], body, output)['findings'])
+        self.assertFalse(output.exists())
+        body.write_text('Clean body.')
+        result = export_markdown('pr', ['SERIAL-A'], body, self.root / 'x', 'Fix SERIAL-A crash')
+        self.assertTrue(result['findings'])
+        self.assertFalse((self.root / 'x').exists())
+
+    def package(self, words=(), **overrides):
+        options = dict(kind='qa', target='pr-40563',
+                       now=datetime.datetime(2026, 10, 13, 9, 15, 59, tzinfo=datetime.timezone.utc))
+        options.update(overrides)
+        out = self.root / 'out'
+        out.mkdir(exist_ok=True)
+        return package_context(list(words), self.input, out, **options), out
+
+    def test_package_names_and_layout(self):
+        (self.input / 'README.md').write_text('# Context')
+        (self.input / 'receipts').mkdir()
+        (self.input / 'receipts' / 'a.json').write_text('{}')
+        result, out = self.package()
+        name = 'bart-context-pr-40563-20261013T0915'
+        self.assertEqual(result['archive'], name + '.zip')
+        with zipfile.ZipFile(out / (name + '.zip')) as archive:
+            self.assertEqual(archive.namelist(), [f'{name}/README.md', f'{name}/receipts/a.json'])
+        self.assertTrue(package_context([], self.input, out, kind='review', target='issue-1')['archive'].startswith('bart-review-context-issue-1-'))
+        with self.assertRaises(ValueError):
+            self.package()
+
+    def test_package_refuses_unsafe_input_and_leaves_no_zip(self):
+        (self.input / 'README.md').write_text('Device SERIAL-A')
+        result, out = self.package(['SERIAL-A'])
+        self.assertTrue(result['findings'])
+        self.assertEqual(list(out.iterdir()), [])
+        (self.input / 'README.md').write_text('ok')
+        result, out = self.package(['bart-context'])
+        self.assertTrue(result['findings'])
+        self.assertEqual(list(out.iterdir()), [])
+        for bad in (dict(target='40563'), dict(target='pr-0')):
+            with self.assertRaises(ValueError):
+                self.package(**bad)
+        (self.input / 'shot.png').write_bytes(b'x')
+        with self.assertRaises(ValueError):
+            self.package()
+        (self.input / 'shot.png').unlink()
+        (self.input / 'README.md').unlink()
+        with self.assertRaises(ValueError):
+            self.package()
 
 
 if __name__ == '__main__':
