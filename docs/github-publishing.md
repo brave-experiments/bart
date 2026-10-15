@@ -30,3 +30,15 @@ If the comment was already posted without media, patch it in place with `gh api 
 - Order-based mapping breaks when files are uploaded out of order. The agent cannot detect a swap between two images of the same size.
 - Attachments uploaded into a comment box that is never submitted may stay on GitHub unreferenced. Whether they resolve before submission is not verified here.
 - Rendering of the final comment is not visible to the agent. The user checks the preview or the posted page and reports clips that show as plain links.
+
+## Possible simplification
+
+Hosting the media and ZIP somewhere the agent can upload to would remove the manual upload, the upload-order mapping and the image resizing step. The agent would know every URL and filename before writing the body, set image widths directly and post once with `gh`.
+
+Open points before adopting it:
+
+- GitHub plays a video inline only for its own `user-attachments` URLs, as far as is known. Externally hosted clips would need a scaled thumbnail that links to the file, or a short GIF. This is not verified.
+- The host needs access control, retention and deletion handling, because reports on public repositories are public and the privacy check cannot find every sensitive value in pixels.
+- It adds infrastructure and credentials to maintain, which this repository does not currently have.
+
+Committing media to a public repository or branch, or using release assets, would let `gh` publish without a new host, but it keeps evidence in repository history.
