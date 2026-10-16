@@ -18,6 +18,8 @@ For each useful check, identify the action, intended observation and evidence ne
 
 Preserve the reported trigger and foreground state. Use [action recipes](recipes.md) for system-theme changes, rotation and settings navigation when applicable, with the issue's STR/TP taking precedence. Determine which event matters from source and reference media; re-entry-only coverage cannot establish foreground restoration.
 
+When the expected result does not appear, record the user behavior that should have produced it and what was tried: for example, the scroll gestures a person would use on a clipped screen, their count, any system-gesture or tool side effects that invalidated an attempt, and the node state afterward. Repeat the attempt once with a different valid input before calling an unreachable control a finding, and keep both attempts in the notes. [Reporting](reporting.md#verification-summary-format) puts this record in the failure block.
+
 Observe the result after the action. Do not manually rescue the transition being assessed and then attribute success to the app. Capture the transition and result using [evidence](evidence.md); a screenshot of a final state may not establish how it was reached.
 
 Select nearby regression checks proportionate to the change, using applicable [QA resources](qa-resources.md) as leads. A non-reproducing baseline weakens causal comparison. An external site change or inaccessible setup can limit historical verification. State which trigger/condition was established rather than imply an internal race was exercised by ordinary taps.
