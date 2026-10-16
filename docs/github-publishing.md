@@ -19,6 +19,7 @@ If the comment was already posted without media, patch it in place with `gh api 
 ## Formatting the final body
 
 - Scale every image with a small `width` attribute and no `height`. Pasted images carry full pixel dimensions (1080, 2410, 2560) and render very large. Starting points: about 230 px for portrait phone and tablet captures and about 420 px for landscape captures. Adjust to the content.
+- Order the body for a skim: failure block with its decisive media, results grid, observations, then the passing media. Start each caption and table header with its outcome emoji (🔴, 🟡, 🟢, ⚪) and list failure and observation media before passing media. Leave passing media visible; do not wrap it in `<details>`.
 - Group stills in an HTML table with one capture per cell, a short caption under each and a header row per configuration. Keep the configuration and result table from [reporting](reporting.md#configuration-coverage-evidence) for outcomes, with a text label for each piece of evidence, not a link: a link in a table cell stays a plain link and does not preview.
 - Put each video outside any table, on its own line, with a label line above it and blank lines around it. GitHub renders an attachment URL as a player only in that position; inside a table cell or beside other text it stays a plain link. A `<video>` tag may render in a cell; check the preview before relying on it.
 - Link the context ZIP as a file link with its full filename; it does not render inline.

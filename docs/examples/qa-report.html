@@ -25,6 +25,24 @@
   <p><strong>Automated BART assessment - not an official QA sign-off.</strong></p>
   <p>Target: &lt;issue/PR link and title&gt;</p>
   <p class="notice">&lt;Key observed results, additional defects and important missing coverage. Select the headline from actual outcomes, not this example.&gt;</p>
+  <p><strong>Bottom line:</strong> &lt;One sentence: what holds, what failed&gt;</p>
+  <section><h2>🔴 What failed</h2>
+    <p><strong>&lt;Screen and configuration&gt;:</strong> &lt;One-line symptom&gt;</p>
+    <ul>
+      <li><strong>Expected user behavior:</strong> &lt;What a person would do to get the expected result&gt;</li>
+      <li><strong>Tried:</strong> &lt;Actions, counts, variants and fallbacks; mark invalid attempts&gt;</li>
+      <li><strong>Observed:</strong> &lt;Result with measurements or node state&gt;</li>
+      <li><strong>Likely cause:</strong> &lt;Source-backed hypothesis and what was not compared, or omit&gt;</li>
+    </ul>
+    <figure><div class="placeholder">&lt;Decisive failure screenshot or playable clip&gt;</div><figcaption>🔴 &lt;Condition and link to full media&gt;</figcaption></figure>
+  </section>
+  <section><h2>Results at a glance</h2>
+    <p>🟢 pass, 🔴 fail, 🟡 observation, 🟠 blocked, ⚪ not run.</p>
+    <table><tr><th>Screen/check</th><th>&lt;Configuration A&gt;</th><th>&lt;Configuration B&gt;</th></tr>
+      <tr><td>&lt;Screen or check&gt;</td><td>🟢</td><td>🔴</td></tr>
+    </table>
+  </section>
+  <section><h2>🟡 Observations</h2><ul><li>&lt;Behavior worth attention that is not a failure of the assessed change, with media&gt;</li></ul></section>
   <section><h2>User facing changes</h2><p>&lt;What a person encounters and what should visibly change. Distinguish intended implementation from behavior actually observed; keep internal mechanics below.&gt;</p></section>
   <section><h2>Reproduction and verification guide</h2>
     <p><strong>Reproduction difficulty:</strong> &lt;Observed attempts, necessary conditions, unsuccessful routes and remaining trigger uncertainty; no invented reliability claim&gt;</p>
@@ -47,8 +65,9 @@
     <li>&lt;Observed interaction and restoration steps&gt;</li>
   </ol></section>
   <section><h2>ACTUAL RESULTS:</h2><ul>
-    <li>&lt;Concrete expected/observed behavior and individual outcome&gt;</li>
-    <li>&lt;Relevant failures or incomplete checks, without overstating causal proof&gt;</li>
+    <li>🔴 &lt;Failure first, without overstating causal proof&gt;</li>
+    <li>🟢 &lt;Concrete expected/observed behavior and individual outcome&gt;</li>
+    <li>⚪ &lt;Incomplete or omitted checks and the reason&gt;</li>
     <li>&lt;Video inspection method and any limit affecting the claim&gt;</li>
   </ul></section>
   <section><h2>SCREENSHOT / SCREENCAST:</h2>
@@ -60,10 +79,10 @@
   </section>
   <section><h2>Configuration coverage</h2>
     <table><tr><th>Configuration</th><th>Observed result/outcome</th><th>Evidence</th></tr>
-      <tr><td>Phone portrait</td><td>&lt;Observation&gt;</td><td>&lt;Relative media link&gt;</td></tr>
-      <tr><td>Phone landscape</td><td>&lt;Full affected content and reachability, or precise gap&gt;</td><td>&lt;Media link or blocker&gt;</td></tr>
-      <tr><td>Foreground system-theme change</td><td>&lt;Observation and transition coverage&gt;</td><td>&lt;Demo clip or explicit capture failure&gt;</td></tr>
-      <tr><td>Tablet portrait/landscape</td><td>&lt;Per-orientation observations and device-specific controls&gt;</td><td>&lt;Relevant captures or gap&gt;</td></tr>
+      <tr><td>🟢 Phone portrait</td><td>&lt;Observation&gt;</td><td>&lt;Relative media link&gt;</td></tr>
+      <tr><td>🟢 Phone landscape</td><td>&lt;Full affected content and reachability, or precise gap&gt;</td><td>&lt;Media link or blocker&gt;</td></tr>
+      <tr><td>🟢 Foreground system-theme change</td><td>&lt;Observation and transition coverage&gt;</td><td>&lt;Demo clip or explicit capture failure&gt;</td></tr>
+      <tr><td>🟢 Tablet portrait/landscape</td><td>&lt;Per-orientation observations and device-specific controls&gt;</td><td>&lt;Relevant captures or gap&gt;</td></tr>
     </table>
   </section>
   <section><h2>Implementation and validation details</h2><p>&lt;For development: requirement, focused change, actual commits/builds and test results. Label source hypotheses and unexecuted assertions. Omit when irrelevant.&gt;</p></section>
