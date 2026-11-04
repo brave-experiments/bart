@@ -10,7 +10,7 @@ Run `gh --version`, then check the subcommand you will use:
 gh pr edit --help | grep -i attach
 ```
 
-`--attach` was confirmed in the help of `gh` 2.103.3 for `pr edit`, `pr comment`, `issue edit` and `issue comment`. Probe the installed client instead of assuming; an older client may lack it. Each flag takes `<file>#<alt text>`, may repeat, and accepts up to 50 files per command. Supported types are png, jpg, jpeg, gif, webp, svg, mp4, mov and webm; the client rejects a ZIP with "not a supported file type". Attach the context ZIP by the [fallback](#fallback-client-without---attach) route and say in the comment that it is pending until it is uploaded.
+`--attach` was confirmed in the help of `gh` 2.103.3 for `pr edit`, `pr comment`, `issue edit` and `issue comment`. Probe the installed client instead of assuming; an older client may lack it. Each flag takes `<file>#<alt text>`, may repeat, and accepts up to 50 files per command. Supported types are png, jpg, jpeg, gif, webp, svg, mp4, mov and webm; the client rejects a ZIP with "not a supported file type". Attach the context ZIP by the [fallback](#fallback-client-without---attach) route, or inline its text files in the comment as one collapsed `<details><summary>` block per file (a blank line after `<summary>`, code fences for source). Run the privacy `comment` check on the final text, and keep the comment under GitHub's 65,536-character limit.
 
 ## Procedure
 
@@ -64,6 +64,7 @@ Stop and ask when a number is missing or duplicated, when the type of a pasted i
 ## Limits
 
 - Verified on an issue comment (`gh` 2.103.3, `brave-experiments/bart`): six mp4 clips and eight png stills attached in one `gh issue comment --attach` call; all 14 references were rewritten, none were left as local paths, the rendered HTML had six `<video>` elements, and a following `gh issue comment --edit-last --body-file` pass set `width="230"` on the table images. The same run showed that a ZIP is rejected.
+- Verified: six `<details>` blocks holding the context README, notes, commands, receipt and fixture source (22,317 characters in total with the report) rendered correctly beside the attached media.
 - Not verified here: `--attach` on `pr create`, `pr comment` and `issue edit` in practice (only the help text was checked for the last two), and a ZIP upload by any command-line route.
 - Public-repository attachments are accessible publicly; select task-appropriate evidence.
 - The agent cannot see the rendered page. Check the preview or posted page, or ask the user to report clips that show as plain links.
