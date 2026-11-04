@@ -1,6 +1,6 @@
 # Publish a report with media to GitHub
 
-This is the procedure for a GitHub issue, PR or comment that includes screenshots, videos or a context ZIP. Current `gh` clients upload media with `--attach`. Clients without it use the [fallback](#fallback-client-without---attach). Posting still follows the user's request and [publication](reporting.md#publication) rules. Uploading is publication, so it needs the same authority as posting.
+This is the procedure for a GitHub issue, PR or comment that includes screenshots, videos and the report's context. It is expected to run end to end from the agent with no human upload step: images and videos go up with `gh --attach`, and the context pack is inlined in the same text as collapsed `<details>` blocks. Do not ask the user to drag files into a browser unless the client lacks `--attach` (see the [fallback](#fallback-client-without---attach)). Posting still follows the user's request and [publication](reporting.md#publication) rules. Uploading is publication, so it needs the same authority as posting.
 
 ## Check the client
 
@@ -10,7 +10,7 @@ Run `gh --version`, then check the subcommand you will use:
 gh pr edit --help | grep -i attach
 ```
 
-`--attach` was confirmed in the help of `gh` 2.103.3 for `pr edit`, `pr comment`, `issue edit` and `issue comment`. Probe the installed client instead of assuming; an older client may lack it. Each flag takes `<file>#<alt text>`, may repeat, and accepts up to 50 files per command. Supported types are png, jpg, jpeg, gif, webp, svg, mp4, mov and webm; the client rejects a ZIP with "not a supported file type". Attach the context ZIP by the [fallback](#fallback-client-without---attach) route, or inline its text files in the comment as one collapsed `<details><summary>` block per file (a blank line after `<summary>`, code fences for source). Run the privacy `comment` check on the final text, and keep the comment under GitHub's 65,536-character limit.
+`--attach` was confirmed in the help of `gh` 2.103.3 for `pr edit`, `pr comment`, `issue edit` and `issue comment`. Probe the installed client instead of assuming; an older client may lack it. Each flag takes `<file>#<alt text>`, may repeat, and accepts up to 50 files per command. Supported types are png, jpg, jpeg, gif, webp, svg, mp4, mov and webm; the client rejects a ZIP with "not a supported file type". Do not try to upload the context ZIP; inline its contents as described in [context pack in the comment](#context-pack-in-the-comment).
 
 ## Procedure
 
@@ -42,20 +42,36 @@ This matters when you need a fixed image width, which only the `<img>` form supp
 - **Accept default sizing.** Reference images with `![alt](./file.png)`. Full-size images may render very large.
 - **Two passes for sized images.** Attach with `![alt](./file.png)` references, read the body back, replace each returned `user-attachments` URL into an `<img src="…" width="…" alt="…">` tag, delete the appended copies, and apply with `gh … edit --body-file`. Re-run step 3.
 
+## Context pack in the comment
+
+Publish the [context pack](report-context.md) as text in the same comment, after the media, under a `#### Context attachment` heading. Use one collapsed block per file:
+
+```
+<details>
+<summary>Commands used</summary>
+
+<file contents as Markdown, or a code fence for source files>
+
+</details>
+```
+
+Leave a blank line after `<summary>` and before `</details>` so the content renders as Markdown. Use code fences for fixture or helper source. Include the README with the reproduction guide, the original attempt and limits, the commands, the build identity receipt, the Androperator usage notes and any fixture source. Skip files whose only use is local, such as media hashes.
+
+Run the privacy `comment` check on the final text, which covers the inlined files. The whole comment must stay under GitHub's 65,536-character limit. If it will not fit, post the full pack as follow-up comments of the same kind and link them from the first, or trim the fixture and notes; do not drop the README or the original attempt. A ZIP is still built for local reports and handoff, but it is not part of the published result.
+
 ## Formatting the final body
 
 - Scale every image with a small `width` attribute and no `height`. Starting points: about 230 px for portrait phone and tablet captures and about 420 px for landscape captures. Adjust to the content.
 - Group stills in an HTML table with one capture per cell, a short caption under each and a header row per configuration. Keep the configuration and result table from [reporting](reporting.md#configuration-coverage-evidence) for outcomes, with a text label for each piece of evidence, not a link: a link in a table cell stays a plain link and does not preview.
 - Put each video outside any table, on its own line, with a label line above it and blank lines around it. GitHub renders an attachment URL as a player only in that position. A `<video>` tag may render in a cell; check the preview before relying on it. After posting, `gh api -H "Accept: application/vnd.github.full+json" repos/<owner>/<repo>/issues/comments/<id> -q .body_html` shows whether each video became a `<video>` element and each image kept its `width`.
-- Link the context ZIP as a file link with its full filename; it does not render inline.
 - Apply [links and identifiers](reporting.md#links-and-identifiers-in-published-text): linked versions in code ticks, commit permalinks and full issue URLs.
 - Keep the unofficial BART notice, the outcome headline and the limits where [the summary format](reporting.md#verification-summary-format) puts them.
 
 ## Fallback: client without `--attach`
 
-`gh` cannot upload files here, and undocumented upload endpoints are not used. Posting text first and adding media afterward leaves an incomplete public comment and an edit history, so prepare the whole body before posting.
+Use this only when the installed `gh` lacks `--attach` and cannot be updated within the task's scope. `gh` cannot upload files here, and undocumented upload endpoints are not used. Posting text first and adding media afterward leaves an incomplete public comment and an edit history, so prepare the whole body before posting.
 
-1. **Agent exports a draft.** Use numbered placeholders such as `{{MEDIA-01}}` for media and a matching upload list, with the same file naming, privacy checks and ZIP entry as above.
+1. **Agent exports a draft.** Use numbered placeholders such as `{{MEDIA-01}}` for media and a matching upload list, with the same file naming and privacy checks as above. The context pack is still inlined.
 2. **The user uploads the files and sends back the URLs.** The user drags the files into any scratch comment box on GitHub, does not submit, and copies the generated Markdown. The draft is not pasted. The user sends each result to the agent labelled with its file number, such as `01: <img ... />`.
 3. **Agent finalizes and posts.** Map each URL to its placeholder by label, apply the formatting above, re-run the privacy `comment` check and post with `gh issue comment --body-file`, or hand the text back if the user prefers to submit it. Confirm the posted URL and re-read the body with `gh api`.
 

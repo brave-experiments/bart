@@ -1,6 +1,6 @@
 # Text-only report context attachment
 
-For a requested published QA report, prepare a text-only context ZIP alongside separately attached screenshots/videos. It lets another agent inspect how checks were performed, repeat the workflow and assess the retained results independently. Prepare the same ZIP for a local QA report intended for later publication; a short session answer or local development summary does not automatically need one. Creating the attachment does not require a new live replay or new executable helpers.
+For a requested published QA report, publish the context pack as text in the report comment (collapsed `<details>` blocks, see [GitHub publishing](github-publishing.md#context-pack-in-the-comment)) alongside separately attached screenshots/videos. `gh --attach` cannot upload a ZIP, so the ZIP is for local reports and handoff, not a published requirement. It lets another agent inspect how checks were performed, repeat the workflow and assess the retained results independently. Prepare the same ZIP for a local QA report intended for later publication; a short session answer or local development summary does not automatically need one. Creating the attachment does not require a new live replay or new executable helpers.
 
 A requested [development QA evidence pack](develop.md#requested-qa-evidence-pack) includes this export even when all output stays local. Identify the selected Core starting/final revisions, relevant task diff, actual changed-build identity, commands/test inputs and observed validation; do not imply a published commit permalink exists for local-only work.
 
@@ -52,6 +52,6 @@ Inspect the selected staging directory and ZIP file listing, ensure all files ar
 
 Run the [export privacy helper](export-privacy.md) on the final delivery directory, including the ZIP. It checks archive entry filenames and decompressed text; a compressed-byte search alone is insufficient.
 
-Link the archive from local HTML. For requested GitHub publication, attach it through the supported archive-upload route and link the confirmed attachment URL; a media-only CLI upload route may require a browser or human handoff for ZIPs. Do not invent an upload API. After upload, retain a local publication receipt mapping the archive/media to their URLs; provide the association in the posted report. Keep app assessment and attachment/publication completion separate.
+Link the archive from local HTML. For requested GitHub publication, inline the same files in the posted comment instead of uploading the ZIP, and do not invent an upload API. After posting, retain a local publication receipt mapping the media to their URLs. Keep app assessment and publication completion separate.
 
 If context is limited because commands, receipts or test inputs were not retained, state that in README and the report. Do not rerun device actions just to manufacture missing history. Package inspection verifies portability of files, not successful live reproduction; report a fresh replay only when separately requested and actually performed.
