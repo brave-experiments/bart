@@ -52,6 +52,21 @@ The standard STEPS section can serve as this guide when concise, or summarize/li
 
 Start a QA verification report with the compact summary below, before detailed source analysis, attempt logs or the full check matrix. Use the same order in Markdown comments and local HTML. Keep the unofficial BART notice immediately beside the headline so the familiar QA format does not imply official sign-off.
 
+Make the report skimmable: the outcome, any failure and the coverage must be readable from the first screen without opening anything. Order the top as the headline and notice, the scope line, a one-sentence **Bottom line**, a **What failed** block when the outcome is not a pass, a **Results at a glance** grid and an **Observations** list. The device and build block, STEPS, ACTUAL RESULTS and the passing media follow. Passing detail stays below the failure and stays visible; do not fold it into collapsed sections.
+
+For each failed check, and each blocked or inconclusive check that drives the headline, the **What failed** block gives the screen and configuration, then these four items:
+
+- **Expected user behavior:** the action a person would reasonably take to get the expected result, such as scrolling a clipped form to reach its buttons.
+- **Tried:** the actions actually attempted, with counts and variants, including fallbacks such as ADB gestures, and any attempt that was invalid.
+- **Observed:** what happened, with measurements or node state when they exist, such as no scrollable node or a control reported as not visible.
+- **Likely cause:** only when source or measurements support it, labeled as a hypothesis, with what was not compared (for example no pre-change build).
+
+Put the decisive screenshot and clip in the block, before any passing media. If the failure could not be reproduced on a second attempt, say so here.
+
+The **Results at a glance** grid has one row per screen or check and one column per tested configuration. Each cell holds one outcome emoji: 🟢 pass, 🔴 fail, 🟡 observation or inconclusive, 🟠 blocked, ⚪ not run. Put the key above the grid and give the reason for every 🟡, 🟠 and ⚪ in the observations, ACTUAL RESULTS or limits. List 🟡 observations (behavior worth a reviewer's attention that is not a failure of the assessed change) with their media right after the grid.
+
+Prefix every media caption and table header with the outcome emoji of the check it supports, and place 🔴 and 🟡 media before 🟢 media. Do not draw status marks onto captures; they are evidence.
+
 Use `#### <emoji> Verification <OUTCOME> using the following:` in Markdown, or an equivalent visible heading in HTML. Select the emoji and outcome from the assessment, not command completion:
 
 | Headline | Meaning |
@@ -62,14 +77,14 @@ Use `#### <emoji> Verification <OUTCOME> using the following:` in Markdown, or a
 | 🟡 Verification INCONCLUSIVE | An attempt was made, but observations cannot settle the stated behavioral expectation. |
 | 🟡 Verification PARTIAL | Some scope was assessed, with remaining selected checks unrun/blocked and no observed failure hidden by this label. Describe individual outcomes. |
 
-These non-pass emoji are BART's reporting convention; the linked examples establish the green-pass format. Always include the outcome text so color/emoji is not the only signal. A scoped pass can list unrequested historical or internal checks as limitations without claiming they were required for present-day QA.
+These non-pass emoji are BART's reporting convention; the linked examples establish the green-pass format. Always include the outcome text so color/emoji is not the only signal. The same emoji mark individual checks in the results grid and media captions: 🟢 pass, 🔴 fail, 🟡 observation or inconclusive, 🟠 blocked, ⚪ not run. Keep the words beside the emoji wherever a check is described. A scoped pass can list unrequested historical or internal checks as limitations without claiming they were required for present-day QA.
 
 Below the headline, show a compact **Device, build and conditions block**. In HTML, render a small two-column field/value table: Device/OS, Brave Build, Chromium, Channel/architecture, Revision/build relationship, Androperator, Agent execution context and Scope/conditions. The agent-context row names the available model, harness/version and reasoning mode/effort, with unavailable values stated concisely. The Androperator row identifies the CLI version used in the tested session. Operator version/package details belong in supporting setup receipts or usage notes when relevant, not the summary. Use actual observed values; include Android OS build when available and write unknown values with their limits rather than invent them. Avoid burying tested versions in a long provenance paragraph. Link full artifact/installation receipts from the detail section.
 
 Then use these visible section labels:
 
 - **STEPS:** numbered actions actually performed. Link the specific STR (steps to reproduce) or TP (test plan) used, plus material variations. “Follow STR/TP; verify” is enough only when that linked procedure describes the actual trigger; otherwise summarize the decisive actions, setup and observation. Record an ADB/API trigger explicitly when used.
-- **ACTUAL RESULTS:** short, concrete observed-behavior bullets. Tie results to tested variants and state important failure, uncertainty or omitted scope here, not only in a collapsed detail section.
+- **ACTUAL RESULTS:** short, concrete observed-behavior bullets, failure first, each prefixed with its outcome emoji. Tie results to tested variants and state important failure, uncertainty or omitted scope here, not only in the grid or a detail section.
 - **SCREENSHOT / SCREENCAST:** relevant labeled captures. Use a comparison table or responsive side-by-side media grid when variants benefit from it, such as Signed out / Signed in or System light / System dark. A single decisive clip is sufficient when it shows the scope clearly; do not require extra variants or duplicate media just to fill a table.
 
 An illustrative Markdown summary follows. Replace the outcome and placeholders from evidence; this is not a recorded pass:
@@ -79,6 +94,27 @@ An illustrative Markdown summary follows. Replace the outcome and placeholders f
 
 Automated BART assessment - not an official QA sign-off.
 Scope: <behavior/variants assessed; important limits> on current Nightly ([`<version>`](<release URL>)); resolves [<issue>](<issue URL>)
+
+**Bottom line:** <one sentence: what holds, what failed>
+
+#### 🔴 What failed
+**<screen and configuration>:** <one-line symptom>
+- **Expected user behavior:** <what a person would do to get the expected result>
+- **Tried:** <actions, counts, variants and fallbacks>
+- **Observed:** <result with measurements or node state>
+- **Likely cause:** <source-backed hypothesis and what was not compared, or omit>
+
+<decisive failure screenshot or clip>
+
+#### Results at a glance
+🟢 pass, 🔴 fail, 🟡 observation, 🟠 blocked, ⚪ not run.
+
+| Screen/check | <configuration A> | <configuration B> |
+| --- | :-: | :-: |
+| <screen or check> | 🟢 | 🔴 |
+
+#### 🟡 Observations
+- <behavior worth attention that is not a failure of the assessed change, with media>
 
 Device/OS:
 - <model / Android version / OS build when observed>
@@ -102,12 +138,13 @@ Agent execution context:
 2. <decisive action and observation, including actual trigger>.
 
 #### ACTUAL RESULTS:
-- Verified <concrete behavior under tested conditions>.
-- <failure, uncertainty or omitted scope where relevant>.
+- 🔴 <failure, first>.
+- 🟢 Verified <concrete behavior under tested conditions>.
+- ⚪ <omitted scope and reason>.
 
 #### SCREENSHOT / SCREENCAST:
 
-| <tested condition A> | <tested condition B> |
+| 🟢 <tested condition A> | 🟢 <tested condition B> |
 |:-:|:-:|
 | <relevant image/video link> | <relevant image/video link> |
 ```
@@ -125,9 +162,9 @@ Make identifiers in a comment or report readable and checkable by linking them. 
 
 ## Configuration coverage evidence
 
-Include evidence for configuration checks in the report, not only a claim that they were tested. After the standard QA summary and primary media, show a compact table with configuration, actual observed result/outcome and evidence links. Use entries such as phone portrait, phone landscape, after system theme change, tablet portrait and tablet landscape, following [verification scope](verify.md#configuration-coverage). Name actual tested devices by make/model and record relevant conditions; never include physical serials. Mark blocked, omitted or inapplicable checks with reasons rather than empty evidence cells implying success.
+Include evidence for configuration checks in the report, not only a claim that they were tested. The [results grid](#verification-summary-format) gives the outcome of every screen in every configuration at a glance. After the standard QA summary and primary media, show a compact table with configuration, actual observed result/outcome and evidence links. Use entries such as phone portrait, phone landscape, after system theme change, tablet portrait and tablet landscape, following [verification scope](verify.md#configuration-coverage). Name actual tested devices by make/model and record relevant conditions; never include physical serials. Mark blocked, omitted or inapplicable checks with reasons rather than empty evidence cells implying success.
 
-Show useful labeled captures for each exercised configuration in a comparison grid or expandable supporting section. Use screenshots for visible layout and clips for scrolling, recreation or interaction claims. One clip can support several checks; link the same capture instead of duplicating media. Include relevant successful coverage even when it adds report length: reviewers should be able to inspect what landscape/tablet testing actually looked like.
+Show useful labeled captures for each exercised configuration in a comparison grid, visible without expanding anything. Use screenshots for visible layout and clips for scrolling, recreation or interaction claims. One clip can support several checks; link the same capture instead of duplicating media. Include relevant successful coverage even when it adds report length: reviewers should be able to inspect what landscape/tablet testing actually looked like.
 
 Keep the main finding and decisive capture near the headline. Additional observed defects belong prominently in ACTUAL RESULTS with their captures, separately identifying the original fix's result and affected configuration. Do not hide them in a collapsed successful-coverage appendix. Repeated captures adding no information and raw diagnostic logs remain local supporting material, linked selectively. Preserve original/failed attempts under [evidence guidance](evidence.md).
 
@@ -135,11 +172,11 @@ An illustrative coverage table, not claimed results:
 
 | Configuration | Actual result/outcome | Evidence |
 | --- | --- | --- |
-| Phone portrait | <observed behavior> | <capture> |
-| Phone landscape | <layout and usability observations> | <capture/clip> |
-| After system theme change | <restoration and control observations> | <clip> |
-| Tablet portrait | <tablet layout/controls observed> | <capture> |
-| Tablet landscape | <observations or specific blocker> | <capture or not run reason> |
+| 🟢 Phone portrait | <observed behavior> | <capture> |
+| 🟢 Phone landscape | <layout and usability observations> | <capture/clip> |
+| 🟢 After system theme change | <restoration and control observations> | <clip> |
+| 🟢 Tablet portrait | <tablet layout/controls observed> | <capture> |
+| 🟢 Tablet landscape | <observations or specific blocker> | <capture or not run reason> |
 
 ## Context attachment
 
@@ -174,7 +211,7 @@ For orientation-dependent bugs, include the [required rotation demo](evidence.md
 
 Create directories as their contents arise. Retain the selected APK under `builds/` or reference a local cache in its private receipt; the report identifies origin/hash/source relationship without requiring the binary to read it. Keep original capture bundles and their hashes intact privately. Link only reviewed, privacy-safe media and sanitized text receipts from the delivered report, labeling redacted copies and their relationship to originals. Do not expose a raw manifest or usage-note file containing target serials merely because it is local. Reference actual log files/IDs in private usage notes rather than copy entire logs; export only relevant sanitized context.
 
-Use the [verification summary format](#verification-summary-format) at the top: emoji/outcome heading and unofficial notice, compact build/device table, STEPS, ACTUAL RESULTS and labeled media. Make the first viewport show the PR/issue, scoped outcome, key limits and tested identity; place the full check matrix, provenance and attempt history after this concise summary. Keep summary media useful and readable, with additional galleries below when needed. Include:
+Use the [verification summary format](#verification-summary-format) at the top: emoji/outcome heading and unofficial notice, compact build/device table, STEPS, ACTUAL RESULTS and labeled media. Make the first viewport show the PR/issue, scoped outcome, the failure block and results grid when present, key limits and tested identity; place the full check matrix, provenance and attempt history after this concise summary. Keep summary media useful and readable, with additional galleries below when needed. Include:
 
 - Tested build/device and supported relationship to the change, relevant setup and conditions, and local receipt links.
 - The checks actually performed, steps, expected/observed behavior, individual outcomes and omitted/blocked checks. Separate source/test assertions from observed app behavior.
