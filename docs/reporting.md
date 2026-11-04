@@ -180,7 +180,7 @@ An illustrative coverage table, not claimed results:
 
 ## Context attachment
 
-Include a [text-only context ZIP](report-context.md) with requested published QA reports, and prepare it for local QA reports intended for publication. It contains useful reproduction/verification context, commands or adaptive instructions, any local test inputs/helper source and sanitized text receipts. Media and APKs remain separate. Link its long unique filename locally, and its confirmed attachment URL when posted; state missing context or delivery blockers.
+Include the [text-only context pack](report-context.md) with requested published QA reports, inlined in the comment as collapsed blocks; build it as a ZIP for local QA reports. Prepare the ZIP for local reports intended for publication too, since publication uses its contents. It contains useful reproduction/verification context, commands or adaptive instructions, any local test inputs/helper source and sanitized text receipts. Media and APKs remain separate. Link the ZIP's long unique filename locally; the posted comment carries the text itself. State missing context or delivery blockers.
 
 This attachment packages useful material from the work. It does not require a formal reproduction skill or another live session. Optional skill authoring/replay remains separately scoped under [reproduction](reproduction.md).
 
@@ -268,14 +268,14 @@ Development defaults route both categories to BART issues. If that conflicts wit
 
 ## Publication
 
-Use the host's available, authorized tools. Config selects a default destination, not permission to upload or post. If the host permits only reads or lacks delivery tools, retain the draft and selected media and provide a precise human handoff. No permanent manual step or BART uploader is required.
+Use the host's available, authorized tools. Config selects a default destination, not permission to upload or post. If the host permits only reads or lacks delivery tools, retain the draft and selected media and provide a precise human handoff. Publishing media and context is expected to be fully automated with `gh`; no permanent manual step or BART uploader is required.
 
 Prefer supported GitHub-native attachments for requested GitHub delivery. Inspect the installed client's help before using media flags; current [CLI attachment docs](https://docs.github.com/en/github-cli/github-cli/attaching-files-with-github-cli) may describe capabilities absent from an older client. Use existing `gh`/publication workflows, with explicit repository and item or PR base/head selections. Avoid implicit pushes or a supposed dry run that can publish source.
 
-For attachments unsupported by the client, a supported [browser attachment](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) route or necessary human handoff can deliver selected media/ZIP. Uploading itself is publication, even before submitting the comment. Public-repository attachments are accessible publicly; select task-appropriate evidence and omit unrelated local paths, account data and working logs.
+Do not attempt file types `--attach` rejects, such as a ZIP; inline text context instead. For a client without `--attach`, a supported [browser attachment](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) route or necessary human handoff can deliver selected media/ZIP. Uploading itself is publication, even before submitting the comment. Public-repository attachments are accessible publicly; select task-appropriate evidence and omit unrelated local paths, account data and working logs.
 
 Inspect selected media using [evidence](evidence.md). Save the uploaded URLs, rewrite the delivery copy's local references and confirm accessibility/rendering for the audience. Confirm the final issue/comment/PR URL and real draft state where applicable. Preserve local drafts and user's edits after failure. Retrying publication reuses saved evidence and does not rerun device work or change the assessment.
 
 ### GitHub media limitations
 
-Current `gh` clients post comment text but cannot attach images, videos or ZIPs; attachment URLs come from the GitHub web editor. Follow [publishing a report with media to GitHub](github-publishing.md), which covers the export, upload and finalize steps, video placement and image sizing.
+Current `gh` clients (confirmed on 2.103.3) upload images and videos, not ZIPs or other files, with `--attach` on `pr edit`, `pr comment`, `issue edit` and `issue comment`; older clients lack it. Follow [publishing a report with media to GitHub](github-publishing.md), which covers the client check, how `gh` rewrites image references, body verification, video placement, image sizing and the manual fallback.
