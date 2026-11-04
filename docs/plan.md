@@ -33,7 +33,7 @@ Task-specific reports and receipts remain in working directories. Use their obse
 | --- | --- | --- |
 | Additional host/version coverage | Limited | Native invocation and linked-document access for each supported host, beyond the inspected local discovery route. |
 | Exact PR APK retrieval | Not demonstrated | Existing job/artifact route, revision and installed APK identity. Normal merged-fix QA uses current Nightly instead. |
-| Requested external publication | Not demonstrated | Resolved destination, media uploaded with `gh --attach` on a comment and an issue or PR body, context ZIP delivery, rendering of attached videos, and confirmed comment/issue URL. |
+| Requested external publication | Not demonstrated | Media upload with `gh issue comment --attach` and sized images was exercised on a BART issue. Remaining: media on a PR body, context ZIP delivery (`gh --attach` rejects ZIPs), and a confirmed release-ready destination. |
 | Actual draft PR delivery | Not demonstrated | A real PR URL and draft state in the selected base repository; a preview is distinct. |
 | Independent reproduction reuse | Not demonstrated | A fresh attempt following exported instructions and independently assessing the result. ZIP integrity alone does not establish this. |
 

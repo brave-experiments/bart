@@ -10,11 +10,11 @@ Run `gh --version`, then check the subcommand you will use:
 gh pr edit --help | grep -i attach
 ```
 
-`--attach` was confirmed in the help of `gh` 2.103.3 for `pr edit`, `pr comment`, `issue edit` and `issue comment`. Probe the installed client instead of assuming; an older client may lack it. Each flag takes `<file>#<alt text>`, may repeat, and accepts up to 50 files per command. The documented types are images and videos. Whether a ZIP uploads this way is not verified here; try it and fall back for the ZIP if it fails.
+`--attach` was confirmed in the help of `gh` 2.103.3 for `pr edit`, `pr comment`, `issue edit` and `issue comment`. Probe the installed client instead of assuming; an older client may lack it. Each flag takes `<file>#<alt text>`, may repeat, and accepts up to 50 files per command. Supported types are png, jpg, jpeg, gif, webp, svg, mp4, mov and webm; the client rejects a ZIP with "not a supported file type". Attach the context ZIP by the [fallback](#fallback-client-without---attach) route and say in the comment that it is pending until it is uploaded.
 
 ## Procedure
 
-1. **Prepare the draft.** Write the checked Markdown body with each image as `![alt](./NN-name.png)`, where the path is the real file and `NN-name` starts with its number and says what it shows. Include the context ZIP as a file in the same set. Run the [export privacy helper](export-privacy.md) `comment` (or `pr`) operation on the draft and `check` on the media and ZIP.
+1. **Prepare the draft.** Write the checked Markdown body with each image as `![alt](./NN-name.png)`, where the path is the real file and `NN-name` starts with its number and says what it shows. Run the [export privacy helper](export-privacy.md) `comment` (or `pr`) operation on the draft and `check` on the media and ZIP. Reference each video the same way as an image; `gh` rewrites it to a bare attachment URL on its own line, which GitHub renders as a player.
 2. **Publish once.** Pass the draft and every file in one command, with alt text after `#`:
    ```
    gh pr edit <number> --body-file body.md \
@@ -46,7 +46,7 @@ This matters when you need a fixed image width, which only the `<img>` form supp
 
 - Scale every image with a small `width` attribute and no `height`. Starting points: about 230 px for portrait phone and tablet captures and about 420 px for landscape captures. Adjust to the content.
 - Group stills in an HTML table with one capture per cell, a short caption under each and a header row per configuration. Keep the configuration and result table from [reporting](reporting.md#configuration-coverage-evidence) for outcomes, with a text label for each piece of evidence, not a link: a link in a table cell stays a plain link and does not preview.
-- Put each video outside any table, on its own line, with a label line above it and blank lines around it. GitHub renders an attachment URL as a player only in that position. A `<video>` tag may render in a cell; check the preview before relying on it.
+- Put each video outside any table, on its own line, with a label line above it and blank lines around it. GitHub renders an attachment URL as a player only in that position. A `<video>` tag may render in a cell; check the preview before relying on it. After posting, `gh api -H "Accept: application/vnd.github.full+json" repos/<owner>/<repo>/issues/comments/<id> -q .body_html` shows whether each video became a `<video>` element and each image kept its `width`.
 - Link the context ZIP as a file link with its full filename; it does not render inline.
 - Apply [links and identifiers](reporting.md#links-and-identifiers-in-published-text): linked versions in code ticks, commit permalinks and full issue URLs.
 - Keep the unofficial BART notice, the outcome headline and the limits where [the summary format](reporting.md#verification-summary-format) puts them.
@@ -63,7 +63,8 @@ Stop and ask when a number is missing or duplicated, when the type of a pasted i
 
 ## Limits
 
-- Not verified here: `--attach` on comments (only `pr edit` was exercised end to end), ZIP uploads, and whether videos attached this way render as players.
+- Verified on an issue comment (`gh` 2.103.3, `brave-experiments/bart`): six mp4 clips and eight png stills attached in one `gh issue comment --attach` call; all 14 references were rewritten, none were left as local paths, the rendered HTML had six `<video>` elements, and a following `gh issue comment --edit-last --body-file` pass set `width="230"` on the table images. The same run showed that a ZIP is rejected.
+- Not verified here: `--attach` on `pr create`, `pr comment` and `issue edit` in practice (only the help text was checked for the last two), and a ZIP upload by any command-line route.
 - Public-repository attachments are accessible publicly; select task-appropriate evidence.
 - The agent cannot see the rendered page. Check the preview or posted page, or ask the user to report clips that show as plain links.
 - In the fallback, mapping depends on the user's labels; two mislabelled videos or same-size images cannot be detected.
