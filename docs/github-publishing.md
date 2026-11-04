@@ -2,6 +2,24 @@
 
 This is the procedure for a GitHub issue, PR or comment that includes screenshots, videos and the report's context. It is expected to run end to end from the agent with no human upload step: images and videos go up with `gh --attach`, and the context pack is inlined in the same text as collapsed `<details>` blocks. Do not ask the user to drag files into a browser unless the client lacks `--attach` (see the [fallback](#fallback-client-without---attach)). Posting still follows the user's request and [publication](reporting.md#publication) rules. Uploading is publication, so it needs the same authority as posting.
 
+## Helper script
+
+`scripts/gh_publish.py` (standard library, Python 3.11+) does the mechanical checks and the gh call. It is an aid: raw `gh` commands stay valid, and the agent still writes the body and decides when and where to post. Run it from the BART checkout with explicit arguments:
+
+```
+python3 /path/to/bart/scripts/gh_publish.py doctor
+python3 /path/to/bart/scripts/gh_publish.py preflight --body-file body.md --media-dir media/ --media-reviewed
+python3 /path/to/bart/scripts/gh_publish.py post --repo OWNER/REPO --kind issue-comment --number 40 --body-file body.md --media-dir media/ --media-reviewed
+python3 /path/to/bart/scripts/gh_publish.py verify --repo OWNER/REPO --comment-id 123 --body-file body.md
+```
+
+- `doctor` checks that `gh` is installed and authenticated, that its version is at least `2.103.3` (the version where `--attach` was confirmed; an older version is a warning and the next check decides), and that `--attach` is listed in `--help` for each target (`issue comment`, `pr comment`, `issue edit`, `pr edit`). Use `--kind` to probe one target. A client without `--attach` fails here, which sends you to the [fallback](#fallback-client-without---attach).
+- `preflight` is read-only. It checks that every `![alt](./file)` reference exists and has a type `--attach` accepts, that no local link, local `<img src>` or `{{MEDIA-..}}` placeholder remains, that the text is under the length limit and the file count under 50, and runs the [privacy helper](export-privacy.md) `comment` check on the text and `check` on `--media-dir`. Pass `--media-reviewed` only after you have looked at the media.
+- `post` runs `doctor` for the target and `preflight`, then runs `gh <issue|pr> <comment|edit> <number> -R <repo> --body-file ... --attach ...` for the files the body references, and then runs `verify` on the result. `--kind` is one of `issue-comment`, `pr-comment`, `issue-body` and `pr-body`; `--edit-last` re-edits your last comment. `--show-command` prints the command and runs nothing. It does not create PRs: create a draft PR first, then use `pr-body`.
+- `verify` is read-only. It reads the item back and checks the attachment URL count, leftover local paths, placeholders, length, the rendered `<video>` and `<img width>` counts, and the privacy `comment` check. Give `--body-file` or `--expect-attachments`, and one of `--comment-id`, `--issue` or `--pr`.
+
+All commands print JSON and exit 0 on success, 1 on a failed check and 2 on bad arguments or a failed gh call. A nonzero `post` may already have updated the item; read `verify` before retrying. Sizing images with a `width` still needs a second `post` with the edited body, as described below.
+
 ## Check the client
 
 Run `gh --version`, then check the subcommand you will use:
