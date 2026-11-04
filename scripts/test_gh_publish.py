@@ -141,7 +141,7 @@ class GhPublishTests(unittest.TestCase):
 
     def test_build_command_is_explicit(self):
         command = gh_publish.build_command('issue-comment', 'o/r', 7, 'b.md', ['/a.png'], True)
-        self.assertEqual(command, ['issue', 'comment', '7', '-R', 'o/r', '--body-file', 'b.md', '--edit-last', '--attach', '/a.png'])
+        self.assertEqual(command, ['issue', 'comment', '7', '-R', 'o/r', '--body-file', str(Path('b.md').resolve()), '--edit-last', '--attach', '/a.png'])
 
     def test_post_show_command_runs_nothing(self):
         code, result = self.run_main('post', '--repo', 'o/r', '--kind', 'issue-comment', '--number', '1', '--body-file', str(self.body), '--show-command', *self.privacy_config())
@@ -180,6 +180,38 @@ class GhPublishTests(unittest.TestCase):
         self.posted_body([])
         code, result = self.run_main('verify', '--repo', 'o/r', '--issue', '1', *self.privacy_config())
         self.assertEqual(code, 2)
+
+    def test_unsafe_targets_are_rejected_before_gh_runs(self):
+        for repo in ('--help/x', 'o/--force', '../r', 'o/..', 'o/r;id', 'o r/x', 'o/r/extra', ''):
+            with self.subTest(repo):
+                with self.assertRaises(ValueError):
+                    gh_publish.validate_target(repo)
+        for bad in (dict(number=0), dict(comment_id='9; id'), dict(comment_id='-1')):
+            with self.assertRaises(ValueError):
+                gh_publish.validate_target('o/r', **bad)
+        gh_publish.validate_target('brave-experiments/bart', number=1, comment_id='6620491806')
+        code, result = self.run_main('post', '--repo=--foo/bar', '--kind', 'issue-comment', '--number', '1', '--body-file', str(self.body), *self.privacy_config())
+        self.assertEqual(code, 2)
+        code, result = self.run_main('verify', '--repo', 'o/r', '--comment-id', 'abc', '--expect-attachments', '1', *self.privacy_config())
+        self.assertEqual(code, 2)
+        self.assertEqual(self.calls(), [])
+
+    def test_gh_runs_by_absolute_path_without_a_shell(self):
+        with mock.patch('gh_publish.subprocess.run') as run:
+            run.return_value = mock.Mock(returncode=0, stdout='', stderr='')
+            gh_publish.run_gh(['--version'])
+        command = run.call_args.args[0]
+        self.assertTrue(os.path.isabs(command[0]))
+        self.assertEqual(Path(command[0]).name, 'gh')
+        self.assertEqual(command[1:], ['--version'])
+        self.assertFalse(run.call_args.kwargs['shell'])
+        self.assertEqual(run.call_args.kwargs['timeout'], gh_publish.GH_TIMEOUT_SECONDS)
+
+    def test_timeout_is_reported_not_raised(self):
+        with mock.patch('gh_publish.subprocess.run', side_effect=gh_publish.subprocess.TimeoutExpired('gh', 1)):
+            code, result = self.run_main('verify', '--repo', 'o/r', '--comment-id', '1', '--expect-attachments', '1', *self.privacy_config())
+        self.assertEqual(code, 2)
+        self.assertFalse(result['ok'])
 
     def test_edit_last_only_for_comments(self):
         code, result = self.run_main('post', '--repo', 'o/r', '--kind', 'pr-body', '--number', '1', '--body-file', str(self.body), '--edit-last', *self.privacy_config())

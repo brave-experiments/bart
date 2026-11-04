@@ -10,10 +10,11 @@ https://mozilla.org/MPL/2.0/
 """
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import shutil
-import subprocess
+import subprocess  # nosemgrep: gitlab.bandit.B404 -- runs only the resolved gh binary, with a list of validated arguments and no shell
 import sys
 import tempfile
 
@@ -32,6 +33,8 @@ KINDS = {
     'issue-body': ('issue', 'edit'),
     'pr-body': ('pr', 'edit'),
 }
+GH_TIMEOUT_SECONDS = 120
+REPO = re.compile(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+')
 IMAGE = re.compile(r'!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)')
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)')
 HTML_SRC = re.compile(r'<(?:img|video|source)\b[^>]*?\bsrc=["\']([^"\']+)["\']', re.I)
@@ -39,9 +42,27 @@ ATTACHMENT_URL = re.compile(r'https://github\.com/user-attachments/(?:assets|fil
 SCHEME = re.compile(r'^(?:[a-z][a-z0-9+.-]*:|//|#|mailto:)', re.I)
 
 
+def gh_executable():
+    found = shutil.which('gh')
+    if not found:
+        raise RuntimeError('gh is not on PATH.')
+    return os.path.realpath(found)
+
+
 def run_gh(args, *, input_text=None):
-    process = subprocess.run(['gh', *args], capture_output=True, text=True, input=input_text)
+    """Run the resolved gh binary with a list of arguments: no shell, no inherited argv[0] lookup."""
+    process = subprocess.run([gh_executable(), *map(str, args)], capture_output=True, text=True, input=input_text, shell=False, timeout=GH_TIMEOUT_SECONDS)
     return process.returncode, process.stdout, process.stderr.strip()
+
+
+def validate_target(repo, *, number=None, comment_id=None):
+    """Reject values that could be read as gh flags or alter an API path."""
+    if not REPO.fullmatch(repo) or any(part in ('.', '..') or part.startswith('-') for part in repo.split('/')):
+        raise ValueError('--repo must look like OWNER/REPO.')
+    if number is not None and number < 1:
+        raise ValueError('--number must be a positive integer.')
+    if comment_id is not None and not re.fullmatch(r'\d+', str(comment_id)):
+        raise ValueError('--comment-id must be digits only.')
 
 
 def parse_gh_version(text):
@@ -163,7 +184,7 @@ def preflight(body_path, *, words, media_dir=None, media_reviewed=False):
 
 def build_command(kind, repo, number, body_path, attachments, edit_last):
     words = list(KINDS[kind])
-    command = [*words, str(number), '-R', repo, '--body-file', str(body_path)]
+    command = [*words, str(number), '-R', repo, '--body-file', str(Path(body_path).resolve())]
     if edit_last:
         command.append('--edit-last')
     for path in attachments:
@@ -268,6 +289,7 @@ def main(argv=None):
         elif args.operation == 'preflight':
             result = preflight(args.body_file, words=load_words(args), media_dir=args.media_dir, media_reviewed=args.media_reviewed)
         elif args.operation == 'post':
+            validate_target(args.repo, number=args.number)
             if args.edit_last and not args.kind.endswith('-comment'):
                 raise ValueError('--edit-last applies to comment kinds only.')
             words = load_words(args)
@@ -294,6 +316,7 @@ def main(argv=None):
                             result['verify'] = verify(args.repo, expected=result['expected'], words=words, **target)
                             result['ok'] = result['verify']['ok']
         else:
+            validate_target(args.repo, number=args.issue or args.pr, comment_id=args.comment_id)
             expected = {'attachments': args.expect_attachments or 0, 'videos': args.expect_videos or 0}
             if args.body_file:
                 expected = preflight(args.body_file, words=load_words(args))['expected']
@@ -302,7 +325,7 @@ def main(argv=None):
             result = verify(args.repo, expected=expected, words=load_words(args), comment_id=args.comment_id, issue=args.issue, pr=args.pr)
         print(json.dumps(result, indent=2))
         return 0 if result['ok'] else 1
-    except (ValueError, RuntimeError, OSError) as error:
+    except (ValueError, RuntimeError, OSError, subprocess.TimeoutExpired) as error:
         print(json.dumps({'ok': False, 'error': str(error)}, indent=2))
         return 2
 
